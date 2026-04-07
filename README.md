@@ -263,31 +263,13 @@ In production, add `https://yourdomain.com/api/webhook/stripe` as a webhook endp
 
 ## Subscription Gate
 
-The storefront validates your API key on every server-side render via the Xeboki Gateway. Accounts that fail validation serve a blocking page — not just a UI gate:
-
-| Status | Page shown |
-|--------|-----------|
-| Invalid / missing API key | "Invalid API Key" — contact your administrator |
-| No active subscription | "No Active Subscription" — link to upgrade |
-| Free plan | "Plan Upgrade Required" — link to upgrade |
-| Feature not in plan | "Feature Not Included" — link to upgrade |
-
-This check happens server-side and **cannot be bypassed** through the browser.
+Your API key and subscription are validated on every server-side render. Invalid or free-plan accounts are served a blocking page — this check is enforced server-side and cannot be bypassed through the browser.
 
 ---
 
 ## Rate Limiting
 
-Built-in sliding-window rate limiting protects all API routes:
-
-| Route prefix | Limit |
-|---|---|
-| `/api/checkout` | 10 requests / minute |
-| `/api/auth` | 20 requests / minute |
-| `/api/reviews` | 30 requests / minute |
-| `/api/wishlist` | 60 requests / minute |
-
-For multi-instance production deployments, replace the in-memory store (`src/middleware.ts`) with Upstash Redis or Vercel KV.
+All API routes have built-in sliding-window rate limiting. For multi-instance production deployments, replace the in-memory store (`src/middleware.ts`) with Upstash Redis or Vercel KV.
 
 ---
 
