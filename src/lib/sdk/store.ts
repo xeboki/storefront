@@ -14,6 +14,7 @@ import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 export interface ResolvedStore {
   slug: string;
   apiKey: string;
+  isTestMode: boolean;
   storeConfig: StoreConfig;
   storefrontConfig: StorefrontConfig | null;
 }
@@ -64,6 +65,7 @@ export const loadStore = unstable_cache(
     return {
       slug,
       apiKey,
+      isTestMode: apiKey.startsWith('xbk_test_'),
       storeConfig: storeConfig.value,
       storefrontConfig:
         storefrontConfig.status === 'fulfilled' ? storefrontConfig.value : null,

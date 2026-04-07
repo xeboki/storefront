@@ -73,6 +73,11 @@ export default async function StoreLayout({ params, children }: Props) {
       </head>
       <body className="min-h-screen flex flex-col bg-white">
         <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
+          {resolved.isTestMode && (
+            <div style={{ background: '#F59E0B', color: '#000', textAlign: 'center', padding: '8px 16px', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>
+              ⚠ TEST MODE — No real payments are processed. Use Stripe test cards only.
+            </div>
+          )}
           <StorefrontHeader
             storeConfig={storeConfig}
             storefrontConfig={storefrontConfig}
