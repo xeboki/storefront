@@ -90,6 +90,10 @@ export function ProductDetail({ product, storeSlug }: Props) {
   }
 
   return (
+    // The product panel and the reviews are siblings, so they need a wrapper.
+    // Without one this file does not parse, and nothing in the storefront
+    // builds — not this page, the whole app.
+    <>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
       {/* Image */}
       <div className="relative aspect-square rounded-brand overflow-hidden bg-slate-100">
@@ -246,5 +250,6 @@ export function ProductDetail({ product, storeSlug }: Props) {
     <div className="mt-12 border-t border-slate-100 pt-10">
       <ProductReviews storeSlug={storeSlug} productId={product.id} />
     </div>
+    </>
   );
 }
