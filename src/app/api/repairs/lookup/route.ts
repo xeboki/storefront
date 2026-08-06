@@ -1,11 +1,29 @@
 /**
  * Work order public lookup — Gap 53.
- * Query by work order number or customer phone number.
- * Returns a sanitised view (no internal notes, no PII beyond what customer needs).
+ *
+ * NOT IMPLEMENTED. This route called `client.workOrders.lookup(...)`, and
+ * there is no `workOrders` product on the SDK and no public work-order
+ * endpoint on the API — it was written against both before either existed.
+ * The file therefore never compiled, and a file that does not compile fails
+ * the entire build, not just its own route.
+ *
+ * It answers honestly rather than being deleted: the intent is clear, and
+ * what is missing is a public endpoint plus an SDK product, not a decision to
+ * drop repair tracking. The sanitised response shape the page expects is kept
+ * below as the specification for whoever builds it — status label and colour,
+ * public technician notes only, and no PII beyond what the customer already
+ * knows.
+ *
+ * To finish it:
+ *   1. add a public lookup endpoint to POS/API (by work order number or
+ *      customer phone, rate-limited — it is unauthenticated by design),
+ *   2. add a `workOrders` product to the SDK wrapping it,
+ *   3. replace the 501 below with the mapping described here.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { getStoreClient } from '@/lib/sdk/client'
+import { loadStore } from '@/lib/sdk/store'
 
+// Not exported: a route module may only export handlers and route config.
 const STATUS_META: Record<string, { label: string; color: string }> = {
   received:      { label: 'Received',       color: '#6B7280' },
   diagnosing:    { label: 'Diagnosing',     color: '#F59E0B' },
@@ -25,42 +43,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing store or query' }, { status: 400 })
   }
 
-  try {
-    const client = await getStoreClient(store)
-    if (!client) {
-      return NextResponse.json({ error: 'Store not found' }, { status: 404 })
-    }
-
-    // Look up work order via SDK
-    const result = await client.workOrders.lookup({ query: q })
-    if (!result) {
-      return NextResponse.json({ error: 'Work order not found' }, { status: 404 })
-    }
-
-    const meta = STATUS_META[result.status] ?? { label: result.status, color: '#666' }
-
-    // Return sanitised public view
-    return NextResponse.json({
-      id: result.id,
-      workOrderNumber: result.workOrderNumber,
-      customerName: result.customerName,
-      deviceDescription: result.deviceDescription ?? result.title,
-      status: result.status,
-      statusLabel: meta.label,
-      statusColor: meta.color,
-      estimatedCompletionDate: result.estimatedCompletionDate,
-      completedAt: result.completedAt,
-      // Only show technician notes marked as public
-      technicianNotes: result.publicNotes ?? null,
-      items: (result.items ?? []).map((item: Record<string, unknown>) => ({
-        description: item.description,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        status: item.status,
-      })),
-    })
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Lookup failed'
-    return NextResponse.json({ error: msg }, { status: 500 })
+  // Still resolved, so an unknown storefront gets the same 404 it always would
+  // — a customer typing the wrong address should be told that, not told the
+  // feature is missing.
+  const resolved = await loadStore(store)
+  if (!resolved) {
+    return NextResponse.json({ error: 'Store not found' }, { status: 404 })
   }
+
+  return NextResponse.json(
+    { error: 'Repair status lookup is not available yet.' },
+    { status: 501 },
+  )
 }

@@ -30,10 +30,17 @@ function base64UrlEncode(input: string | Uint8Array): string {
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
-function base64UrlDecode(input: string): Uint8Array {
+function base64UrlDecode(input: string): Uint8Array<ArrayBuffer> {
   const padded = input.replace(/-/g, '+').replace(/_/g, '/');
   const binary = atob(padded);
-  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  // Allocated rather than built with Uint8Array.from, which is typed over
+  // ArrayBufferLike and so includes SharedArrayBuffer — WebCrypto will not
+  // accept that, and the session could not be verified.
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
 }
 
 async function getSigningKey(): Promise<CryptoKey> {

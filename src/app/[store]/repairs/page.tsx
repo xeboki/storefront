@@ -24,7 +24,7 @@ export default async function RepairsPage() {
           Enter your work order ID or phone number to track your repair.
         </p>
       </div>
-      <RepairLookup storeSlug={slug} storeName={store?.name ?? ''} />
+      <RepairLookup storeSlug={slug} storeName={store?.storeConfig.businessName ?? ''} />
     </main>
   )
 }

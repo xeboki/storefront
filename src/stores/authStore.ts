@@ -11,6 +11,12 @@ export interface CustomerSession {
   email: string;
   name: string;
   storeSlug: string;
+  /**
+   * Optional because the session token does not carry it. The profile form
+   * seeds its phone field from here and so starts empty — pre-existing, and
+   * the form saves correctly either way.
+   */
+  phone?: string;
 }
 
 interface AuthState {

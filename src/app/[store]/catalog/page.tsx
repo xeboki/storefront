@@ -11,7 +11,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const store = await loadStore(params.store)
   return {
-    title: store ? `Shop — ${store.storeConfig.name}` : 'Shop',
+    title: store ? `Shop — ${store.storeConfig.businessName}` : 'Shop',
   }
 }
 

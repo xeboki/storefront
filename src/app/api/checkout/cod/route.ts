@@ -26,6 +26,8 @@ const Body = z.object({
   guestEmail: z.string().email().optional(),
   deliveryType: z.enum(['pickup', 'delivery', 'dineIn']).default('pickup'),
   notes: z.string().optional(),
+  // A dine-in order without its table cannot be delivered to anyone.
+  tableId: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -59,6 +61,7 @@ export async function POST(req: NextRequest) {
       guestName: body.guestName,
       guestEmail: body.guestEmail,
       notes: body.notes,
+      tableId: body.tableId,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to place order';
