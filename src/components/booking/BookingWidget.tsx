@@ -9,18 +9,28 @@ import { formatCurrency } from '@/lib/utils';
 import type { OrderingProduct, OrderingStaff } from '@xeboki/sdk';
 
 // ── Time slot helpers ──────────────────────────────────────────────────────────
+//
+// There was a `generateSlots()` here that invented the shop's diary in the
+// browser: 09:00 to 17:00 every half hour, **every day of the week**, ignoring
+// the working days, blocked dates, opening hours, staff rota, the length of the
+// service and every booking already made. A shop closed on Sundays was shown
+// offering Sunday mornings, and two customers could be handed the same slot.
+//
+// Availability now comes from `/api/availability`, which asks the shop.
 
-function generateSlots(date: string): string[] {
-  const slots: string[] = [];
-  for (let h = 9; h <= 17; h++) {
-    for (const m of [0, 30]) {
-      if (h === 17 && m === 30) continue;
-      const hh = String(h).padStart(2, '0');
-      const mm = String(m).padStart(2, '0');
-      slots.push(`${date}T${hh}:${mm}:00`);
-    }
-  }
-  return slots;
+/** One bookable start, as the availability endpoint reports it. */
+interface Slot {
+  start_time: string;   // "HH:mm", shop-local
+  end_time: string;
+  available: boolean;
+  reason: string | null;
+}
+
+interface DayAvailability {
+  date: string;         // "yyyy-MM-dd"
+  is_open: boolean;
+  slots: Slot[];
+  available_count: number;
 }
 
 function formatSlot(iso: string): string {
@@ -65,7 +75,6 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
   today.setHours(0, 0, 0, 0);
   const [viewStart, setViewStart] = useState(today);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const slots = selectedDate ? generateSlots(isoDate(selectedDate)) : [];
 
   // Week days (7 days from viewStart)
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(viewStart, i));
@@ -73,6 +82,58 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [bookedAppt, setBookedAppt] = useState<{ id: string } | null>(null);
+
+  // ── Real availability ────────────────────────────────────────────────────
+  //
+  // Fetched for the whole visible week rather than per day: the strip shows
+  // which days are worth tapping, and a request per tap makes the shop look
+  // slow and empty until each one lands.
+  const [days, setDays] = useState<DayAvailability[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedService) return;
+
+    let cancelled = false;
+    setLoadingSlots(true);
+    setSlotsError(null);
+
+    const url =
+      `/api/availability?storeSlug=${encodeURIComponent(storeSlug)}` +
+      `&serviceId=${encodeURIComponent(selectedService.id)}` +
+      `&startDate=${isoDate(viewStart)}&days=7` +
+      (selectedStaff ? `&staffId=${encodeURIComponent(selectedStaff.id)}` : '');
+
+    fetch(url)
+      .then(async (res) => {
+        if (!res.ok) throw new Error('unavailable');
+        return res.json();
+      })
+      .then((data) => {
+        if (cancelled) return;
+        setDays(data.days ?? []);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        // Never fall back to a generated grid. Showing made-up times is the
+        // failure this replaced, and an honest error is better than a booking
+        // the shop cannot honour.
+        setDays([]);
+        setSlotsError('We could not load available times. Please try again.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSlots(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [storeSlug, selectedService, selectedStaff, viewStart]);
+
+  const dayFor = (d: Date): DayAvailability | undefined =>
+    days.find((x) => x.date === isoDate(d));
+
+  const selectedDay = selectedDate ? dayFor(selectedDate) : undefined;
+  const slots = selectedDay?.slots ?? [];
 
   // Reset slot when date changes
   useEffect(() => { setSelectedSlot(null); }, [selectedDate]);
@@ -231,17 +292,30 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
           <div className="grid grid-cols-7 gap-1">
             {weekDays.map((day) => {
               const isPast = day < today;
+              const info = dayFor(day);
+              // A day with nothing free is not worth tapping. Disabled only
+              // once the answer has arrived — greying the strip while it loads
+              // makes every shop look shut for a moment.
+              const isUnavailable =
+                info !== undefined && info.available_count === 0;
               const isSelected = selectedDate && isoDate(day) === isoDate(selectedDate);
               return (
                 <button
                   key={isoDate(day)}
-                  disabled={isPast}
+                  disabled={isPast || isUnavailable}
+                  title={
+                    info && !info.is_open
+                      ? 'Closed'
+                      : isUnavailable
+                      ? 'Fully booked'
+                      : undefined
+                  }
                   onClick={() => setSelectedDate(day)}
                   className={clsx(
                     'flex flex-col items-center py-2 rounded-brand text-xs font-medium transition-colors',
                     isSelected
                       ? 'bg-primary text-primary-foreground'
-                      : isPast
+                      : isPast || isUnavailable
                       ? 'text-slate-300 cursor-not-allowed'
                       : 'text-slate-700 hover:bg-primary/10 hover:text-primary border border-slate-200',
                   )}
@@ -261,22 +335,53 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
               <Clock size={14} />
               Available times
             </p>
-            <div className="grid grid-cols-4 gap-2">
-              {slots.map((slot) => (
-                <button
-                  key={slot}
-                  onClick={() => setSelectedSlot(slot)}
-                  className={clsx(
-                    'py-2 px-2 rounded-brand border text-xs font-medium transition-colors',
-                    selectedSlot === slot
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-surface text-slate-700 border-slate-200 hover:border-primary',
-                  )}
-                >
-                  {formatSlot(slot)}
-                </button>
-              ))}
-            </div>
+
+            {loadingSlots ? (
+              <p className="text-sm text-slate-400 py-4">Checking availability…</p>
+            ) : slotsError ? (
+              <p className="text-sm text-red-600 py-4">{slotsError}</p>
+            ) : selectedDay && !selectedDay.is_open ? (
+              // Said outright. A closed shop and a fully booked one look
+              // identical from an empty grid, and a customer reads them very
+              // differently — one means "come another day", the other means
+              // "try another time".
+              <p className="text-sm text-slate-500 py-4">
+                We&apos;re closed on this day. Please choose another date.
+              </p>
+            ) : slots.length === 0 ? (
+              <p className="text-sm text-slate-500 py-4">
+                No times available on this day.
+              </p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {slots.map((slot) => {
+                  const iso = `${isoDate(selectedDate)}T${slot.start_time}:00`;
+                  const isSelected = selectedSlot === iso;
+                  return (
+                    <button
+                      key={slot.start_time}
+                      onClick={() => slot.available && setSelectedSlot(iso)}
+                      disabled={!slot.available}
+                      // Taken slots are shown struck through rather than
+                      // removed: a grid that silently omits 2pm tells a
+                      // customer nothing about why their preferred time is
+                      // missing, which is what makes them telephone.
+                      title={slot.reason ?? undefined}
+                      className={clsx(
+                        'py-2 px-2 rounded-brand border text-xs font-medium transition-colors',
+                        !slot.available
+                          ? 'bg-slate-50 text-slate-300 border-slate-100 line-through cursor-not-allowed'
+                          : isSelected
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-surface text-slate-700 border-slate-200 hover:border-primary',
+                      )}
+                    >
+                      {formatSlot(iso)}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
