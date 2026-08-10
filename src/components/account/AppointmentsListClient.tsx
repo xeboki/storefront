@@ -14,6 +14,10 @@ const STATUS_FILTERS = [
   { key: undefined,     label: 'All' },
   { key: 'scheduled',   label: 'Upcoming' },
   { key: 'confirmed',   label: 'Confirmed' },
+  // Shops that review their bookings leave them here. Without the filter a
+  // customer could see the badge but had no way to list just the ones still
+  // waiting on the shop.
+  { key: 'pending',     label: 'Awaiting confirmation' },
   { key: 'completed',   label: 'Completed' },
   { key: 'cancelled',   label: 'Cancelled' },
 ];
@@ -22,6 +26,10 @@ function statusBadge(status: string): string {
   switch (status) {
     case 'confirmed':  return 'bg-emerald-50 text-emerald-700';
     case 'scheduled':  return 'bg-blue-50 text-blue-700';
+    // A shop that reviews its bookings leaves them here until somebody
+    // accepts. This was missing entirely, so a pending booking got the grey
+    // "unknown status" badge and read as though something had gone wrong.
+    case 'pending':    return 'bg-amber-50 text-amber-700';
     case 'completed':  return 'bg-slate-100 text-slate-600';
     case 'cancelled':  return 'bg-rose-50 text-rose-700';
     case 'no_show':    return 'bg-amber-50 text-amber-700';
@@ -104,7 +112,14 @@ export function AppointmentsListClient({ initialAppointments, storeSlug }: Props
       ) : (
         <ul className="divide-y divide-slate-100 border border-slate-200 rounded-brand overflow-hidden">
           {filtered.map((appt) => {
-            const isCancellable = appt.status === 'scheduled' || appt.status === 'confirmed';
+            // A booking still awaiting the shop's acceptance is the *most*
+            // cancellable thing on this list — nobody has committed to it yet.
+            // Leaving `pending` out meant a customer of a shop that reviews
+            // its bookings could not cancel their own request at all.
+            const isCancellable =
+              appt.status === 'scheduled' ||
+              appt.status === 'confirmed' ||
+              appt.status === 'pending';
             return (
               <li key={appt.id} className="p-4 hover:bg-slate-50 transition-colors">
                 <div className="flex items-start justify-between gap-4">
