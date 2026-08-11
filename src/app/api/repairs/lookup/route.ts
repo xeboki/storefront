@@ -1,58 +1,144 @@
 /**
- * Work order public lookup — Gap 53.
+ * Work order public lookup.
  *
- * NOT IMPLEMENTED. This route called `client.workOrders.lookup(...)`, and
- * there is no `workOrders` product on the SDK and no public work-order
- * endpoint on the API — it was written against both before either existed.
- * The file therefore never compiled, and a file that does not compile fails
- * the entire build, not just its own route.
+ * This route used to be a 501. It was written against `client.workOrders`,
+ * which never existed on the SDK, and against a public endpoint that had not
+ * been built — so the page in front of it looked finished and answered "not
+ * available yet" to every customer who used it.
  *
- * It answers honestly rather than being deleted: the intent is clear, and
- * what is missing is a public endpoint plus an SDK product, not a decision to
- * drop repair tracking. The sanitised response shape the page expects is kept
- * below as the specification for whoever builds it — status label and colour,
- * public technician notes only, and no PII beyond what the customer already
- * knows.
+ * SPEC-079 built the endpoint. This calls it directly rather than waiting for
+ * an SDK product: the storefront already holds the API key, and one HTTP call
+ * behind a server route is not worth a new SDK surface.
  *
- * To finish it:
- *   1. add a public lookup endpoint to POS/API (by work order number or
- *      customer phone, rate-limited — it is unauthenticated by design),
- *   2. add a `workOrders` product to the SDK wrapping it,
- *   3. replace the 501 below with the mapping described here.
+ * Authorisation is ticket number **plus** the phone number on the job. A ticket
+ * number alone is guessable — they are sequential — and a phone number alone
+ * would list everything that person has ever brought in. The API returns the
+ * same 404 for "no such ticket" and "wrong phone", so this route must not
+ * distinguish them either.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { loadStore } from '@/lib/sdk/store'
 
-// Not exported: a route module may only export handlers and route config.
+/**
+ * The POS API — `api.pos.xeboki.com`, deliberately not `api.xeboki.com`.
+ *
+ * They are different services. Repair endpoints live on the POS API, and the
+ * POS API's own working notes record that defaulting to the other host has
+ * already shipped dead links inside an email once.
+ *
+ * Its own variable rather than reusing `XEBOKI_API_BASE_URL`, which the SDK
+ * client and three other routes point at the ordering host.
+ */
+const POS_API_BASE =
+  process.env.XEBOKI_POS_API_BASE_URL ?? 'https://api.pos.xeboki.com'
+
+/**
+ * Display metadata for the statuses a customer may see.
+ *
+ * Keyed by the status names the Pro app actually serialises. The previous
+ * version of this map used a different vocabulary entirely (`received`,
+ * `diagnosing`, `waiting_parts`) that no work order has ever been written
+ * with, so every lookup would have fallen through to the default.
+ *
+ * Not exported: a route module may only export handlers and route config.
+ */
 const STATUS_META: Record<string, { label: string; color: string }> = {
-  received:      { label: 'Received',       color: '#6B7280' },
-  diagnosing:    { label: 'Diagnosing',     color: '#F59E0B' },
-  in_progress:   { label: 'In Progress',    color: '#3B82F6' },
-  waiting_parts: { label: 'Parts Ordered',  color: '#8B5CF6' },
-  ready:         { label: 'Ready for Pickup', color: '#10B981' },
-  completed:     { label: 'Completed',      color: '#059669' },
-  cancelled:     { label: 'Cancelled',      color: '#EF4444' },
+  pending:          { label: 'Received',           color: '#6B7280' },
+  diagnosed:        { label: 'Diagnosed',          color: '#F59E0B' },
+  awaitingApproval: { label: 'Awaiting your OK',   color: '#F59E0B' },
+  awaitingParts:    { label: 'Parts on order',     color: '#8B5CF6' },
+  inProgress:       { label: 'Being worked on',    color: '#3B82F6' },
+  qcTesting:        { label: 'Final testing',      color: '#3B82F6' },
+  completed:        { label: 'Ready to collect',   color: '#10B981' },
+  readyForPickup:   { label: 'Ready to collect',   color: '#10B981' },
+  delivered:        { label: 'Collected',          color: '#059669' },
+  closed:           { label: 'Closed',             color: '#059669' },
+  onHold:           { label: 'On hold',            color: '#6B7280' },
+  declined:         { label: 'Quote declined',     color: '#EF4444' },
+  unrepairable:     { label: 'Cannot be repaired', color: '#EF4444' },
+  cancelled:        { label: 'Cancelled',          color: '#EF4444' },
 }
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const store = searchParams.get('store')
-  const q = searchParams.get('q')?.trim()
+  const ticket = searchParams.get('ticket')?.trim()
+  const phone = searchParams.get('phone')?.trim()
 
-  if (!store || !q) {
-    return NextResponse.json({ error: 'Missing store or query' }, { status: 400 })
+  if (!store || !ticket || !phone) {
+    return NextResponse.json(
+      { error: 'Enter both your ticket number and the phone number on the job.' },
+      { status: 400 },
+    )
   }
 
-  // Still resolved, so an unknown storefront gets the same 404 it always would
-  // — a customer typing the wrong address should be told that, not told the
-  // feature is missing.
   const resolved = await loadStore(store)
   if (!resolved) {
     return NextResponse.json({ error: 'Store not found' }, { status: 404 })
   }
 
-  return NextResponse.json(
-    { error: 'Repair status lookup is not available yet.' },
-    { status: 501 },
-  )
+  const url = new URL('/repairs/status', POS_API_BASE)
+  url.searchParams.set('ticket_number', ticket)
+  url.searchParams.set('phone', phone)
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      headers: { 'X-API-Key': resolved.apiKey },
+      // A repair moves through statuses during the day, and a customer
+      // refreshing to see whether it is ready must not be served a cached
+      // "being worked on" from twenty minutes ago.
+      cache: 'no-store',
+    })
+  } catch {
+    return NextResponse.json(
+      { error: 'Could not reach the shop right now. Please try again shortly.' },
+      { status: 502 },
+    )
+  }
+
+  if (res.status === 404) {
+    // Same message for "no such ticket" and "phone does not match" — telling
+    // them apart turns this into a way to test which tickets exist.
+    return NextResponse.json(
+      {
+        error:
+          'We could not find that repair. Check the ticket number and the ' +
+          'phone number you gave the shop.',
+      },
+      { status: 404 },
+    )
+  }
+
+  if (!res.ok) {
+    return NextResponse.json(
+      { error: 'Could not look that up right now.' },
+      { status: 502 },
+    )
+  }
+
+  const job = (await res.json()) as {
+    ticket_number?: string
+    status?: string
+    is_ready?: boolean
+    device?: string
+    received_at?: string
+    estimated_ready?: string
+  }
+
+  const meta = STATUS_META[job.status ?? ''] ?? {
+    label: 'In progress',
+    color: '#6B7280',
+  }
+
+  return NextResponse.json({
+    ticketNumber: job.ticket_number ?? ticket,
+    status: job.status ?? '',
+    statusLabel: meta.label,
+    statusColor: meta.color,
+    isReady: job.is_ready === true,
+    device: job.device ?? '',
+    receivedAt: job.received_at ?? null,
+    estimatedReady: job.estimated_ready ?? null,
+  })
 }
