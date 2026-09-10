@@ -126,6 +126,20 @@ export const loadCategories = unstable_cache(
   { revalidate: 300, tags: ['categories'] },
 );
 
+export const loadUpsells = unstable_cache(
+  async (apiKey: string, productId: string) => {
+    const { getXebokiClient } = await import('./client');
+    const client = getXebokiClient(apiKey);
+    try {
+      return await client.ordering.listUpsells([productId]);
+    } catch {
+      return [];
+    }
+  },
+  ['upsells'],
+  { revalidate: 300, tags: ['catalog'] },
+);
+
 export const loadProduct = unstable_cache(
   async (apiKey: string, slug: string) => {
     const { getXebokiClient } = await import('./client');
