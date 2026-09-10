@@ -24,6 +24,9 @@ interface RateBucket {
 const _rateBuckets = new Map<string, RateBucket>()
 
 const RATE_LIMITS: Record<string, { limit: number; windowMs: number }> = {
+  '/api/mobile/v1/session': { limit: 20,  windowMs: 60_000 }, // sign-in exchanges
+  '/api/mobile/v1/orders':  { limit: 15,  windowMs: 60_000 }, // order placement
+  '/api/mobile':            { limit: 300, windowMs: 60_000 }, // mobile reads (per IP)
   '/api/checkout':       { limit: 10,  windowMs: 60_000 },   // 10 checkouts/min
   '/api/auth':           { limit: 20,  windowMs: 60_000 },   // 20 auth calls/min
   '/api/reviews':        { limit: 30,  windowMs: 60_000 },
