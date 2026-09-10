@@ -39,6 +39,7 @@ const Body = z.object({
   discountCode: z.string().optional(),
   giftCardCode: z.string().optional(),
   shippingAmount: z.number().nonnegative().optional(),
+  loyaltyPointsRedeemed: z.number().int().nonnegative().optional(),
 });
 
 /**
@@ -118,6 +119,7 @@ export async function POST(req: NextRequest) {
       discountCode: body.discountCode,
       giftCardCode: body.giftCardCode,
       shippingAmount: body.shippingAmount,
+      loyaltyPointsRedeemed: body.loyaltyPointsRedeemed,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create order';

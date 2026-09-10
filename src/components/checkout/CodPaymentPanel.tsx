@@ -26,6 +26,7 @@ interface Props {
   discountCode?: string;
   giftCardCode?: string;
   shippingAmount?: number;
+  loyaltyPointsRedeemed?: number;
 }
 
 export function CodPaymentPanel({
@@ -41,6 +42,7 @@ export function CodPaymentPanel({
   discountCode,
   giftCardCode,
   shippingAmount,
+  loyaltyPointsRedeemed,
 }: Props) {
   const clearCart = useCartStore((s) => s.clearCart);
   const [loading, setLoading] = useState(false);
@@ -66,6 +68,7 @@ export function CodPaymentPanel({
         discountCode,
         giftCardCode,
         shippingAmount,
+        loyaltyPointsRedeemed,
       }),
     });
 

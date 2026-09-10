@@ -72,12 +72,19 @@ const PAYMENT_METHODS: Array<{
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
+interface LoyaltyOffer {
+  points: number;
+  redemptionThreshold: number;
+  redemptionValue: number;
+}
+
 interface Props {
   storeSlug: string;
   storefrontConfig: StorefrontConfig | null;
+  loyalty: LoyaltyOffer | null;
 }
 
-export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
+export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
   const customer = useAuthStore((s) => s.customer);
@@ -111,6 +118,9 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
   // Payment
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodType>('stripe');
 
+  // Loyalty redemption
+  const [redeemLoyalty, setRedeemLoyalty] = useState(false);
+
   // State after initiating checkout
   const [stripeState, setStripeState] = useState<StripeState | null>(null);
   const [paypalState, setPaypalState] = useState<PayPalState | null>(null);
@@ -125,8 +135,24 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
   const goods = Math.max(0, subtotal - discountAmount);
   // Delivery is charged on the discounted goods; pickup/dine-in are free.
   const shipping = computeShipping(deliveryType, goods, storefrontConfig);
-  const giftCardApplied = giftCardState ? Math.min(giftCardState.balance, goods + shipping) : 0;
-  const orderTotal = Math.max(0, goods + shipping - giftCardApplied);
+  const billBeforeLoyalty = goods + shipping;
+
+  // Loyalty points reduce the bill like a discount. Clamp to the balance AND to
+  // the bill, and scale points to the discount, mirroring the API so the points
+  // spent and the money saved always agree.
+  const loyaltyPerPoint = loyalty ? loyalty.redemptionValue / loyalty.redemptionThreshold : 0;
+  let loyaltyPointsRedeemed = 0;
+  let loyaltyDiscount = 0;
+  if (redeemLoyalty && loyalty && loyaltyPerPoint > 0) {
+    const maxByBill = Math.floor(billBeforeLoyalty / loyaltyPerPoint);
+    loyaltyPointsRedeemed = Math.min(loyalty.points, maxByBill);
+    loyaltyDiscount = Math.round(loyaltyPointsRedeemed * loyaltyPerPoint * 100) / 100;
+  }
+
+  const giftCardApplied = giftCardState
+    ? Math.min(giftCardState.balance, billBeforeLoyalty - loyaltyDiscount)
+    : 0;
+  const orderTotal = Math.max(0, billBeforeLoyalty - loyaltyDiscount - giftCardApplied);
 
   // GA4/Meta begin_checkout — once, when the checkout mounts with items.
   useEffect(() => {
@@ -183,6 +209,7 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
       discountCode: discountState ? discountCode : undefined,
       giftCardCode: giftCardState ? giftCardCode : undefined,
       shippingAmount: shipping > 0 ? shipping : undefined,
+      loyaltyPointsRedeemed: loyaltyPointsRedeemed > 0 ? loyaltyPointsRedeemed : undefined,
     };
   }
 
@@ -342,7 +369,7 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
   if (paypalState) {
     return (
       <div className="max-w-md mx-auto">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
         <div className="mt-6">
           <PayPalPaymentPanel
             storeSlug={storeSlug}
@@ -359,7 +386,7 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
   if (codItems) {
     return (
       <div className="max-w-md mx-auto">
-        <_OrderSummary items={codItems} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
+        <_OrderSummary items={codItems} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
         <div className="mt-6">
           <CodPaymentPanel
             storeSlug={storeSlug}
@@ -374,6 +401,7 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
             discountCode={discountState ? discountCode : undefined}
             giftCardCode={giftCardState ? giftCardCode : undefined}
             shippingAmount={shipping}
+            loyaltyPointsRedeemed={loyaltyPointsRedeemed > 0 ? loyaltyPointsRedeemed : undefined}
           />
         </div>
       </div>
@@ -604,6 +632,28 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
           )}
         </section>
 
+        {loyalty && loyaltyPerPoint > 0 && (
+          <section>
+            <label className="flex items-start gap-3 p-4 rounded-brand border border-amber-200 bg-amber-50/60 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={redeemLoyalty}
+                onChange={(e) => setRedeemLoyalty(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span className="text-sm">
+                <span className="font-semibold text-amber-800">Use my loyalty points</span>
+                <span className="block text-amber-700">
+                  You have {loyalty.points} points
+                  {redeemLoyalty && loyaltyPointsRedeemed > 0
+                    ? ` — redeeming ${loyaltyPointsRedeemed} for ${formatCurrency(loyaltyDiscount)} off`
+                    : ` (worth up to ${formatCurrency(Math.round(loyalty.points * loyaltyPerPoint * 100) / 100)})`}
+                </span>
+              </span>
+            </label>
+          </section>
+        )}
+
         {/* 5 — Payment method */}
         <section>
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
@@ -661,7 +711,7 @@ export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
 
       {/* Right: order summary */}
       <div className="lg:col-span-2">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} giftCardApplied={giftCardApplied} orderTotal={orderTotal} sticky />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} sticky />
       </div>
     </div>
   );
@@ -681,12 +731,13 @@ interface OrderSummaryProps {
   subtotal: number;
   discountAmount: number;
   shipping: number;
+  loyaltyDiscount: number;
   giftCardApplied: number;
   orderTotal: number;
   sticky?: boolean;
 }
 
-function _OrderSummary({ items, subtotal, discountAmount, shipping, giftCardApplied, orderTotal, sticky }: OrderSummaryProps) {
+function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, sticky }: OrderSummaryProps) {
   return (
     <div className={clsx('rounded-brand border border-slate-200 p-5 space-y-4', sticky && 'sticky top-24')}>
       <h2 className="font-bold text-slate-900">Order Summary</h2>
@@ -720,6 +771,12 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, giftCardAppl
           <span>Shipping</span>
           <span>{shipping > 0 ? formatCurrency(shipping) : 'Free'}</span>
         </div>
+        {loyaltyDiscount > 0 && (
+          <div className="flex justify-between text-amber-600">
+            <span>Loyalty points</span>
+            <span>−{formatCurrency(loyaltyDiscount)}</span>
+          </div>
+        )}
         {giftCardApplied > 0 && (
           <div className="flex justify-between text-violet-600">
             <span>Gift card</span>

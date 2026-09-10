@@ -286,6 +286,18 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
               <span>−{formatCurrency(order.discount)}</span>
             </div>
           )}
+          {order.shipping > 0 && (
+            <div className="flex justify-between text-slate-600">
+              <span>Shipping</span>
+              <span>{formatCurrency(order.shipping)}</span>
+            </div>
+          )}
+          {order.loyaltyDiscount > 0 && (
+            <div className="flex justify-between text-amber-600">
+              <span>Loyalty points</span>
+              <span>−{formatCurrency(order.loyaltyDiscount)}</span>
+            </div>
+          )}
           <div className="flex justify-between font-bold text-slate-900 text-base pt-3 border-t border-slate-200">
             <span>Total</span>
             <span>{formatCurrency(order.total)}</span>
