@@ -5,6 +5,7 @@
  * Called once per page render — expensive work is behind Next.js `unstable_cache`.
  */
 import { unstable_cache } from 'next/cache';
+import { resilientRead } from './resilient';
 import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 
 // ---------------------------------------------------------------------------
@@ -50,26 +51,21 @@ export const loadStore = unstable_cache(
     const apiKey = await resolveApiKey(slug);
     if (!apiKey) return null;
 
-    // Lazy import to keep the module tree clean
-    const { getXebokiClient } = await import('./client');
-    const client = getXebokiClient(apiKey);
-
-    const [storeConfig, storefrontConfig] = await Promise.allSettled([
-      client.ordering.getStoreConfig(),
-      // storefrontConfig is optional — returns 404 if not yet configured
-      client.ordering.getStorefrontConfig().catch(() => null),
-    ]);
-
-    if (storeConfig.status === 'rejected') return null;
-
-    return {
-      slug,
-      apiKey,
-      isTestMode: apiKey.startsWith('xbk_test_'),
-      storeConfig: storeConfig.value,
-      storefrontConfig:
-        storefrontConfig.status === 'fulfilled' ? storefrontConfig.value : null,
-    };
+    // Serve the last-known-good store on a transient upstream error rather than
+    // 404-ing the whole shop. Cold miss while down → null (genuine not-found).
+    return resilientRead<ResolvedStore>(`store:${slug}`, async () => {
+      const { getXebokiClient } = await import('./client');
+      const client = getXebokiClient(apiKey);
+      const storeConfig = await client.ordering.getStoreConfig();
+      const storefrontConfig = await client.ordering.getStorefrontConfig().catch(() => null);
+      return {
+        slug,
+        apiKey,
+        isTestMode: apiKey.startsWith('xbk_test_'),
+        storeConfig,
+        storefrontConfig,
+      };
+    }, { fallback: 'null' });
   },
   ['store-config'],
   { revalidate: 300, tags: ['store-config'] }, // 5 min cache
@@ -101,7 +97,8 @@ export const loadCatalog = unstable_cache(
     const client = getXebokiClient(apiKey);
     const perPage = query.perPage ?? 24;
     const page = Math.max(1, query.page ?? 1);
-    return client.ordering.listProducts({
+    const cacheKey = `catalog:${apiKey.slice(-8)}:${query.categoryId ?? ''}:${query.search ?? ''}:${query.inStockOnly ? 1 : 0}:${query.sort ?? ''}:${query.minPrice ?? ''}:${query.maxPrice ?? ''}:${page}:${perPage}`;
+    const res = await resilientRead(cacheKey, () => client.ordering.listProducts({
       categoryId: query.categoryId,
       search: query.search,
       inStockOnly: query.inStockOnly,
@@ -110,7 +107,8 @@ export const loadCatalog = unstable_cache(
       maxPrice: query.maxPrice,
       limit: perPage,
       offset: (page - 1) * perPage,
-    });
+    }));
+    return res ?? { data: [], total: 0, limit: perPage, offset: (page - 1) * perPage };
   },
   ['catalog'],
   { revalidate: 60, tags: ['catalog'] },
@@ -120,7 +118,8 @@ export const loadCategories = unstable_cache(
   async (apiKey: string) => {
     const { getXebokiClient } = await import('./client');
     const client = getXebokiClient(apiKey);
-    return client.ordering.listCategories();
+    const res = await resilientRead(`categories:${apiKey.slice(-8)}`, () => client.ordering.listCategories());
+    return res ?? { data: [], total: 0, limit: 50, offset: 0 };
   },
   ['categories'],
   { revalidate: 300, tags: ['categories'] },
@@ -144,7 +143,7 @@ export const loadProduct = unstable_cache(
   async (apiKey: string, slug: string) => {
     const { getXebokiClient } = await import('./client');
     const client = getXebokiClient(apiKey);
-    return client.ordering.getProductBySlug(slug);
+    return resilientRead(`product:${apiKey.slice(-8)}:${slug}`, () => client.ordering.getProductBySlug(slug), { fallback: 'null' });
   },
   ['product-by-slug'],
   { revalidate: 60, tags: ['catalog'] },
