@@ -92,3 +92,11 @@ export function trackPurchase(
   });
   fbq('track', 'Purchase', { content_ids: items.map((i) => i.id), value, currency });
 }
+
+
+/** Fires an experiment exposure (GA4 + Meta) for A/B analysis. */
+export function trackExperiment(experimentId: string, variantId: string): void {
+  if (typeof window === 'undefined') return;
+  gtag('event', 'experiment_impression', { experiment_id: experimentId, variant_id: variantId });
+  fbq('trackCustom', 'Experiment', { experiment: experimentId, variant: variantId });
+}
