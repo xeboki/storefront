@@ -36,6 +36,53 @@ function getRateKey(ip: string, routePrefix: string): string {
   return `${ip}:${routePrefix}`
 }
 
+// ── Distributed limiter (Upstash REST) ────────────────────────────────────────
+// The in-memory Map below only ever sees one serverless instance, so across a
+// real deployment it enforces nothing. When Upstash env is present we count in
+// Redis instead — a single pipelined REST call, Edge-compatible. A transport
+// error fails OPEN (better to serve than to wrongly 429 everyone on a blip).
+
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
+
+async function checkRateLimitUpstash(
+  ip: string,
+  pathname: string,
+): Promise<{ allowed: boolean; limit: number; remaining: number; resetAt: number } | null> {
+  const matchedRoute = Object.keys(RATE_LIMITS)
+    .filter(prefix => pathname.startsWith(prefix))
+    .sort((a, b) => b.length - a.length)[0]
+  if (!matchedRoute) return { allowed: true, limit: 999, remaining: 999, resetAt: 0 }
+
+  const rule = RATE_LIMITS[matchedRoute]
+  const winSec = Math.ceil(rule.windowMs / 1000)
+  const key = `rl:${getRateKey(ip, matchedRoute)}`
+
+  try {
+    // SET key 0 EX <win> NX  (start the window only if absent) then INCR.
+    const res = await fetch(`${UPSTASH_URL}/pipeline`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([
+        ['SET', key, '0', 'EX', String(winSec), 'NX'],
+        ['INCR', key],
+      ]),
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const out = (await res.json()) as Array<{ result: unknown }>
+    const count = Number(out?.[1]?.result ?? 0)
+    return {
+      allowed: count <= rule.limit,
+      limit: rule.limit,
+      remaining: Math.max(rule.limit - count, 0),
+      resetAt: Date.now() + rule.windowMs,
+    }
+  } catch {
+    return null // transport error → fall through to in-memory / fail open
+  }
+}
+
 function checkRateLimit(
   ip: string,
   pathname: string
@@ -69,7 +116,7 @@ function checkRateLimit(
 
 // ── Middleware ─────────────────────────────────────────────────────────────────
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname, searchParams, hostname } = request.nextUrl
 
   // Skip Next.js internals and static files
@@ -88,7 +135,10 @@ export function middleware(request: NextRequest) {
       request.headers.get('x-real-ip') ??
       '127.0.0.1'
 
-    const rl = checkRateLimit(ip, pathname)
+    const rl =
+      (UPSTASH_URL && UPSTASH_TOKEN
+        ? await checkRateLimitUpstash(ip, pathname)
+        : null) ?? checkRateLimit(ip, pathname)
 
     if (!rl.allowed) {
       return new NextResponse(
