@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Package, RotateCw } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { ReturnRequest } from './ReturnRequest';
 import { trackPurchase } from '@/lib/analytics';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import type { OrderingOrder } from '@xeboki/sdk';
@@ -310,6 +311,12 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
           )}
         </div>
       </div>
+
+      <ReturnRequest
+        orderId={order.id}
+        storeSlug={storeSlug}
+        eligible={order.status === 'completed' || order.status === 'ready'}
+      />
 
       {/* Guest CTA */}
       {isGuest && (
