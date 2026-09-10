@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    // Without a target tsc defaults to ES5, which cannot iterate a Set —
+    // `npm run typecheck` failed on code Next itself compiles happily.
+    "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,

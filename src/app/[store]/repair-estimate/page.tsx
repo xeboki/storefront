@@ -13,6 +13,7 @@
 import type { Metadata } from 'next'
 import { RepairEstimateApproval } from '@/components/repairs/RepairEstimateApproval'
 import { loadStore } from '@/lib/sdk/store'
+import { notFound } from 'next/navigation'
 import { getStoreSlug } from '@/lib/utils/store-slug'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,6 +37,7 @@ export default async function RepairEstimatePage({ params, searchParams }: Props
   // The middleware rewrite supplies the slug on the shared deployment; the
   // route param is what a shop on its own domain has. Either resolves.
   const slug = params.store || (await getStoreSlug())
+  if (!slug) notFound()
   const store = await loadStore(slug)
   const { e: estimateId, t: token } = searchParams
 

@@ -132,9 +132,13 @@ export function middleware(request: NextRequest) {
   const rewriteUrl = request.nextUrl.clone()
   rewriteUrl.pathname = `/${slug}${pathname}`
 
-  const res = NextResponse.rewrite(rewriteUrl)
-  res.headers.set('x-store-slug', slug)
-  return res
+  // The slug has to travel on the REQUEST headers to be readable by
+  // `headers()` in a server component. Setting it on the response only sent it
+  // back to the browser, so every reader fell through to its 'demo' default.
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-store-slug', slug)
+
+  return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
 }
 
 export const config = {

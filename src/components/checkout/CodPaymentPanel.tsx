@@ -42,6 +42,8 @@ export function CodPaymentPanel({
   deliveryType,
   notes,
   tableId,
+  discountCode,
+  giftCardCode,
 }: Props) {
   const clearCart = useCartStore((s) => s.clearCart);
   const [loading, setLoading] = useState(false);
@@ -61,6 +63,11 @@ export function CodPaymentPanel({
         deliveryType,
         notes,
         tableId,
+        // These arrive as props and the order summary already reflects them,
+        // but they were left out of the request — so a COD order was always
+        // created at full price and the discount the customer saw vanished.
+        discountCode,
+        giftCardCode,
       }),
     });
 

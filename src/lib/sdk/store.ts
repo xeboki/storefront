@@ -157,3 +157,29 @@ export const loadCustomPage = unstable_cache(
   ['custom-page'],
   { revalidate: 300, tags: ['pages'] },
 );
+
+// ---------------------------------------------------------------------------
+// Ordering location resolution (5 min cache)
+//
+// Online orders must name a location, but only when the business has more than
+// one — a single-location shop is resolved server-side. The storefront has no
+// UI concept of a location, so it defers to the API's own "ordering-enabled"
+// list (the single source of truth) and takes the first. Returns null when the
+// merchant has not enabled online ordering on any location, so callers can say
+// so plainly instead of surfacing a raw 400.
+// ---------------------------------------------------------------------------
+
+export const resolveOrderingLocationId = unstable_cache(
+  async (apiKey: string): Promise<string | null> => {
+    const { getXebokiClient } = await import('./client');
+    const client = getXebokiClient(apiKey);
+    try {
+      const res = await client.ordering.listLocations();
+      return res.data[0]?.id ?? null;
+    } catch {
+      return null;
+    }
+  },
+  ['ordering-location'],
+  { revalidate: 300, tags: ['store-config'] },
+);

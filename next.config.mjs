@@ -25,6 +25,15 @@ const nextConfig = {
         protocol: 'https',
         hostname: '**.googleusercontent.com',
       },
+      {
+        // This is a multi-tenant storefront: each merchant's product images can
+        // live on any CDN they configured in the POS, so the host cannot be
+        // known ahead of time. Without a catch-all, next/image throws
+        // "hostname not configured" and takes down the whole page the moment a
+        // product uses anything but the two hosts above.
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
   },
   // Rewrite for local development: ?store=slug → subdomain emulation

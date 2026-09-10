@@ -54,15 +54,18 @@ export default async function StoreLayout({ params, children }: Props) {
   if (!resolved) notFound();
 
   const { storeConfig, storefrontConfig, slug } = resolved;
+  // themeVars is already a { '--color-*': value } object — the shape React's
+  // style prop wants. Passing the semicolon-joined string form (via
+  // themeVarsToStyle) crashed every store page: React's style prop rejects a
+  // string at runtime, cast or no cast.
   const themeVars = buildThemeVars(storefrontConfig);
-  const themeStyle = themeVarsToStyle(themeVars);
 
   const orgJsonLd = storefrontConfig?.structuredDataEnabled
     ? generateOrganization(slug, storeConfig, storefrontConfig)
     : null;
 
   return (
-    <html lang="en" style={themeStyle as React.CSSProperties}>
+    <html lang="en" style={themeVars as React.CSSProperties}>
       <head>
         {orgJsonLd && (
           <script

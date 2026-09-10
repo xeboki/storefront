@@ -7,7 +7,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { loadStore } from '@/lib/sdk/store';
+import { loadStore, resolveOrderingLocationId } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
 
 const LineItemSchema = z.object({
@@ -28,7 +28,19 @@ const Body = z.object({
   notes: z.string().optional(),
   // A dine-in order without its table cannot be delivered to anyone.
   tableId: z.string().optional(),
+  // Both were sent by the checkout and stripped here by Zod, so the customer
+  // was billed the full price the screen had already discounted.
+  discountCode: z.string().optional(),
+  giftCardCode: z.string().optional(),
 });
+
+/**
+ * The checkout speaks camelCase; the API's order types are snake_case and it
+ * rejects anything outside its set — 'dineIn' was a 400 on every dine-in order.
+ */
+function toOrderType(deliveryType: 'pickup' | 'delivery' | 'dineIn'): string {
+  return deliveryType === 'dineIn' ? 'dine_in' : deliveryType;
+}
 
 export async function POST(req: NextRequest) {
   let body: z.infer<typeof Body>;
@@ -45,11 +57,17 @@ export async function POST(req: NextRequest) {
 
   const client = getXebokiClient(resolved.apiKey);
 
+  // Online orders name a location only when the shop has more than one; the
+  // API infers a sole location and this stays undefined. null (no ordering-
+  // enabled location) is normalised to undefined so the API can still try.
+  const locationId = (await resolveOrderingLocationId(resolved.apiKey)) ?? undefined;
+
   // Step 1: Create the order (pending status)
   let order: { id: string; status: string; total: number };
   try {
     order = await client.ordering.createOrder({
-      orderType: body.deliveryType,
+      locationId,
+      orderType: toOrderType(body.deliveryType),
       items: body.items.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
@@ -62,6 +80,8 @@ export async function POST(req: NextRequest) {
       guestEmail: body.guestEmail,
       notes: body.notes,
       tableId: body.tableId,
+      discountCode: body.discountCode,
+      giftCardCode: body.giftCardCode,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to place order';
