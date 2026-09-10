@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAddressAutocomplete } from '@/lib/address/autocomplete';
 import { Plus, Trash2, Star } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import type { CustomerAddress } from '@xeboki/sdk';
@@ -38,6 +39,18 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<AddressFormData>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+
+  // Google Places autocomplete on line 1 (env-gated; manual entry otherwise).
+  const line1Ref = useAddressAutocomplete((a) =>
+    setForm((f) => ({
+      ...f,
+      line1: a.line1 || f.line1,
+      city: a.city || f.city,
+      state: a.state || f.state,
+      postcode: a.postcode || f.postcode,
+      country: a.country || f.country,
+    })),
+  );
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -135,6 +148,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
             </div>
             <div className="col-span-2">
               <input
+                ref={line1Ref}
                 required
                 placeholder="Address line 1"
                 value={form.line1}
