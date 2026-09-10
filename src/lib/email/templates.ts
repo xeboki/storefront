@@ -97,3 +97,43 @@ export function orderConfirmationEmail(
 
   return { subject: `Order confirmed — #${num} · ${brand}`, html, text };
 }
+
+
+export function abandonedCartEmail(
+  items: Array<Record<string, unknown>>,
+  total: number,
+  storeConfig: StoreConfig,
+  storeSlug: string,
+  recoverUrl: string,
+): OrderEmail {
+  const cur = storeConfig.currencyCode;
+  const brand = storeConfig.businessName || storeSlug;
+  const names = items
+    .map((i) => (i['product_name'] as string) || (i['name'] as string) || '')
+    .filter(Boolean);
+  const list = names.length
+    ? `<ul style="padding-left:18px;margin:0 0 16px;color:#333;">${names.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>`
+    : '';
+
+  const html = `<!doctype html><html><body style="margin:0;background:#f6f7f9;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#111;">
+    <div style="max-width:520px;margin:0 auto;padding:24px;">
+      <div style="background:#fff;border-radius:12px;padding:28px;border:1px solid #eee;">
+        <h1 style="margin:0 0 8px;font-size:20px;">You left something behind</h1>
+        <p style="margin:0 0 16px;color:#555;">Your cart at ${esc(brand)} is still waiting${total > 0 ? ` — ${money(total, cur)}` : ''}.</p>
+        ${list}
+        <a href="${recoverUrl}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:10px 18px;border-radius:8px;font-size:14px;">Return to your cart</a>
+      </div>
+      <p style="text-align:center;color:#aaa;font-size:12px;margin-top:16px;">${esc(brand)}</p>
+    </div>
+  </body></html>`;
+
+  const text = [
+    `You left something behind — ${brand}`,
+    total > 0 ? `Your cart total: ${money(total, cur)}` : '',
+    ...names.map((n) => `- ${n}`),
+    '',
+    `Return to your cart: ${recoverUrl}`,
+  ].filter(Boolean).join('\n');
+
+  return { subject: `Your cart is waiting at ${brand}`, html, text };
+}

@@ -165,6 +165,29 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Abandoned-cart capture — once a valid email is present, record the cart so
+  // a recovery email can go out if they leave. Debounced, best-effort.
+  const captureEmail = customer?.email ?? guestEmail;
+  useEffect(() => {
+    const email = (captureEmail ?? '').trim();
+    if (items.length === 0 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return;
+    const t = setTimeout(() => {
+      fetch('/api/cart/capture', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeSlug,
+          email,
+          total: subtotal,
+          items: items.map((i) => ({ product_id: i.productId, product_name: i.name, quantity: i.quantity })),
+        }),
+        keepalive: true,
+      }).catch(() => {});
+    }, 1200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [captureEmail, items.length]);
+
   // ── Guards ──────────────────────────────────────────────────────────────────
 
   if (items.length === 0) {
