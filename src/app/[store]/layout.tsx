@@ -7,6 +7,8 @@ import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { generateOrganization } from '@/lib/seo/structured-data';
+import { LocaleProvider } from '@/lib/i18n/client';
+import { resolveLocale } from '@/lib/i18n';
 import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
 
 interface Props {
@@ -60,13 +62,14 @@ export default async function StoreLayout({ params, children }: Props) {
   // themeVarsToStyle) crashed every store page: React's style prop rejects a
   // string at runtime, cast or no cast.
   const themeVars = buildThemeVars(storefrontConfig);
+  const locale = resolveLocale(null);
 
   const orgJsonLd = storefrontConfig?.structuredDataEnabled
     ? generateOrganization(slug, storeConfig, storefrontConfig)
     : null;
 
   return (
-    <html lang="en" style={themeVars as React.CSSProperties}>
+    <html lang={locale} style={themeVars as React.CSSProperties}>
       <head>
         {orgJsonLd && (
           <script
@@ -81,6 +84,7 @@ export default async function StoreLayout({ params, children }: Props) {
       </head>
       <body className="min-h-screen flex flex-col bg-white">
         <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
+          <LocaleProvider locale={locale}>
           {resolved.isTestMode && (
             <div style={{ background: '#F59E0B', color: '#000', textAlign: 'center', padding: '8px 16px', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>
               ⚠ TEST MODE — No real payments are processed. Use Stripe test cards only.
@@ -93,6 +97,7 @@ export default async function StoreLayout({ params, children }: Props) {
           />
           <main className="flex-1">{children}</main>
           <StorefrontFooter storeConfig={storeConfig} storefrontConfig={storefrontConfig} storeSlug={slug} />
+          </LocaleProvider>
         </StoreProviders>
       </body>
     </html>

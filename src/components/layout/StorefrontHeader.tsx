@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, APPOINTMENT_TYPES, WORK_ORDER_TYPES } from '@/stores/storeConfigStore';
+import { useT } from '@/lib/i18n/client';
 import type { StoreConfig, StorefrontConfig, NavLink } from '@xeboki/sdk';
 
 interface Props {
@@ -20,6 +21,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
   const itemCount = useCartStore((s) => s.itemCount());
   const customer = useAuthStore((s) => s.customer);
   const businessType = useStoreConfigStore((s) => s.businessType);
+  const t = useT();
 
   const hasAppointments = APPOINTMENT_TYPES.has(businessType);
   const hasWorkOrders = WORK_ORDER_TYPES.has(businessType);
@@ -48,7 +50,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
             <Link href={`/${storeSlug}/catalog`} className="text-slate-600 hover:text-primary transition-colors">
-              Shop
+              {t('nav.shop')}
             </Link>
             {hasAppointments && (
               <Link href={`/${storeSlug}/book`} className="text-slate-600 hover:text-primary transition-colors">
@@ -123,7 +125,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
                 href={`/${storeSlug}/login`}
                 className="hidden md:block text-sm font-medium text-slate-600 hover:text-primary transition-colors px-2"
               >
-                Sign in
+                {t('nav.signIn')}
               </Link>
             )}
 
