@@ -1,32 +1,35 @@
 # Storefront e-commerce roadmap — execution tracker
 
-Follows the readiness assessment (2026-09-10). Status: done | needs-config (keys) | blocked (decision/account).
+Assessment 2026-09-10. Status: done | needs-config (keys/dashboard) | decision (product/FX choice).
 
 ## P0 — revenue / trust blockers  → COMPLETE
-- [done] Transactional email — order confirmation on Stripe/PayPal/COD; provider-agnostic mailer (lib/email/, Resend via env), best-effort. needs-config: RESEND_API_KEY + EMAIL_FROM.
-- [done] Shipping cost — API shipping_amount folded into total; storefront lib/shipping.ts (flat / free-over-threshold, pickup free), Shipping line at checkout; rules from config or env.
-- [done] Analytics + conversion — GA4 + Meta Pixel via config/env ids; view_item / add_to_cart / begin_checkout / purchase (deduped). needs-config: GA4/Pixel ids.
-- [done] Reliability net — free SDK<->API contract test (fails CI on path drift); opt-in live checkout smoke (verify_storefront_live.py).
+- [done] Transactional email — order confirmation on Stripe/PayPal/COD (lib/email/, Resend). needs-config: RESEND_API_KEY, EMAIL_FROM.
+- [done] Shipping cost — API shipping_amount in total; storefront rules (flat / free-over-threshold, pickup free) + checkout line.
+- [done] Analytics + conversion — GA4 + Meta Pixel; view_item/add_to_cart/begin_checkout/purchase (deduped). needs-config: ids.
+- [done] Reliability net — free SDK<->API contract test; live checkout smoke (verify_storefront_live.py).
 
-## P1 — conversion / AOV
-- [done] Customer accounts — rebuilt on the tenant's Firebase Auth (were calling non-existent /customers/register|login). Client Firebase sign-in -> ID token -> /api/auth/* -> session.
-- [done] Server-side search + pagination — URL-driven search / category / in-stock / sort / paging, resolved by the API (removed the 100-product client cap and the dead CatalogClientWrapper).
-- [done] Upsell/cross-sell on PDP — wired the existing /catalog/upsells; "You might also like" on the product page.
-- [done] Express Apple/Google Pay — already provided by Stripe PaymentElement; needs-config: enable wallets + verify the Apple Pay domain in the Stripe dashboard (no code). A top-of-funnel ExpressCheckoutElement button is a future nicety.
-- [blocked] Loyalty redemption in checkout — API applies loyalty_points_redeemed as a POST-write ledger entry; it does NOT reduce the order's charged total at creation. Exposing it in checkout would misprice the order. Needs a careful API spec: compute redemption_value before the total, subtract it like a discount, and stop the post-write ledger op double-counting. Deferred to avoid a money bug.
-- [blocked] Abandoned-cart capture + recovery email — needs a persistence store for in-progress carts + a scheduled job (cron) to send. Infra decision.
-- [blocked] Address autocomplete/validation — needs an external provider (Google Places / Loqate) + key.
+## P1 — conversion / AOV  → COMPLETE
+- [done] Customer accounts — rebuilt on tenant Firebase Auth.
+- [done] Server-side search + pagination — search/category/in-stock/sort/paging via API; 100-cap gone.
+- [done] Upsell/cross-sell on PDP — /catalog/upsells.
+- [done] Express Apple/Google Pay — via Stripe PaymentElement. needs-config: enable wallets + verify Apple Pay domain in Stripe dashboard.
+- [done] Loyalty redemption in checkout — API now reduces the total by the clamped redemption value; checkout UI for signed-in customers.
+- [done] Abandoned-cart recovery — capture at checkout, hourly cron emails via Resend, order closes the cart. needs-config: STOREFRONT_STORES, CRON_SECRET.
+- [done] Address autocomplete/validation — Google Places on the address form. needs-config: NEXT_PUBLIC_GOOGLE_PLACES_KEY (degrades to manual entry).
 
 ## P2 — scale / enterprise
-- [done] Distributed rate limiting — middleware uses Upstash REST (one pipelined call, Edge-safe, fails open) when UPSTASH_REDIS_REST_URL/_TOKEN are set, else the in-memory map. needs-config: Upstash env in prod.
-- [blocked] Observability (Sentry/uptime/perf) — add @sentry/nextjs gated on SENTRY_DSN; needs a Sentry account/DSN + uptime monitor choice.
-- [blocked] Multi-currency + i18n — large; needs locale/currency model + translated-content decisions.
-- [blocked] Returns / RMA self-service — needs API endpoints + UI; product decision on policy.
-- [blocked] A/B testing hooks — needs a framework / flag-provider choice.
-- [blocked] Headless-CMS content / per-store storefront editor — large; product decision.
+- [done] Distributed rate limiting — Upstash REST in middleware, in-memory fallback. needs-config: UPSTASH_REDIS_REST_URL/_TOKEN.
+- [done] Observability baseline — error boundaries report to /api/log (ERROR_WEBHOOK_URL). Production: drop in @sentry/nextjs + SENTRY_DSN (needs install through workspace tooling).
+- [done] i18n framework — locale resolver + en/es dictionaries + server/client t(); header wired. Extend by translating remaining strings.
+- [done] Returns / RMA — self-service on the order page; API order_returns.
+- [done] A/B testing — lib/experiments.tsx: registry + useExperiment() + exposure events. Register experiments to use.
+- [decision] Multi-currency CHARGING — display is already store-currency-correct everywhere; charging a buyer in their own currency needs an FX source + Stripe presentment-currency setup. Product/finance decision.
+- [decision] Headless-CMS / visual storefront editor — storefront already consumes blog + custom pages + config; a visual per-store editor belongs in the Manager app (separate surface), not the storefront.
 
-## Decisions the team needs to make (to unblock)
-- Provider picks: email (Resend assumed), address validation, Sentry, Upstash; GA4/Pixel ids per store.
-- Loyalty-in-checkout needs the API accounting change above before it can be exposed safely.
-- Gateway free tier is 100 req/day/key — upgrade for real load.
-- API is always LIVE (never mock); StoreFront runs on :7090.
+## needs-config summary (set these to activate)
+RESEND_API_KEY, EMAIL_FROM · GA4/Meta ids · UPSTASH_REDIS_REST_URL/_TOKEN · STOREFRONT_STORES, CRON_SECRET, ABANDONED_CART_MINUTES · NEXT_PUBLIC_GOOGLE_PLACES_KEY · ERROR_WEBHOOK_URL · NEXT_PUBLIC_DEFAULT_LOCALE · Stripe dashboard: wallets + Apple Pay domain.
+
+## remaining decisions for the team
+- Multi-currency charging (FX source + payment config) — the only true feature gap left.
+- Sentry account/DSN if the /api/log baseline isn't enough.
+- API is always LIVE (never mock); StoreFront on :7090; gateway free tier 100/day/key — upgrade for load.
