@@ -79,12 +79,38 @@ export const loadStore = unstable_cache(
 // Catalog helpers (60s ISR — product listings change more frequently)
 // ---------------------------------------------------------------------------
 
+export interface CatalogQuery {
+  categoryId?: string;
+  search?: string;
+  inStockOnly?: boolean;
+  sort?: 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc' | 'newest';
+  minPrice?: number;
+  maxPrice?: number;
+  page?: number;
+  perPage?: number;
+}
+
+/**
+ * A single page of the catalog, searched and filtered SERVER-SIDE. Replaces the
+ * old "load 100 and filter in the browser" approach, which silently capped the
+ * catalog at 100 products and never searched beyond them.
+ */
 export const loadCatalog = unstable_cache(
-  async (apiKey: string, categoryId?: string) => {
+  async (apiKey: string, query: CatalogQuery = {}) => {
     const { getXebokiClient } = await import('./client');
     const client = getXebokiClient(apiKey);
-    // returns OrderingListResponse with .data array
-    return client.ordering.listProducts({ categoryId, limit: 100 });
+    const perPage = query.perPage ?? 24;
+    const page = Math.max(1, query.page ?? 1);
+    return client.ordering.listProducts({
+      categoryId: query.categoryId,
+      search: query.search,
+      inStockOnly: query.inStockOnly,
+      sort: query.sort,
+      minPrice: query.minPrice,
+      maxPrice: query.maxPrice,
+      limit: perPage,
+      offset: (page - 1) * perPage,
+    });
   },
   ['catalog'],
   { revalidate: 60, tags: ['catalog'] },

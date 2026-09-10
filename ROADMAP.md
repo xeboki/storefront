@@ -9,8 +9,8 @@ Follows the readiness assessment (2026-09-10). Status: ☐ todo · ◐ in progre
 - ☑ **Reliability net**: SDK↔API contract tests (paths + snake/camel shapes) so a wire mismatch fails CI; synthetic checkout smoke (create→pay→read) runnable against live.
 
 ## P1 — conversion / AOV
-- ☐ **Customer accounts broken** (discovered): SDK `registerCustomer`/`loginCustomer` call `/customers/register|login`, which the API does not serve — customer auth is Firebase-based (`/customers/firebase-register|verify`). Rebuild storefront auth on the tenant's Firebase (createUser/signIn → token → firebase-register/verify), or add password endpoints to the API. Guest checkout unaffected.
-- ☐ Server-side search + pagination (remove the 100-product client cap; faceting)
+- ☑ **Customer accounts** (rebuilt on tenant Firebase Auth) (discovered): SDK `registerCustomer`/`loginCustomer` call `/customers/register|login`, which the API does not serve — customer auth is Firebase-based (`/customers/firebase-register|verify`). Rebuild storefront auth on the tenant's Firebase (createUser/signIn → token → firebase-register/verify), or add password endpoints to the API. Guest checkout unaffected.
+- ☑ Server-side search + pagination (remove the 100-product client cap; faceting)
 - ☐ Upsell/cross-sell on PDP (wire existing `/catalog/upsells`)
 - ☐ Loyalty redemption in checkout (SDK/API already support `loyaltyPointsRedeemed`)
 - ☐ Express checkout (Apple/Google Pay via Stripe Payment Request)
