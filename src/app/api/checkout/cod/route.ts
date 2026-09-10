@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { loadStore, resolveOrderingLocationId } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
+import { sendOrderConfirmation } from '@/lib/email/order-confirmation';
 
 const LineItemSchema = z.object({
   productId: z.string(),
@@ -32,6 +33,7 @@ const Body = z.object({
   // was billed the full price the screen had already discounted.
   discountCode: z.string().optional(),
   giftCardCode: z.string().optional(),
+  shippingAmount: z.number().nonnegative().optional(),
 });
 
 /**
@@ -82,6 +84,7 @@ export async function POST(req: NextRequest) {
       tableId: body.tableId,
       discountCode: body.discountCode,
       giftCardCode: body.giftCardCode,
+      shippingAmount: body.shippingAmount,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to place order';
@@ -95,9 +98,11 @@ export async function POST(req: NextRequest) {
       method: 'cod',
       amount: order.total,
     });
+    await sendOrderConfirmation(client, resolved, paid.id);
     return NextResponse.json({ orderId: paid.id, status: paid.status });
   } catch (err: unknown) {
     // Order is created — return it even if payOrder fails so we don't lose the order
+    await sendOrderConfirmation(client, resolved, order.id);
     return NextResponse.json({ orderId: order.id, status: order.status });
   }
 }

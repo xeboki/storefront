@@ -38,6 +38,7 @@ const Body = z.object({
   // was charged the full price the screen had already discounted.
   discountCode: z.string().optional(),
   giftCardCode: z.string().optional(),
+  shippingAmount: z.number().nonnegative().optional(),
 });
 
 /**
@@ -116,6 +117,7 @@ export async function POST(req: NextRequest) {
       tableId: body.tableId,
       discountCode: body.discountCode,
       giftCardCode: body.giftCardCode,
+      shippingAmount: body.shippingAmount,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create order';

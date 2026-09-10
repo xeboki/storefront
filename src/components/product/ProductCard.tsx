@@ -8,6 +8,8 @@ import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { trackAddToCart } from '@/lib/analytics';
+import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import type { OrderingProduct } from '@xeboki/sdk';
 
 interface Props {
@@ -52,6 +54,10 @@ export function ProductCard({ product, storeSlug }: Props) {
       modifiers: [],
       modifierLabels: [],
     });
+    trackAddToCart(
+      { id: product.id, name: product.name, price: product.price ?? 0, quantity: 1, category: product.categoryName },
+      useStoreConfigStore.getState().currencyCode,
+    );
     toast.success(`${product.name} added to cart`);
   }
 

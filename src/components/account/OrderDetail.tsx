@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Package, RotateCw } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { trackPurchase } from '@/lib/analytics';
+import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import type { OrderingOrder } from '@xeboki/sdk';
 
 interface Props {
@@ -62,6 +64,19 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // GA4/Meta purchase — fired once per order id (deduped in trackPurchase),
+  // so landing on or refreshing the confirmation page counts one conversion.
+  useEffect(() => {
+    trackPurchase(
+      order.id,
+      order.total,
+      useStoreConfigStore.getState().currencyCode,
+      order.items.map((i) => ({ id: i.productId, name: i.productName, price: i.unitPrice, quantity: i.quantity })),
+      { shipping: order.shipping, tax: order.tax },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

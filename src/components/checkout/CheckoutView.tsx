@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { clsx } from 'clsx';
@@ -9,6 +9,9 @@ import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, TABLE_TYPES } from '@/stores/storeConfigStore';
 import { formatCurrency } from '@/lib/utils';
+import { computeShipping } from '@/lib/shipping';
+import { trackBeginCheckout } from '@/lib/analytics';
+import type { StorefrontConfig } from '@xeboki/sdk';
 import { CheckoutForm } from './CheckoutForm';
 import { PayPalPaymentPanel } from './PayPalPaymentPanel';
 import { CodPaymentPanel } from './CodPaymentPanel';
@@ -71,9 +74,10 @@ const PAYMENT_METHODS: Array<{
 
 interface Props {
   storeSlug: string;
+  storefrontConfig: StorefrontConfig | null;
 }
 
-export function CheckoutView({ storeSlug }: Props) {
+export function CheckoutView({ storeSlug, storefrontConfig }: Props) {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
   const customer = useAuthStore((s) => s.customer);
@@ -118,8 +122,22 @@ export function CheckoutView({ storeSlug }: Props) {
   // ── Computed totals ──────────────────────────────────────────────────────────
 
   const discountAmount = discountState?.discountAmount ?? 0;
-  const giftCardApplied = giftCardState ? Math.min(giftCardState.balance, subtotal - discountAmount) : 0;
-  const orderTotal = Math.max(0, subtotal - discountAmount - giftCardApplied);
+  const goods = Math.max(0, subtotal - discountAmount);
+  // Delivery is charged on the discounted goods; pickup/dine-in are free.
+  const shipping = computeShipping(deliveryType, goods, storefrontConfig);
+  const giftCardApplied = giftCardState ? Math.min(giftCardState.balance, goods + shipping) : 0;
+  const orderTotal = Math.max(0, goods + shipping - giftCardApplied);
+
+  // GA4/Meta begin_checkout — once, when the checkout mounts with items.
+  useEffect(() => {
+    if (items.length === 0) return;
+    trackBeginCheckout(
+      items.map((i) => ({ id: i.productId, name: i.name, price: i.price, quantity: i.quantity })),
+      subtotal,
+      useStoreConfigStore.getState().currencyCode,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Guards ──────────────────────────────────────────────────────────────────
 
@@ -164,6 +182,7 @@ export function CheckoutView({ storeSlug }: Props) {
       tableId: deliveryType === 'dineIn' && tableNumber ? tableNumber : undefined,
       discountCode: discountState ? discountCode : undefined,
       giftCardCode: giftCardState ? giftCardCode : undefined,
+      shippingAmount: shipping > 0 ? shipping : undefined,
     };
   }
 
@@ -323,7 +342,7 @@ export function CheckoutView({ storeSlug }: Props) {
   if (paypalState) {
     return (
       <div className="max-w-md mx-auto">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
         <div className="mt-6">
           <PayPalPaymentPanel
             storeSlug={storeSlug}
@@ -340,7 +359,7 @@ export function CheckoutView({ storeSlug }: Props) {
   if (codItems) {
     return (
       <div className="max-w-md mx-auto">
-        <_OrderSummary items={codItems} subtotal={subtotal} discountAmount={discountAmount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
+        <_OrderSummary items={codItems} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
         <div className="mt-6">
           <CodPaymentPanel
             storeSlug={storeSlug}
@@ -354,6 +373,7 @@ export function CheckoutView({ storeSlug }: Props) {
             tableId={deliveryType === 'dineIn' && tableNumber ? tableNumber : undefined}
             discountCode={discountState ? discountCode : undefined}
             giftCardCode={giftCardState ? giftCardCode : undefined}
+            shippingAmount={shipping}
           />
         </div>
       </div>
@@ -641,7 +661,7 @@ export function CheckoutView({ storeSlug }: Props) {
 
       {/* Right: order summary */}
       <div className="lg:col-span-2">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} sticky />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} giftCardApplied={giftCardApplied} orderTotal={orderTotal} sticky />
       </div>
     </div>
   );
@@ -660,12 +680,13 @@ interface OrderSummaryProps {
   }>;
   subtotal: number;
   discountAmount: number;
+  shipping: number;
   giftCardApplied: number;
   orderTotal: number;
   sticky?: boolean;
 }
 
-function _OrderSummary({ items, subtotal, discountAmount, giftCardApplied, orderTotal, sticky }: OrderSummaryProps) {
+function _OrderSummary({ items, subtotal, discountAmount, shipping, giftCardApplied, orderTotal, sticky }: OrderSummaryProps) {
   return (
     <div className={clsx('rounded-brand border border-slate-200 p-5 space-y-4', sticky && 'sticky top-24')}>
       <h2 className="font-bold text-slate-900">Order Summary</h2>
@@ -695,6 +716,10 @@ function _OrderSummary({ items, subtotal, discountAmount, giftCardApplied, order
             <span>−{formatCurrency(discountAmount)}</span>
           </div>
         )}
+        <div className="flex justify-between text-slate-600">
+          <span>Shipping</span>
+          <span>{shipping > 0 ? formatCurrency(shipping) : 'Free'}</span>
+        </div>
         {giftCardApplied > 0 && (
           <div className="flex justify-between text-violet-600">
             <span>Gift card</span>

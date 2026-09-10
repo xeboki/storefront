@@ -1,13 +1,15 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart, Plus, Minus, Heart } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { trackViewItem, trackAddToCart } from '@/lib/analytics';
+import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import { ProductReviews } from './ProductReviews';
 import type { OrderingProduct, ProductVariant } from '@xeboki/sdk';
 
@@ -38,6 +40,15 @@ export function ProductDetail({ product, storeSlug }: Props) {
     null;
 
   const isAvailable = product.isActive && (!product.hasVariants || (selectedVariant?.stock ?? 0) > 0);
+
+  // Fire GA4/Meta view_item once per product view.
+  useEffect(() => {
+    trackViewItem(
+      { id: product.id, name: product.name, price: product.price ?? 0, category: product.categoryName },
+      useStoreConfigStore.getState().currencyCode,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id]);
 
   function toggleModifier(id: string) {
     setSelectedModifiers((prev) => {
@@ -86,6 +97,10 @@ export function ProductDetail({ product, storeSlug }: Props) {
       modifiers: Array.from(selectedModifiers),
       modifierLabels,
     });
+    trackAddToCart(
+      { id: product.id, name: product.name, price: activePrice, quantity, category: product.categoryName },
+      useStoreConfigStore.getState().currencyCode,
+    );
     toast.success(`${product.name} added to cart`);
   }
 

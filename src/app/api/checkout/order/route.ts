@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { loadStore } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
+import { sendOrderConfirmation } from '@/lib/email/order-confirmation';
 
 const Body = z.object({
   storeSlug: z.string(),
@@ -35,6 +36,8 @@ export async function POST(req: NextRequest) {
     body.orderId,
     body.paymentIntentId,
   );
+
+  await sendOrderConfirmation(client, resolved, result.orderId);
 
   return NextResponse.json({ orderId: result.orderId, status: result.status });
 }

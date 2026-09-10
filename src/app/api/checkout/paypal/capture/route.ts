@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { loadStore } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
+import { sendOrderConfirmation } from '@/lib/email/order-confirmation';
 
 const Body = z.object({
   storeSlug: z.string(),
@@ -100,6 +101,7 @@ export async function POST(req: NextRequest) {
       amount: capturedAmountCents,
       reference: body.paypalOrderId,
     });
+    await sendOrderConfirmation(client, resolved, order.id);
     return NextResponse.json({ orderId: order.id, status: order.status });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Order confirmation failed';

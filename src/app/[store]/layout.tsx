@@ -7,6 +7,7 @@ import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { generateOrganization } from '@/lib/seo/structured-data';
+import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
 
 interface Props {
   params: { store: string };
@@ -73,6 +74,10 @@ export default async function StoreLayout({ params, children }: Props) {
             dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
           />
         )}
+        <AnalyticsScripts
+          ga4Id={storefrontConfig?.ga4MeasurementId}
+          metaPixelId={storefrontConfig?.metaPixelId}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-white">
         <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>

@@ -22,14 +22,10 @@ interface Props {
   notes?: string;
   /** Which table a dine-in order belongs to. Forwarded to the order. */
   tableId?: string;
-  /**
-   * Collected by the checkout and NOT yet applied to a cash order: neither the
-   * SDK's createOrder nor the API behind it has a field for either, so there
-   * is nowhere to send them. Accepted here so the checkout compiles and so the
-   * gap is visible at the boundary rather than swallowed silently.
-   */
+  /** Forwarded to /api/checkout/cod and applied to the order server-side. */
   discountCode?: string;
   giftCardCode?: string;
+  shippingAmount?: number;
 }
 
 export function CodPaymentPanel({
@@ -44,6 +40,7 @@ export function CodPaymentPanel({
   tableId,
   discountCode,
   giftCardCode,
+  shippingAmount,
 }: Props) {
   const clearCart = useCartStore((s) => s.clearCart);
   const [loading, setLoading] = useState(false);
@@ -68,6 +65,7 @@ export function CodPaymentPanel({
         // created at full price and the discount the customer saw vanished.
         discountCode,
         giftCardCode,
+        shippingAmount,
       }),
     });
 
