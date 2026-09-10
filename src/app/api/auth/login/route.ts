@@ -1,8 +1,10 @@
 /**
  * POST /api/auth/login
  *
- * Authenticates an ordering customer via the Xeboki SDK and sets a session cookie.
- * Body: { storeSlug, email, password }
+ * The client has already signed in against the tenant's Firebase Auth and holds
+ * a Firebase ID token; we exchange it for a Xeboki customer session. There is
+ * no email/password endpoint on the API — passwords live in Firebase.
+ * Body: { storeSlug, idToken }
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -12,8 +14,7 @@ import { signSession, SESSION_COOKIE } from '@/lib/auth/session';
 
 const Body = z.object({
   storeSlug: z.string(),
-  email: z.string().email(),
-  password: z.string().min(1),
+  idToken: z.string().min(1),
 });
 
 export async function POST(req: NextRequest) {
@@ -33,17 +34,17 @@ export async function POST(req: NextRequest) {
 
   let auth;
   try {
-    // SDK signature: loginCustomer({ email, password })
-    auth = await client.ordering.loginCustomer({ email: body.email, password: body.password });
+    auth = await client.ordering.verifyCustomerToken(body.idToken);
   } catch {
-    return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
+    return NextResponse.json({ error: 'Could not sign you in. Please try again.' }, { status: 401 });
   }
 
   const sessionToken = await signSession({
     customerId: auth.customer.id,
-    email: auth.customer.email ?? body.email,
+    email: auth.customer.email ?? '',
     name: auth.customer.name,
     storeSlug: body.storeSlug,
+    firebaseToken: auth.token,
   });
 
   const res = NextResponse.json({ customer: auth.customer });

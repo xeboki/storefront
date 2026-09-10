@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
+import { registerWithEmail, friendlyAuthError } from '@/lib/auth/firebase-client';
 
 interface Props {
   storeSlug: string;
@@ -19,10 +20,19 @@ export function RegisterForm({ storeSlug }: Props) {
     e.preventDefault();
     setLoading(true);
 
+    let idToken: string;
+    try {
+      idToken = await registerWithEmail(storeSlug, email, password, name);
+    } catch (err) {
+      setLoading(false);
+      toast.error(friendlyAuthError(err));
+      return;
+    }
+
     const res = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ storeSlug, name, email, password }),
+      body: JSON.stringify({ storeSlug, idToken, name }),
     });
 
     setLoading(false);

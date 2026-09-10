@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
+import { signInWithEmail, friendlyAuthError } from '@/lib/auth/firebase-client';
 
 interface Props {
   storeSlug: string;
@@ -18,10 +19,19 @@ export function LoginForm({ storeSlug }: Props) {
     e.preventDefault();
     setLoading(true);
 
+    let idToken: string;
+    try {
+      idToken = await signInWithEmail(storeSlug, email, password);
+    } catch (err) {
+      setLoading(false);
+      toast.error(friendlyAuthError(err));
+      return;
+    }
+
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ storeSlug, email, password }),
+      body: JSON.stringify({ storeSlug, idToken }),
     });
 
     setLoading(false);
