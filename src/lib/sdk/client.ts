@@ -20,9 +20,14 @@ export function getXebokiClient(apiKey: string): XebokiClient {
   if (clientCache.has(apiKey)) {
     return clientCache.get(apiKey)!;
   }
+  const secret = process.env.STOREFRONT_SERVICE_SECRET;
   const client = new XebokiClient({
     apiKey,
     baseUrl: process.env.XEBOKI_API_BASE_URL ?? 'https://api.xeboki.com',
+    // First-party marker: lets the gateway exempt this shop's traffic from the
+    // per-key daily quota (a store's whole public traffic runs through one key).
+    // Server-side only — never reaches the browser.
+    ...(secret ? { headers: { 'X-Xeboki-Storefront-Secret': secret } } : {}),
   });
   clientCache.set(apiKey, client);
   return client;
