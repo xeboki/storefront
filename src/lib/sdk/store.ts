@@ -82,6 +82,8 @@ export interface CatalogQuery {
   sort?: 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc' | 'newest';
   minPrice?: number;
   maxPrice?: number;
+  /** Location-first browsing: scope stock + availability to one store. */
+  locationId?: string;
   page?: number;
   perPage?: number;
 }
@@ -97,7 +99,7 @@ export const loadCatalog = unstable_cache(
     const client = getXebokiClient(apiKey);
     const perPage = query.perPage ?? 24;
     const page = Math.max(1, query.page ?? 1);
-    const cacheKey = `catalog:${apiKey.slice(-8)}:${query.categoryId ?? ''}:${query.search ?? ''}:${query.inStockOnly ? 1 : 0}:${query.sort ?? ''}:${query.minPrice ?? ''}:${query.maxPrice ?? ''}:${page}:${perPage}`;
+    const cacheKey = `catalog:${apiKey.slice(-8)}:${query.categoryId ?? ''}:${query.search ?? ''}:${query.inStockOnly ? 1 : 0}:${query.sort ?? ''}:${query.minPrice ?? ''}:${query.maxPrice ?? ''}:${query.locationId ?? ''}:${page}:${perPage}`;
     const res = await resilientRead(cacheKey, () => client.ordering.listProducts({
       categoryId: query.categoryId,
       search: query.search,
@@ -105,6 +107,7 @@ export const loadCatalog = unstable_cache(
       sort: query.sort,
       minPrice: query.minPrice,
       maxPrice: query.maxPrice,
+      locationId: query.locationId,
       limit: perPage,
       offset: (page - 1) * perPage,
     }));

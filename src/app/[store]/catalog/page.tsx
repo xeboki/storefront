@@ -9,7 +9,7 @@ import { ProductGrid } from '@/components/product/ProductGrid'
 
 interface Props {
   params: { store: string }
-  searchParams: { category?: string; q?: string; page?: string; instock?: string; sort?: string }
+  searchParams: { category?: string; q?: string; page?: string; instock?: string; sort?: string; loc?: string }
 }
 
 const PER_PAGE = 24
@@ -36,6 +36,17 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   const search = searchParams.q?.trim() || undefined
   const sort = (searchParams.sort as 'name_asc'|'name_desc'|'price_asc'|'price_desc'|'newest'|undefined) || undefined
 
+  // Catalog browsing model (merchant-configured). In 'location_first', the buyer
+  // browses one store's catalog — scope stock + availability to that location.
+  const catalogMode = store.storefrontConfig?.catalogMode ?? 'unified'
+  const onlineStores = (store.storefrontConfig?.fulfillmentLocations ?? [])
+    .filter((l) => l.deliveryEnabled || l.pickupEnabled)
+  const locationFirst = catalogMode === 'location_first' && onlineStores.length > 0
+  const activeLoc = locationFirst
+    ? (onlineStores.find((s) => s.locationId === searchParams.loc)?.locationId
+       ?? onlineStores[0].locationId)
+    : undefined
+
   // Search / category / paging all happen SERVER-SIDE against the API, so the
   // catalog is no longer capped at a client-loaded slice.
   const [catalogResult, categoriesResult] = await Promise.allSettled([
@@ -44,6 +55,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       search,
       inStockOnly,
       sort,
+      locationId: activeLoc,
       page,
       perPage: PER_PAGE,
     }),
@@ -61,6 +73,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   if (search) sp.set('q', search)
   if (inStockOnly) sp.set('instock', '1')
   if (sort) sp.set('sort', sort)
+  if (locationFirst && activeLoc) sp.set('loc', activeLoc)
 
   const categoryName = searchParams.category
     ? categories.find((c) => c.id === searchParams.category)?.name ?? 'Products'
@@ -71,6 +84,35 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
         {search ? `Results for “${search}”` : categoryName}
       </h1>
+
+      {/* Location-first: pick a store; the catalog shows its own stock. */}
+      {locationFirst && (
+        <div className="mb-5 rounded-brand border border-slate-200 bg-slate-50 p-3">
+          <p className="text-xs font-medium text-slate-500 mb-2">Shopping at</p>
+          <div className="flex flex-wrap gap-2">
+            {onlineStores.map((s) => {
+              const params2 = new URLSearchParams()
+              params2.set('loc', s.locationId)
+              if (searchParams.category) params2.set('category', searchParams.category)
+              const active = s.locationId === activeLoc
+              return (
+                <Link
+                  key={s.locationId}
+                  href={`${base}?${params2.toString()}`}
+                  className={
+                    'px-3 py-1.5 rounded-full text-sm border transition-colors ' +
+                    (active
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-primary')
+                  }
+                >
+                  {s.locationName || s.city || 'Store'}
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       <CategoryFilterBar categories={categories} activeId={searchParams.category} storeSlug={params.store} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
