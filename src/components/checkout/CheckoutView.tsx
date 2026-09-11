@@ -16,7 +16,7 @@ import {
   taxRateFor,
 } from '@/lib/shipping';
 import { trackBeginCheckout } from '@/lib/analytics';
-import type { StorefrontConfig } from '@xeboki/sdk';
+import type { StorefrontConfig, StorePaymentMethod } from '@xeboki/sdk';
 import { CheckoutForm } from './CheckoutForm';
 import { PayPalPaymentPanel } from './PayPalPaymentPanel';
 import { CodPaymentPanel } from './CodPaymentPanel';
@@ -75,6 +75,18 @@ const PAYMENT_METHODS: Array<{
   { id: 'cod', label: 'Pay later', description: 'Cash on delivery or pay at pickup', icon: '💵' },
 ];
 
+// Maps a configured method (the SINGLE SOURCE — the merchant's Payment Methods
+// dialog) to the storefront's checkout handler. Capability map, not an enable
+// list: WHICH methods show and in WHAT order is driven entirely by the config;
+// this only says which flow can run each one, and returns null for a method the
+// storefront has no handler for yet (so it is skipped rather than misrendered).
+function methodHandler(pm: StorePaymentMethod): PaymentMethodType | null {
+  if (pm.gateway === 'stripe') return 'stripe';
+  if (pm.gateway === 'paypal') return 'paypal';
+  if (pm.key === 'cod') return 'cod';
+  return null;
+}
+
 // ── Main component ─────────────────────────────────────────────────────────────
 
 interface LoyaltyOffer {
@@ -84,12 +96,13 @@ interface LoyaltyOffer {
 }
 
 interface Props {
+  paymentMethods?: StorePaymentMethod[];
   storeSlug: string;
   storefrontConfig: StorefrontConfig | null;
   loyalty: LoyaltyOffer | null;
 }
 
-export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
+export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [], loyalty }: Props) {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
   const customer = useAuthStore((s) => s.customer);
@@ -158,6 +171,30 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
   // Tax rate is display-only — the charged total's tax comes from the POS.
   const taxRate = taxRateFor(fulfilBranch, storefrontConfig);
   const taxInclusive = storefrontConfig?.taxInclusive ?? false;
+
+  // Payment options come from the SINGLE SOURCE — the merchant's Payment Methods
+  // config (store config), mapped from each method's gateway to a checkout
+  // handler, in the merchant's configured order. Nothing is hardcoded on here.
+  // An unconfigured store (no method flagged available-online) falls back to the
+  // built-in options so it can still take payment.
+  const configuredIds: PaymentMethodType[] = [];
+  for (const pm of paymentMethods) {
+    const id = methodHandler(pm);
+    if (id && !configuredIds.includes(id)) configuredIds.push(id);
+  }
+  const availablePaymentMethods = (configuredIds.length > 0
+    ? configuredIds
+    : PAYMENT_METHODS.map((m) => m.id))
+    .map((id) => PAYMENT_METHODS.find((m) => m.id === id))
+    .filter((m): m is (typeof PAYMENT_METHODS)[number] => m != null);
+  // If the selected method isn't offered, fall back to the first available one.
+  useEffect(() => {
+    if (availablePaymentMethods.length > 0 &&
+        !availablePaymentMethods.some((m) => m.id === paymentMethod)) {
+      setPaymentMethod(availablePaymentMethods[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availablePaymentMethods.length]);
 
   // Loyalty points reduce the bill like a discount. Clamp to the balance AND to
   // the bill, and scale points to the discount, mirroring the API so the points
@@ -764,7 +801,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
             Payment method
           </h2>
           <div className="space-y-2">
-            {PAYMENT_METHODS.map((m) => (
+            {availablePaymentMethods.map((m) => (
               <button
                 key={m.id}
                 onClick={() => setPaymentMethod(m.id)}

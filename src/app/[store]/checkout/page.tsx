@@ -46,6 +46,7 @@ export default async function CheckoutPage({ params }: Props) {
       <CheckoutView
         storeSlug={params.store}
         storefrontConfig={resolved.storefrontConfig}
+        paymentMethods={resolved.storeConfig.paymentMethods}
         loyalty={loyalty}
       />
     </div>
