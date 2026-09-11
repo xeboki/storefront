@@ -40,6 +40,10 @@ const Body = z.object({
   giftCardCode: z.string().optional(),
   shippingAmount: z.number().nonnegative().optional(),
   loyaltyPointsRedeemed: z.number().int().nonnegative().optional(),
+  // City/location-based fulfillment: the branch chosen to fulfill this order,
+  // and the delivery city, so the order is attributed to the right location.
+  fulfillmentLocationId: z.string().optional(),
+  deliveryCity: z.string().optional(),
 });
 
 /**
@@ -68,7 +72,12 @@ export async function POST(req: NextRequest) {
   // Online orders name a location only when the shop has more than one; the
   // API infers a sole location and this stays undefined. null (no ordering-
   // enabled location) is normalised to undefined so the API can still try.
-  const locationId = (await resolveOrderingLocationId(resolved.apiKey)) ?? undefined;
+  // The buyer's chosen fulfillment branch (city/location-based) wins when set,
+  // so a multi-location order is attributed to the branch that serves it.
+  const locationId =
+    body.fulfillmentLocationId ||
+    (await resolveOrderingLocationId(resolved.apiKey)) ||
+    undefined;
 
   // Step 1: create a pending order
   let order;
@@ -88,6 +97,7 @@ export async function POST(req: NextRequest) {
       guestEmail: body.guestEmail,
       notes: body.notes,
       tableId: body.tableId,
+      deliveryAddress: body.deliveryCity,
       discountCode: body.discountCode,
       giftCardCode: body.giftCardCode,
       shippingAmount: body.shippingAmount,

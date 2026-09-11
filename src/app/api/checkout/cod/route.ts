@@ -35,6 +35,8 @@ const Body = z.object({
   giftCardCode: z.string().optional(),
   shippingAmount: z.number().nonnegative().optional(),
   loyaltyPointsRedeemed: z.number().int().nonnegative().optional(),
+  fulfillmentLocationId: z.string().optional(),
+  deliveryCity: z.string().optional(),
 });
 
 /**
@@ -63,7 +65,10 @@ export async function POST(req: NextRequest) {
   // Online orders name a location only when the shop has more than one; the
   // API infers a sole location and this stays undefined. null (no ordering-
   // enabled location) is normalised to undefined so the API can still try.
-  const locationId = (await resolveOrderingLocationId(resolved.apiKey)) ?? undefined;
+  const locationId =
+    body.fulfillmentLocationId ||
+    (await resolveOrderingLocationId(resolved.apiKey)) ||
+    undefined;
 
   // Step 1: Create the order (pending status)
   let order: { id: string; status: string; total: number };
@@ -83,6 +88,7 @@ export async function POST(req: NextRequest) {
       guestEmail: body.guestEmail,
       notes: body.notes,
       tableId: body.tableId,
+      deliveryAddress: body.deliveryCity,
       discountCode: body.discountCode,
       giftCardCode: body.giftCardCode,
       shippingAmount: body.shippingAmount,

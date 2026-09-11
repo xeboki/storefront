@@ -9,7 +9,12 @@ import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, TABLE_TYPES } from '@/stores/storeConfigStore';
 import { formatCurrency } from '@/lib/utils';
-import { computeShipping } from '@/lib/shipping';
+import {
+  computeShippingForCity,
+  resolveDeliveryLocation,
+  pickupLocations,
+  taxRateFor,
+} from '@/lib/shipping';
 import { trackBeginCheckout } from '@/lib/analytics';
 import type { StorefrontConfig } from '@xeboki/sdk';
 import { CheckoutForm } from './CheckoutForm';
@@ -100,6 +105,12 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
   const [deliveryType, setDeliveryType] = useState<DeliveryType>(isTableBusiness ? 'dineIn' : 'pickup');
   const [notes, setNotes] = useState('');
   const [tableNumber, setTableNumber] = useState('');
+  // City/location-based fulfillment: where to deliver, and which branch to collect from.
+  const [deliveryCity, setDeliveryCity] = useState('');
+  const _pickupBranches = pickupLocations(storefrontConfig);
+  const [pickupLocationId, setPickupLocationId] = useState<string>(
+    _pickupBranches[0]?.locationId ?? '',
+  );
 
   // Discount
   const [discountCode, setDiscountCode] = useState('');
@@ -134,8 +145,19 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
   const discountAmount = discountState?.discountAmount ?? 0;
   const goods = Math.max(0, subtotal - discountAmount);
   // Delivery is charged on the discounted goods; pickup/dine-in are free.
-  const shipping = computeShipping(deliveryType, goods, storefrontConfig);
+  // City/location-based: the branch serving the buyer's city sets the fee.
+  const deliveryBranch = resolveDeliveryLocation(deliveryCity, storefrontConfig);
+  const shipping = computeShippingForCity(deliveryType, goods, deliveryCity, storefrontConfig);
   const billBeforeLoyalty = goods + shipping;
+
+  // Fulfilling branch: the serving branch for delivery, the chosen branch for
+  // pickup. Drives the order's location attribution and the tax rate shown.
+  const pickupBranch = _pickupBranches.find((b) => b.locationId === pickupLocationId) ?? null;
+  const fulfilBranch = deliveryType === 'delivery' ? deliveryBranch : pickupBranch;
+  const fulfilLocationId = fulfilBranch?.locationId ?? '';
+  // Tax rate is display-only — the charged total's tax comes from the POS.
+  const taxRate = taxRateFor(fulfilBranch, storefrontConfig);
+  const taxInclusive = storefrontConfig?.taxInclusive ?? false;
 
   // Loyalty points reduce the bill like a discount. Clamp to the balance AND to
   // the bill, and scale points to the discount, mirroring the API so the points
@@ -233,6 +255,10 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
       giftCardCode: giftCardState ? giftCardCode : undefined,
       shippingAmount: shipping > 0 ? shipping : undefined,
       loyaltyPointsRedeemed: loyaltyPointsRedeemed > 0 ? loyaltyPointsRedeemed : undefined,
+      // City/location-based routing: attribute the order to the fulfilling
+      // branch and record the delivery city.
+      fulfillmentLocationId: fulfilLocationId || undefined,
+      deliveryCity: deliveryType === 'delivery' && deliveryCity.trim() ? deliveryCity.trim() : undefined,
     };
   }
 
@@ -527,6 +553,61 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
             ))}
           </div>
 
+          {/* Delivery city (city/location-based routing) */}
+          {deliveryType === 'delivery' && (
+            <div className="mt-3">
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Delivery city / area
+              </label>
+              <input
+                type="text"
+                value={deliveryCity}
+                onChange={(e) => setDeliveryCity(e.target.value)}
+                placeholder="e.g. London"
+                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+              />
+              {deliveryCity.trim() !== '' && (
+                deliveryBranch ? (
+                  <p className="text-xs text-emerald-600 mt-1.5">
+                    Delivered from {deliveryBranch.locationName} · est.{' '}
+                    {deliveryBranch.minDays}–{deliveryBranch.maxDays} days
+                  </p>
+                ) : (
+                  <p className="text-xs text-amber-600 mt-1.5">
+                    No branch delivers to “{deliveryCity.trim()}” — a standard delivery fee applies.
+                  </p>
+                )
+              )}
+            </div>
+          )}
+
+          {/* Pickup branch (click & collect) */}
+          {deliveryType === 'pickup' && _pickupBranches.length > 0 && (
+            <div className="mt-3">
+              <label className="block text-xs font-medium text-slate-600 mb-1">
+                Collect from
+              </label>
+              <select
+                value={pickupLocationId}
+                onChange={(e) => setPickupLocationId(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm bg-surface focus:outline-none focus:border-primary"
+              >
+                {_pickupBranches.map((b) => (
+                  <option key={b.locationId} value={b.locationId}>
+                    {b.locationName}
+                    {b.city ? ` — ${b.city}` : ''}
+                  </option>
+                ))}
+              </select>
+              {pickupBranch?.pickupAddress && (
+                <p className="text-xs text-slate-500 mt-1.5">{pickupBranch.pickupAddress}</p>
+              )}
+              {pickupBranch?.pickupInstructions && (
+                <p className="text-xs text-slate-400 mt-0.5">{pickupBranch.pickupInstructions}</p>
+              )}
+            </div>
+          )}
+
           {/* Table number for dine-in */}
           {deliveryType === 'dineIn' && (
             <div className="mt-3">
@@ -734,7 +815,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, loyalty }: Props) {
 
       {/* Right: order summary */}
       <div className="lg:col-span-2">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} sticky />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} taxRate={taxRate} taxInclusive={taxInclusive} sticky />
       </div>
     </div>
   );
@@ -757,10 +838,12 @@ interface OrderSummaryProps {
   loyaltyDiscount: number;
   giftCardApplied: number;
   orderTotal: number;
+  taxRate?: number;
+  taxInclusive?: boolean;
   sticky?: boolean;
 }
 
-function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, sticky }: OrderSummaryProps) {
+function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, taxRate = 0, taxInclusive = false, sticky }: OrderSummaryProps) {
   return (
     <div className={clsx('rounded-brand border border-slate-200 p-5 space-y-4', sticky && 'sticky top-24')}>
       <h2 className="font-bold text-slate-900">Order Summary</h2>
@@ -810,6 +893,13 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
           <span>Total</span>
           <span>{formatCurrency(orderTotal)}</span>
         </div>
+        {taxRate > 0 && (
+          <p className="text-xs text-slate-400 pt-0.5">
+            {taxInclusive
+              ? `Includes ${taxRate}% local tax`
+              : `Plus ${taxRate}% local tax where applicable`}
+          </p>
+        )}
       </div>
     </div>
   );

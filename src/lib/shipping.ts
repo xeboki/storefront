@@ -8,11 +8,81 @@
  *
  * Pickup / dine-in / takeaway are always free — only 'delivery' is charged.
  */
-import type { StorefrontConfig } from '@xeboki/sdk';
+import type { StorefrontConfig, FulfillmentLocation } from '@xeboki/sdk';
 
 export interface ShippingRules {
   flatRate: number;
   freeThreshold: number | null;
+}
+
+const _norm = (s: string) => s.trim().toLowerCase();
+
+/**
+ * The branch that delivers to `city` (city/location-based model), or null when
+ * no branch serves it. A branch serves a city if it is in the branch's
+ * `servedCities` list or is the branch's own city. Cheapest serving branch wins.
+ */
+export function resolveDeliveryLocation(
+  city: string | null | undefined,
+  config: StorefrontConfig | null,
+): FulfillmentLocation | null {
+  if (!config || !city) return null;
+  const c = _norm(city);
+  if (!c) return null;
+  const serving = config.fulfillmentLocations.filter(
+    (l) =>
+      l.deliveryEnabled &&
+      (l.servedCities.some((sc) => _norm(sc) === c) || _norm(l.city) === c),
+  );
+  if (serving.length === 0) return null;
+  return serving.reduce((a, b) => (b.deliveryFee < a.deliveryFee ? b : a));
+}
+
+/** Branches offering click & collect, for the pickup-location picker. */
+export function pickupLocations(config: StorefrontConfig | null): FulfillmentLocation[] {
+  return config?.fulfillmentLocations.filter((l) => l.pickupEnabled) ?? [];
+}
+
+/**
+ * Delivery charge for `city` under the location model: the serving branch's fee
+ * (free at/above its threshold), else the store-level default fee (free at/above
+ * the store threshold), else the deployment env fallback.
+ */
+export function computeShippingForCity(
+  deliveryType: 'pickup' | 'delivery' | 'dineIn',
+  subtotal: number,
+  city: string | null | undefined,
+  config: StorefrontConfig | null,
+): number {
+  if (deliveryType !== 'delivery') return 0;
+  const branch = resolveDeliveryLocation(city, config);
+  if (branch) {
+    if (branch.freeShippingThreshold != null && subtotal >= branch.freeShippingThreshold) {
+      return 0;
+    }
+    return Math.round(branch.deliveryFee * 100) / 100;
+  }
+  const def = config?.defaultDeliveryFee ?? 0;
+  if (def > 0) {
+    const t = config?.freeShippingThreshold ?? null;
+    if (t != null && subtotal >= t) return 0;
+    return Math.round(def * 100) / 100;
+  }
+  return computeShipping('delivery', subtotal, config); // env fallback
+}
+
+/**
+ * Applicable tax % for an order the given branch fulfills (else store default).
+ * Display-only: the charged total's tax is computed by the POS from the
+ * business's own tax config server-side, so this surfaces the local rate to the
+ * buyer without double-charging.
+ */
+export function taxRateFor(
+  branch: FulfillmentLocation | null,
+  config: StorefrontConfig | null,
+): number {
+  if (branch && branch.taxRate > 0) return branch.taxRate;
+  return config?.defaultTaxRate ?? 0;
 }
 
 export function shippingRules(config: StorefrontConfig | null): ShippingRules {
