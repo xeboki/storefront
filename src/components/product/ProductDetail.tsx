@@ -19,9 +19,22 @@ interface Props {
 }
 
 export function ProductDetail({ product, storeSlug }: Props) {
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
-    product.variants?.[0] ?? null,
-  );
+  const variants: ProductVariant[] = product.hasVariants ? product.variants ?? [] : [];
+  const axes = product.variantOptions ?? [];
+
+  // Stock only limits a product that tracks it; an untracked item never sells out.
+  const inStock = (v: ProductVariant) => !product.trackInventory || v.stock > 0;
+
+  // One chosen value per axis. A variation is a combination, so choosing "Navy"
+  // after "M" has to keep M. Resolving each click to the first variation holding
+  // that one value jumped a shopper to XS Navy.
+  const [choice, setChoice] = useState<Record<string, string>>(() => {
+    const first = variants.find(inStock) ?? variants[0];
+    return first ? { ...first.attributes } : {};
+  });
+  const selectedVariant: ProductVariant | null =
+    variants.find((v) => axes.every((axis) => v.attributes?.[axis.name] === choice[axis.name])) ??
+    null;
   const [selectedModifiers, setSelectedModifiers] = useState<Set<string>>(new Set());
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((s) => s.addItem);
@@ -39,7 +52,8 @@ export function ProductDetail({ product, storeSlug }: Props) {
     (product.hasVariants ? selectedVariant?.imageUrl ?? product.imageUrl : product.imageUrl) ??
     null;
 
-  const isAvailable = product.isActive && (!product.hasVariants || (selectedVariant?.stock ?? 0) > 0);
+  const isAvailable =
+    product.isActive && (!product.hasVariants || (selectedVariant !== null && inStock(selectedVariant)));
 
   // Fire GA4/Meta view_item once per product view.
   useEffect(() => {
@@ -140,25 +154,35 @@ export function ProductDetail({ product, storeSlug }: Props) {
         )}
 
         {/* Variants */}
-        {product.hasVariants && product.variants && product.variants.length > 0 && (
+        {variants.length > 0 && (
           <div className="space-y-3">
-            {product.variantOptions?.map((option) => (
-              <div key={option.name}>
-                <p className="text-sm font-semibold text-slate-700 mb-2">{option.name}</p>
+            {axes.map((axis) => (
+              <div key={axis.name}>
+                <p className="text-sm font-semibold text-slate-700 mb-2">{axis.name}</p>
                 <div className="flex flex-wrap gap-2">
-                  {option.values.map((value) => {
-                    // Find the variant that matches this axis value
-                    const matchingVariant = product.variants?.find(
-                      (v) => v.attributes?.[option.name] === value,
+                  {axis.values.map((value) => {
+                    const withValue = variants.filter((v) => v.attributes?.[axis.name] === value);
+                    // The variation this value makes with every other axis as chosen.
+                    const exact = withValue.find((v) =>
+                      axes.every(
+                        (other) =>
+                          other.name === axis.name || v.attributes?.[other.name] === choice[other.name],
+                      ),
                     );
-                    const isSelected = selectedVariant?.attributes?.[option.name] === value;
-                    const outOfStock = matchingVariant ? matchingVariant.stock <= 0 : false;
+                    // Struck out only when no variation with this value can be bought.
+                    const outOfStock = !withValue.some(inStock);
+                    const isSelected = choice[axis.name] === value;
 
                     return (
                       <button
                         key={value}
                         disabled={outOfStock}
-                        onClick={() => matchingVariant && setSelectedVariant(matchingVariant)}
+                        onClick={() => {
+                          // Keep the other choices when that combination can be
+                          // bought; otherwise move to one that can.
+                          const target = exact && inStock(exact) ? exact : withValue.find(inStock);
+                          if (target) setChoice({ ...target.attributes });
+                        }}
                         className={clsx(
                           'px-3 py-1.5 rounded-brand border text-sm font-medium transition-colors',
                           isSelected
