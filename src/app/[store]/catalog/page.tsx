@@ -9,6 +9,7 @@ import { CatalogSort } from '@/components/product/CatalogSort'
 import { CatalogFilterSheet } from '@/components/product/CatalogFilterSheet'
 import { ProductGrid } from '@/components/product/ProductGrid'
 import { EmptyStoreNotice } from '@/components/product/EmptyStoreNotice'
+import { storeName } from '@/lib/store-name'
 
 interface Props {
   params: { store: string }
@@ -19,7 +20,7 @@ const PER_PAGE = 24
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const store = await loadStore(params.store)
-  return { title: store ? `Shop — ${store.storeConfig.businessName}` : 'Shop' }
+  return { title: store ? `Shop — ${storeName(store.storeConfig)}` : 'Shop' }
 }
 
 function pageHref(base: string, sp: URLSearchParams, page: number): string {
@@ -86,7 +87,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     : 'All Products'
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+    <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pb-24 lg:px-8 lg:pt-14">
       {/* A listing still deserves a proper masthead: what you are looking at,
           and how much of it. The count used to float as a grey line under the
           controls, where it read as debug output. */}

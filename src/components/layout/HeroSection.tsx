@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { storeName } from '@/lib/store-name';
 import { ArrowRight } from 'lucide-react';
 import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 import { ProductImage } from '@/components/product/ProductImage';
@@ -29,7 +30,7 @@ interface Props {
  * anything a merchant uploads, which is the only guarantee worth having here.
  */
 export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props) {
-  const title = storefrontConfig?.heroTitle || storeConfig.businessName;
+  const title = storefrontConfig?.heroTitle || storeName(storeConfig);
   const subtitle = storefrontConfig?.heroSubtitle || 'Shop our latest products';
   const bgImage = storefrontConfig?.heroImageUrl;
 
@@ -63,10 +64,10 @@ export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props)
         </div>
       )}
 
-      <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8 lg:py-36">
+      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 md:py-28 lg:px-8 lg:py-36">
         <div className="max-w-xl">
           <p className="eyebrow eyebrow-rule text-white/70">
-            {storeConfig.businessName}
+            {storeName(storeConfig)}
           </p>
 
           <h1 className="display-xl mt-5 text-white drop-shadow-sm">{title}</h1>
@@ -77,7 +78,7 @@ export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props)
             </p>
           )}
 
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
             <Link
               href={`/${storeSlug}/catalog`}
               className="lift group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-slate-900 shadow-lg"

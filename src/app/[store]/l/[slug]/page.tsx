@@ -5,6 +5,7 @@
  * own address and delivery area — none of which a `?loc=<uuid>` can do.
  */
 import type { Metadata } from 'next';
+import { storeName } from '@/lib/store-name';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Clock, Mail, MapPin, Navigation, Phone, Store, Truck } from 'lucide-react';
@@ -29,8 +30,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: name,
     description: where
-      ? `${resolved.storeConfig.businessName} in ${where}. Shop this store, check click & collect and see the areas it delivers to.`
-      : `Shop ${resolved.storeConfig.businessName} at ${name}.`,
+      ? `${storeName(resolved.storeConfig)} in ${where}. Shop this store, check click & collect and see the areas it delivers to.`
+      : `Shop ${storeName(resolved.storeConfig)} at ${name}.`,
   };
 }
 

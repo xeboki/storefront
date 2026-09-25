@@ -6,6 +6,7 @@
  *   <script type="application/ld+json">{JSON.stringify(generateOrganization(...))}</script>
  */
 import type { StoreConfig, StorefrontConfig, OrderingProduct, BlogPost, WeeklyHours } from '@xeboki/sdk';
+import { storeName } from '@/lib/store-name';
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store';
 
@@ -27,7 +28,7 @@ export function generateOrganization(
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    name: storeConfig.businessName,
+    name: storeName(storeConfig),
     url: base,
     ...(storefrontConfig?.logoUrl && { logo: storefrontConfig.logoUrl }),
     ...(storeConfig.supportEmail && { email: storeConfig.supportEmail }),
@@ -85,9 +86,9 @@ export function generateLocalBranch(
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
     '@id': `${base}/l/${branch.slug}`,
-    name: `${storeConfig.businessName} — ${branch.name}`,
+    name: `${storeName(storeConfig)} — ${branch.name}`,
     url: `${base}/l/${branch.slug}`,
-    branchOf: { '@type': 'Organization', name: storeConfig.businessName, url: base },
+    branchOf: { '@type': 'Organization', name: storeName(storeConfig), url: base },
     ...(storefrontConfig?.logoUrl && { logo: storefrontConfig.logoUrl }),
     // The branch's own number when it has one; the shop's only as a fallback.
     ...((branch.phone || storeConfig.supportPhone) && {
@@ -126,7 +127,7 @@ export function generateProduct(
     ...(product.imageUrl && { image: [product.imageUrl] }),
     brand: {
       '@type': 'Brand',
-      name: storeConfig.businessName,
+      name: storeName(storeConfig),
     },
     offers: {
       '@type': 'Offer',
@@ -163,7 +164,7 @@ export function generateBlogPosting(
     }),
     publisher: {
       '@type': 'Organization',
-      name: storeConfig.businessName,
+      name: storeName(storeConfig),
       ...(storefrontConfig?.logoUrl && {
         logo: { '@type': 'ImageObject', url: storefrontConfig.logoUrl },
       }),

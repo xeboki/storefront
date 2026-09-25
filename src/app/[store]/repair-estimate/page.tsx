@@ -15,6 +15,7 @@ import { RepairEstimateApproval } from '@/components/repairs/RepairEstimateAppro
 import { loadStore } from '@/lib/sdk/store'
 import { notFound } from 'next/navigation'
 import { getStoreSlug } from '@/lib/utils/store-slug'
+import { storeName } from '@/lib/store-name'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -58,8 +59,8 @@ export default async function RepairEstimatePage({ params, searchParams }: Props
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Your repair quote</h1>
         <p className="text-fg-muted">
-          {store?.storeConfig.businessName
-            ? `${store.storeConfig.businessName} has looked at your item and priced the work.`
+          {store
+            ? `${storeName(store.storeConfig)} has looked at your item and priced the work.`
             : 'The shop has looked at your item and priced the work.'}
         </p>
       </div>

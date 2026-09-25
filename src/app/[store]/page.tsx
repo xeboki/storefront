@@ -95,7 +95,7 @@ export default async function StorePage({ params }: Props) {
       <TrustBar storefrontConfig={storefrontConfig} currency={storeConfig.currencyCode} />
 
       {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+        <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
           <SectionHeader
             eyebrow="Browse"
             title={APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by category'}
@@ -113,7 +113,7 @@ export default async function StorePage({ params }: Props) {
 
       {featured.length > 0 && (
         <section className="border-t border-line">
-          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+          <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
             <SectionHeader
               eyebrow="Handpicked"
               title={APPOINTMENT_TYPES.has(bt) ? 'Featured services' : 'Featured products'}

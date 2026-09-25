@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { storeName } from '@/lib/store-name';
 import { notFound } from 'next/navigation';
 import { loadStore, loadCategories } from '@/lib/sdk/store';
 
@@ -28,16 +29,16 @@ export async function generateMetadata({ params }: { params: { store: string } }
   if (storefrontConfig?.seoOgImageUrl) ogImages.push(storefrontConfig.seoOgImageUrl);
   else if (storefrontConfig?.logoUrl) ogImages.push(storefrontConfig.logoUrl);
 
-  const titleTemplate = storefrontConfig?.seoTitleTemplate ?? `%s | ${storeConfig.businessName}`;
+  const titleTemplate = storefrontConfig?.seoTitleTemplate ?? `%s | ${storeName(storeConfig)}`;
 
   return {
     title: {
-      default: storefrontConfig?.seoTitle || storeConfig.businessName,
+      default: storefrontConfig?.seoTitle || storeName(storeConfig),
       template: titleTemplate,
     },
-    description: storefrontConfig?.seoDescription || `Shop at ${storeConfig.businessName}`,
+    description: storefrontConfig?.seoDescription || `Shop at ${storeName(storeConfig)}`,
     openGraph: {
-      siteName: storeConfig.businessName,
+      siteName: storeName(storeConfig),
       images: ogImages,
       type: 'website',
     },
@@ -116,7 +117,7 @@ export default async function StoreLayout({ params, children }: Props) {
             <StoreGate
               stores={stores}
               storeSlug={slug}
-              businessName={storeConfig.businessName}
+              businessName={storeName(storeConfig)}
             />
           )}
           <StorefrontFooter

@@ -13,6 +13,7 @@
  * and MobileTabBar takes over at the bottom of the screen.
  */
 import Link from 'next/link';
+import { storeName } from '@/lib/store-name';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
@@ -23,7 +24,7 @@ import { LanguageSwitcher } from './LanguageSwitcher';
 import { HeaderSearch } from './HeaderSearch';
 import { MobileTabBar } from './MobileTabBar';
 import { ScrollRail } from './ScrollRail';
-import { ProductImage } from '@/components/product/ProductImage';
+import { StoreLogo } from './StoreLogo';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useScrollDirection } from '@/lib/use-scroll-direction';
 import { useCartStore } from '@/stores/cartStore';
@@ -104,14 +105,7 @@ export function StorefrontHeader({
             href={`/${storeSlug}`}
             className="flex flex-shrink-0 items-center gap-2 text-lg font-bold"
           >
-            <ProductImage
-              src={storefrontConfig?.logoUrl}
-              alt={storeConfig.businessName}
-              width={140}
-              height={36}
-              className="h-9 w-auto object-contain"
-              fallback={<span className="text-primary">{storeConfig.businessName}</span>}
-            />
+            <StoreLogo logoUrl={storefrontConfig?.logoUrl} name={storeName(storeConfig)} />
           </Link>
 
           {/* The search field gets the middle of the bar, as the thing most

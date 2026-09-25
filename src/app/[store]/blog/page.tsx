@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { storeName } from '@/lib/store-name';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Tag } from 'lucide-react';
@@ -13,7 +14,7 @@ interface Props {
 export async function generateMetadata({ params }: { params: { store: string } }): Promise<Metadata> {
   const resolved = await loadStore(params.store);
   if (!resolved) return {};
-  const name = resolved.storeConfig.businessName;
+  const name = storeName(resolved.storeConfig);
   return {
     title: 'Blog',
     description: `News, updates, and stories from ${name}`,
@@ -42,7 +43,7 @@ export default async function BlogListPage({ params, searchParams }: Props) {
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-fg">Blog</h1>
         <p className="text-fg-muted mt-2">
-          News, updates, and stories from {resolved.storeConfig.businessName}
+          News, updates, and stories from {storeName(resolved.storeConfig)}
         </p>
       </div>
 

@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import { RepairLookup } from '@/components/repairs/RepairLookup'
 import { loadStore } from '@/lib/sdk/store'
 import { getStoreSlug } from '@/lib/utils/store-slug'
+import { storeName } from '@/lib/store-name'
 
 type Props = {
   params: { store: string }
@@ -34,7 +35,7 @@ export default async function RepairsPage({ params }: Props) {
           Enter your work order ID or phone number to track your repair.
         </p>
       </div>
-      <RepairLookup storeSlug={slug} storeName={store.storeConfig.businessName} />
+      <RepairLookup storeSlug={slug} storeName={storeName(store.storeConfig)} />
     </main>
   )
 }

@@ -25,21 +25,31 @@ export function CollectionBand({ category, products, storeSlug }: Props) {
   const href = `/${storeSlug}/catalog?category=${category.id}`;
 
   return (
-    <section className="relative overflow-hidden border-t border-line py-24 lg:py-32">
+    <section className="relative overflow-hidden border-t border-line py-14 sm:py-20 lg:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative">
-          {/* The word. aria-hidden because the link below already names it —
-              a screen reader should not hear the category twice. */}
+          {/* A phone gets a heading it can read. The ghost treatment below
+              depends entirely on scale: at 50px and 7% opacity it is not a
+              design element, it is an empty band with two cards in it — which
+              is exactly how it looked. */}
+          <div className="lg:hidden">
+            <p className="eyebrow eyebrow-rule text-primary">Collection</p>
+            <h2 className="display-lg mt-3 text-fg">{category.name}</h2>
+          </div>
+
+          {/* Wide screens: the name at the size of an image. aria-hidden
+              because the heading above and the link below both name it. */}
           <h2
             aria-hidden
-            className="display-hero pointer-events-none select-none whitespace-nowrap text-fg/[0.07]"
+            className="display-hero pointer-events-none hidden select-none whitespace-nowrap text-fg/[0.07] lg:block"
           >
             {category.name}
-            <span className="text-outline ml-4 hidden sm:inline">{category.name}</span>
+            <span className="text-outline ml-4">{category.name}</span>
           </h2>
 
-          {/* Pulled up into the type so the two layers occupy one space. */}
-          <div className="-mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:-mt-24 lg:grid-cols-3">
+          {/* Pulled up into the type on wide screens only — there is nothing
+              to overlap on a phone. */}
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:-mt-24 lg:mt-0 lg:grid-cols-3">
             {picks.map((product, i) => (
               <Link
                 key={product.id}

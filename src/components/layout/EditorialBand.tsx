@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { storeName } from '@/lib/store-name';
 import { ArrowRight } from 'lucide-react';
 import type { FulfillmentLocation, StoreConfig } from '@xeboki/sdk';
 import { ProductImage } from '@/components/product/ProductImage';
@@ -46,12 +47,15 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores }: Prop
           />
         </div>
 
-        {/* Copy column, set on a measure rather than the full width. */}
-        <div className="flex flex-col justify-center px-4 py-16 sm:px-8 lg:px-16 lg:py-24">
+        {/* Copy column, set on a measure rather than the full width.
+            `justify-center` only from lg: it exists to centre this against the
+            image beside it, and on a phone — where the image is above, not
+            beside — it just left a hole under the last line. */}
+        <div className="flex flex-col px-4 py-14 sm:px-8 sm:py-20 lg:justify-center lg:px-16 lg:py-24">
           <p className="eyebrow eyebrow-rule text-primary">The store</p>
-          <h2 className="display-lg mt-4 text-fg">{storeConfig.businessName}</h2>
+          <h2 className="display-lg mt-4 text-fg">{storeName(storeConfig)}</h2>
 
-          <p className="mt-5 max-w-md text-fg-muted">
+          <p className="mt-4 max-w-md text-fg-muted sm:mt-5">
             {count > 0
               ? `Shop online and collect in ${
                   cities.length === 1 ? cities[0] : `${count} ${count === 1 ? 'store' : 'stores'}`
@@ -59,7 +63,7 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores }: Prop
               : 'Everything you see here is stock the shop is holding right now — no backorders, no surprises at checkout.'}
           </p>
 
-          <dl className="mt-10 grid grid-cols-2 gap-8 border-t border-line pt-8 sm:max-w-sm">
+          <dl className="mt-8 grid grid-cols-2 gap-8 border-t border-line pt-6 sm:mt-10 sm:max-w-sm sm:pt-8">
             <div>
               <dt className="eyebrow text-[10px]">Stores</dt>
               <dd className="price mt-1 text-3xl font-medium text-fg">
@@ -74,7 +78,7 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores }: Prop
             </div>
           </dl>
 
-          <div className="mt-10">
+          <div className="mt-8 sm:mt-10">
             <Link
               href={`/${storeSlug}/locations`}
               className="group inline-flex items-center gap-2 border-b border-fg/30 pb-1 text-sm font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:border-primary hover:text-primary"

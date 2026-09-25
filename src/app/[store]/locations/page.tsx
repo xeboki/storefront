@@ -5,6 +5,7 @@
  * link to, rank, or hand someone. This is the index those pages hang off.
  */
 import type { Metadata } from 'next';
+import { storeName } from '@/lib/store-name';
 import { notFound } from 'next/navigation';
 import { loadStore } from '@/lib/sdk/store';
 import { locationSlugs, serviceArea } from '@/lib/location';
@@ -22,8 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: 'Our stores',
     description: count
-      ? `Find your nearest ${resolved.storeConfig.businessName} store — ${count} ${count === 1 ? 'location' : 'locations'}, with opening details, delivery areas and click & collect.`
-      : `${resolved.storeConfig.businessName} store locations.`,
+      ? `Find your nearest ${storeName(resolved.storeConfig)} store — ${count} ${count === 1 ? 'location' : 'locations'}, with opening details, delivery areas and click & collect.`
+      : `${storeName(resolved.storeConfig)} store locations.`,
   };
 }
 
@@ -60,7 +61,7 @@ export default async function LocationsPage({ params }: Props) {
       <h1 className="text-2xl font-bold text-fg">Our stores</h1>
       <p className="mb-6 mt-1 text-sm text-fg-muted">
         {rows.length} {rows.length === 1 ? 'location' : 'locations'} ·{' '}
-        {storeConfig.businessName}
+        {storeName(storeConfig)}
       </p>
       <LocationFinder storeSlug={params.store} rows={rows} />
     </div>

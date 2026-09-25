@@ -35,7 +35,7 @@ export function TrustBar({ storefrontConfig, currency }: Props) {
 
   return (
     <section className="border-y border-line bg-surface-alt/60">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-4 py-10 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-4 lg:px-8">
         {items.map(({ Icon, title, body }) => (
           <div key={title} className="flex items-start gap-3">
             <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { storeName } from '@/lib/store-name';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { MapPin } from 'lucide-react';
 import type { StoreConfig, StorefrontConfig, StorePaymentMethod } from '@xeboki/sdk';
@@ -26,11 +27,14 @@ export function StorefrontFooter({
   return (
     // `bg-muted` survived the token migration as a class name that no longer
     // resolves, so the footer has been rendering with no background at all.
-    <footer className="mt-24 border-t border-line bg-surface-alt/40">
+    // No top margin: every band above already ends on its own bottom padding, and
+    // 96px on top of that put 152px of nothing between the last line of the page
+    // and the footer. The border and the footer's own padding separate it.
+    <footer className="border-t border-line bg-surface-alt/40">
       {/* A closing line before the housekeeping — the page needs somewhere to
           land rather than stopping at the last product. */}
       <div className="border-b border-line">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 sm:py-14 lg:flex-row lg:items-end lg:justify-between lg:px-8">
           <div>
             <p className="eyebrow eyebrow-rule text-primary">Visit</p>
             <h2 className="display-lg mt-3 max-w-lg text-fg">
@@ -52,7 +56,7 @@ export function StorefrontFooter({
 
           {/* Brand column — always shown */}
           <div className="md:col-span-1">
-            <h3 className="font-bold text-fg mb-3">{storeConfig.businessName}</h3>
+            <h3 className="font-bold text-fg mb-3">{storeName(storeConfig)}</h3>
             {storeConfig.supportPhone && (
               <p className="text-sm text-fg-muted">{storeConfig.supportPhone}</p>
             )}
@@ -156,7 +160,7 @@ export function StorefrontFooter({
         )}
 
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-line pt-6 text-xs text-fg-subtle sm:flex-row">
-          <p>© {year} {storeConfig.businessName}. All rights reserved.</p>
+          <p>© {year} {storeName(storeConfig)}. All rights reserved.</p>
           <div className="flex items-center gap-4">
             {/* Appearance belongs with the other housekeeping, not in the
                 header taking room from search and the cart. */}

@@ -3,6 +3,7 @@
  * Slug-based URL for SEO. ISR: 60s revalidation.
  */
 import type { Metadata } from 'next';
+import { storeName } from '@/lib/store-name';
 import { notFound } from 'next/navigation';
 import { loadStore, loadProduct, loadUpsells } from '@/lib/sdk/store';
 import { ProductDetail } from '@/components/product/ProductDetail';
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: product.name,
-    description: product.description ?? `Buy ${product.name} at ${resolved.storeConfig.businessName}`,
+    description: product.description ?? `Buy ${product.name} at ${storeName(resolved.storeConfig)}`,
     openGraph: {
       title: product.name,
       description: product.description ?? '',
