@@ -1,14 +1,19 @@
 import Link from 'next/link';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
-import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
+import { MapPin } from 'lucide-react';
+import type { StoreConfig, StorefrontConfig, StorePaymentMethod } from '@xeboki/sdk';
 
 interface Props {
   storeConfig: StoreConfig;
   storefrontConfig: StorefrontConfig | null;
   storeSlug: string;
+  /** What checkout will actually accept. Named, never guessed. */
+  paymentMethods?: StorePaymentMethod[];
 }
 
-export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: Props) {
+export function StorefrontFooter({
+  storeConfig, storefrontConfig, storeSlug, paymentMethods = [],
+}: Props) {
   const year = new Date().getFullYear();
 
   const footerColumns = storefrontConfig?.footerColumns ?? [];
@@ -19,8 +24,30 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
   const showBuiltIn = footerColumns.length === 0;
 
   return (
-    <footer className="border-t border-line bg-muted mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    // `bg-muted` survived the token migration as a class name that no longer
+    // resolves, so the footer has been rendering with no background at all.
+    <footer className="mt-24 border-t border-line bg-surface-alt/40">
+      {/* A closing line before the housekeeping — the page needs somewhere to
+          land rather than stopping at the last product. */}
+      <div className="border-b border-line">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-14 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <div>
+            <p className="eyebrow eyebrow-rule text-primary">Visit</p>
+            <h2 className="display-lg mt-3 max-w-lg text-fg">
+              Come and see it in person
+            </h2>
+          </div>
+          <Link
+            href={`/${storeSlug}/locations`}
+            className="group inline-flex flex-shrink-0 items-center gap-2 border-b border-fg/30 pb-1 text-sm font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:border-primary hover:text-primary"
+          >
+            <MapPin size={15} />
+            Store locations
+          </Link>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
 
           {/* Brand column — always shown */}
@@ -112,7 +139,23 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
           )}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-fg-subtle">
+        {/* What checkout actually accepts, from the merchant's own payment
+            config — never a row of card logos we cannot honour. */}
+        {paymentMethods.length > 0 && (
+          <div className="mt-12 flex flex-wrap items-center gap-2 border-t border-line pt-8">
+            <span className="eyebrow mr-2 text-[10px]">We accept</span>
+            {paymentMethods.map((method) => (
+              <span
+                key={method.key}
+                className="rounded-brand-sm border border-line px-2.5 py-1 text-xs text-fg-muted"
+              >
+                {method.label}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-line pt-6 text-xs text-fg-subtle sm:flex-row">
           <p>© {year} {storeConfig.businessName}. All rights reserved.</p>
           <div className="flex items-center gap-4">
             {/* Appearance belongs with the other housekeeping, not in the

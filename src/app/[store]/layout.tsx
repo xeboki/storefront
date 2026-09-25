@@ -116,7 +116,12 @@ export default async function StoreLayout({ params, children }: Props) {
               businessName={storeConfig.businessName}
             />
           )}
-          <StorefrontFooter storeConfig={storeConfig} storefrontConfig={storefrontConfig} storeSlug={slug} />
+          <StorefrontFooter
+            storeConfig={storeConfig}
+            storefrontConfig={storefrontConfig}
+            storeSlug={slug}
+            paymentMethods={storeConfig.paymentMethods ?? []}
+          />
           </LocaleProvider>
       </StoreProviders>
     </>

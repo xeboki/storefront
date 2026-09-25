@@ -127,33 +127,49 @@ export function ProductDetail({ product, storeSlug }: Props) {
     // Without one this file does not parse, and nothing in the storefront
     // builds — not this page, the whole app.
     <>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-      {/* Image */}
-      <div className="relative aspect-square rounded-brand overflow-hidden bg-surface-alt">
-        <ProductImage
-          src={activeImage}
-          alt={product.name}
-          fill
-          className="object-cover"
-          priority
-          sizes="(max-width: 1024px) 100vw, 50vw"
-          fallback={
-            <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
-              <ShoppingCart size={80} />
-            </div>
-          }
-        />
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
+      {/* The gallery holds its own column and stays put while the details
+          scroll: on a tall product page the image used to slide away and leave
+          a shopper reading specifications about something they can no longer
+          see. */}
+      <div className="lg:sticky lg:top-24 lg:self-start">
+        {/* Square, not 4:5. A portrait crop on a half-width column ran to
+            ~780px while the details beside it came to ~330, leaving a void
+            that read as an unfinished page. */}
+        <div className="relative aspect-square overflow-hidden rounded-brand-lg bg-surface-alt">
+          <ProductImage
+            src={activeImage}
+            alt={product.name}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 1024px) 100vw, 55vw"
+            fallback={
+              <div className="absolute inset-0 flex items-center justify-center text-fg-subtle/40">
+                <ShoppingCart size={72} strokeWidth={1} />
+              </div>
+            }
+          />
+          {!isAvailable && (
+            <span className="absolute left-4 top-4 bg-fg px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
+              Sold out
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Info */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-fg">{product.name}</h1>
-          <p className="text-2xl font-bold text-primary mt-2">{money(activePrice)}</p>
+          {product.categoryName && (
+            <p className="eyebrow eyebrow-rule text-primary">{product.categoryName}</p>
+          )}
+          <h1 className="display-lg mt-4 text-fg">{product.name}</h1>
+          <p className="price mt-4 text-2xl font-medium text-fg">{money(activePrice)}</p>
         </div>
 
         {product.description && (
-          <p className="text-fg-muted leading-relaxed">{product.description}</p>
+          <p className="max-w-prose leading-relaxed text-fg-muted">{product.description}</p>
         )}
 
         {/* Variants */}
@@ -161,7 +177,12 @@ export function ProductDetail({ product, storeSlug }: Props) {
           <div className="space-y-3">
             {axes.map((axis) => (
               <div key={axis.name}>
-                <p className="text-sm font-semibold text-fg mb-2">{axis.name}</p>
+                <p className="mb-3 flex items-baseline gap-2">
+                  <span className="eyebrow text-[10px]">{axis.name}</span>
+                  {choice[axis.name] && (
+                    <span className="text-sm text-fg">{choice[axis.name]}</span>
+                  )}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {axis.values.map((value) => {
                     const withValue = variants.filter((v) => v.attributes?.[axis.name] === value);
@@ -187,12 +208,12 @@ export function ProductDetail({ product, storeSlug }: Props) {
                           if (target) setChoice({ ...target.attributes });
                         }}
                         className={clsx(
-                          'px-3 py-1.5 rounded-brand border text-sm font-medium transition-colors',
+                          'min-w-[3rem] px-4 py-2.5 border text-sm font-medium transition-colors',
                           isSelected
-                            ? 'bg-primary text-primary-foreground border-primary'
+                            ? 'border-fg bg-fg text-bg'
                             : outOfStock
-                            ? 'bg-surface-alt text-fg-subtle border-line cursor-not-allowed line-through'
-                            : 'bg-surface text-fg border-line hover:border-primary',
+                            ? 'cursor-not-allowed border-line text-fg-subtle line-through'
+                            : 'border-line text-fg hover:border-fg',
                         )}
                       >
                         {value}
@@ -237,21 +258,23 @@ export function ProductDetail({ product, storeSlug }: Props) {
         {/* Quantity + CTA. Hidden on a phone — the sticky bar below owns it
             there, because this one scrolls out of reach past the fold. */}
         <div className="hidden sm:flex items-center gap-4 pt-2">
-          <div className="flex items-center border border-line rounded-brand overflow-hidden">
+          <div className="flex h-12 items-center rounded-brand border border-line">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="px-3 py-2 text-fg-muted hover:bg-surface-alt transition-colors"
+              aria-label="Decrease quantity"
+              className="h-full px-4 text-fg-muted transition-colors hover:text-fg"
             >
-              <Minus size={16} />
+              <Minus size={15} />
             </button>
-            <span className="px-4 py-2 text-fg font-medium min-w-[3ch] text-center">
+            <span className="price min-w-[2.5ch] text-center text-sm font-medium text-fg">
               {quantity}
             </span>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              className="px-3 py-2 text-fg-muted hover:bg-surface-alt transition-colors"
+              aria-label="Increase quantity"
+              className="h-full px-4 text-fg-muted transition-colors hover:text-fg"
             >
-              <Plus size={16} />
+              <Plus size={15} />
             </button>
           </div>
 
@@ -259,13 +282,13 @@ export function ProductDetail({ product, storeSlug }: Props) {
             onClick={handleAddToCart}
             disabled={!isAvailable}
             className={clsx(
-              'flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-brand font-semibold transition-opacity',
+              'flex h-12 flex-1 items-center justify-center gap-2 rounded-brand text-xs font-semibold uppercase tracking-[0.14em] transition-opacity',
               isAvailable
                 ? 'bg-primary text-primary-foreground hover:opacity-90'
-                : 'bg-surface-alt text-fg-subtle cursor-not-allowed',
+                : 'cursor-not-allowed bg-surface-alt text-fg-subtle',
             )}
           >
-            <ShoppingCart size={18} />
+            <ShoppingCart size={16} />
             {isAvailable ? 'Add to Cart' : 'Sold Out'}
           </button>
 
@@ -318,9 +341,32 @@ export function ProductDetail({ product, storeSlug }: Props) {
           </button>
         </div>
 
-        {product.hasVariants && selectedVariant?.sku && (
-          <p className="text-xs text-fg-subtle">SKU: {selectedVariant.sku}</p>
-        )}
+        {/* Only what the record actually says. A PDP is where invented
+            reassurance does the most damage — it is the last thing read before
+            someone commits. */}
+        <dl className="divide-y divide-line border-t border-line text-sm">
+          {product.categoryName && (
+            <div className="flex justify-between gap-4 py-3">
+              <dt className="text-fg-muted">Category</dt>
+              <dd className="text-fg">{product.categoryName}</dd>
+            </div>
+          )}
+          {/* Only a variation carries a SKU on OrderingProduct — the API
+              serves one for the product too, but the SDK type has never
+              mapped it. */}
+          {selectedVariant?.sku && (
+            <div className="flex justify-between gap-4 py-3">
+              <dt className="text-fg-muted">SKU</dt>
+              <dd className="price text-fg">{selectedVariant.sku}</dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-4 py-3">
+            <dt className="text-fg-muted">Availability</dt>
+            <dd className={isAvailable ? 'text-fg' : 'text-fg-muted'}>
+              {isAvailable ? 'In stock at your store' : 'Not available at your store'}
+            </dd>
+          </div>
+        </dl>
       </div>
     </div>
 
