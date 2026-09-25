@@ -31,22 +31,23 @@ export function CartView({ storeSlug }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Line items */}
-      <ul className="divide-y divide-line">
+    // Lines left, summary right and sticky. A single stacked column pushed the
+    // total and the checkout button below the fold the moment a basket had
+    // more than three things in it.
+    <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
+      <ul className="divide-y divide-line border-y border-line">
         {items.map((item) => (
           <li
             key={`${item.productId}::${item.variantId ?? ''}`}
-            className="flex gap-4 py-4"
+            className="flex gap-5 py-6"
           >
-            {/* Thumbnail */}
-            <div className="w-20 h-20 rounded-brand overflow-hidden bg-surface-alt flex-shrink-0">
+            <div className="h-24 w-20 flex-shrink-0 overflow-hidden rounded-brand bg-surface-alt">
               <ProductImage
                 src={item.imageUrl}
                 alt={item.name}
                 width={80}
-                height={80}
-                className="w-full h-full object-cover"
+                height={96}
+                className="h-full w-full object-cover"
                 fallback={
                   <div className="w-full h-full flex items-center justify-center text-fg-subtle">
                     <ShoppingBag size={28} />
@@ -56,7 +57,7 @@ export function CartView({ storeSlug }: Props) {
             </div>
 
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-fg">{item.name}</h3>
+              <h3 className="text-sm font-medium text-fg">{item.name}</h3>
               {item.variantLabel && (
                 <p className="text-xs text-fg-muted mt-0.5">{item.variantLabel}</p>
               )}
@@ -65,9 +66,7 @@ export function CartView({ storeSlug }: Props) {
                   {item.modifierLabels.join(', ')}
                 </p>
               )}
-              <p className="text-sm font-bold text-fg mt-1">
-                {money(item.price)}
-              </p>
+              <p className="price mt-1.5 text-sm text-fg-muted">{money(item.price)}</p>
             </div>
 
             <div className="flex flex-col items-end gap-2">
@@ -96,7 +95,7 @@ export function CartView({ storeSlug }: Props) {
                 <Trash2 size={16} />
               </button>
 
-              <p className="text-sm font-bold text-fg">
+              <p className="price text-sm font-medium text-fg">
                 {money(item.price * item.quantity)}
               </p>
             </div>
@@ -104,34 +103,39 @@ export function CartView({ storeSlug }: Props) {
         ))}
       </ul>
 
-      {/* Summary */}
-      <div className="rounded-brand border border-line p-5 space-y-3">
-        <div className="flex justify-between text-fg-muted">
-          <span>Subtotal</span>
-          <span className="font-medium">{money(subtotal())}</span>
-        </div>
-        <div className="flex justify-between text-fg-subtle text-sm">
-          <span>Shipping & tax</span>
-          <span>Calculated at checkout</span>
-        </div>
-        <div className="border-t border-line pt-3 flex justify-between font-bold text-fg text-lg">
-          <span>Total</span>
-          <span>{money(subtotal())}</span>
-        </div>
+      <div className="lg:sticky lg:top-24 lg:self-start">
+        <div className="rounded-brand-lg border border-line bg-surface-alt/40 p-6">
+          <p className="eyebrow text-[10px]">Summary</p>
 
-        <Link
-          href={`/${storeSlug}/checkout`}
-          className="block w-full text-center py-3 px-6 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity"
-        >
-          Proceed to Checkout
-        </Link>
+          <dl className="mt-5 space-y-3 text-sm">
+            <div className="flex justify-between">
+              <dt className="text-fg-muted">Subtotal</dt>
+              <dd className="price text-fg">{money(subtotal())}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-fg-muted">Shipping &amp; tax</dt>
+              <dd className="text-fg-subtle">Calculated at checkout</dd>
+            </div>
+            <div className="flex justify-between border-t border-line pt-4">
+              <dt className="font-medium text-fg">Total</dt>
+              <dd className="price text-lg font-medium text-fg">{money(subtotal())}</dd>
+            </div>
+          </dl>
 
-        <Link
-          href={`/${storeSlug}/catalog`}
-          className="block w-full text-center py-2 text-sm text-fg-muted hover:text-primary transition-colors"
-        >
-          Continue Shopping
-        </Link>
+          <Link
+            href={`/${storeSlug}/checkout`}
+            className="mt-6 flex h-12 w-full items-center justify-center rounded-brand bg-primary text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Proceed to Checkout
+          </Link>
+
+          <Link
+            href={`/${storeSlug}/catalog`}
+            className="mt-3 block text-center text-xs font-semibold uppercase tracking-[0.12em] text-fg-muted transition-colors hover:text-primary"
+          >
+            Continue Shopping
+          </Link>
+        </div>
       </div>
     </div>
   );

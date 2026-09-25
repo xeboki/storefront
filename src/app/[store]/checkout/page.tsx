@@ -44,8 +44,11 @@ export default async function CheckoutPage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-fg mb-6">{translate(activeLocale(), 'checkout.title')}</h1>
+    <div className="mx-auto max-w-6xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+      <header className="mb-10">
+        <p className="eyebrow eyebrow-rule text-primary">Almost there</p>
+        <h1 className="display-lg mt-3 text-fg">{translate(activeLocale(), 'checkout.title')}</h1>
+      </header>
       <CheckoutView
         shoppingAtLocationId={activeLocationId(resolved.storefrontConfig) ?? null}
         storeSlug={params.store}

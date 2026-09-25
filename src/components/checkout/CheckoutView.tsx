@@ -540,7 +540,7 @@ export function CheckoutView({
 
         {/* 1 — Contact */}
         <section>
-          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
+          <h2 className="eyebrow mb-4 border-b border-line pb-3 text-[10px]">
             Contact
           </h2>
 
@@ -600,7 +600,7 @@ export function CheckoutView({
 
         {/* 2 — Fulfillment */}
         <section>
-          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
+          <h2 className="eyebrow mb-4 border-b border-line pb-3 text-[10px]">
             Fulfillment
           </h2>
           <div className={`grid grid-cols-${fulfillmentOptions.length} gap-3`}>
@@ -838,7 +838,7 @@ export function CheckoutView({
 
         {/* 5 — Payment method */}
         <section>
-          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
+          <h2 className="eyebrow mb-4 border-b border-line pb-3 text-[10px]">
             Payment method
           </h2>
           <div className="space-y-2">
@@ -889,7 +889,7 @@ export function CheckoutView({
         <button
           onClick={handleContinue}
           disabled={loading || belowMinimum}
-          className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="flex h-12 w-full items-center justify-center rounded-brand bg-primary text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading
             ? 'Preparing…'
@@ -932,8 +932,13 @@ interface OrderSummaryProps {
 function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, taxRate = 0, taxInclusive = false, sticky }: OrderSummaryProps) {
   const money = useMoney();
   return (
-    <div className={clsx('rounded-brand border border-line p-5 space-y-4', sticky && 'sticky top-24')}>
-      <h2 className="font-bold text-fg">Order Summary</h2>
+    <div
+      className={clsx(
+        'rounded-brand-lg border border-line bg-surface-alt/40 p-6 space-y-4',
+        sticky && 'sticky top-24',
+      )}
+    >
+      <p className="eyebrow text-[10px]">Order summary</p>
       <ul className="divide-y divide-line text-sm">
         {items.map((item) => (
           <li key={`${item.productId}::${item.variantId ?? ''}`} className="flex justify-between gap-2 py-2">

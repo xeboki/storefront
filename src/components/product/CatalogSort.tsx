@@ -5,6 +5,7 @@
  * API so sorting applies across the whole result set, not just the current page.
  */
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { ChevronDown } from 'lucide-react';
 
 const OPTIONS: Array<{ value: string; label: string }> = [
   { value: '', label: 'Featured' },
@@ -21,8 +22,12 @@ export function CatalogSort({ current, className = '' }: { current: string; clas
   const params = useSearchParams();
 
   return (
-    <label className={`flex items-center gap-2 text-sm text-fg-muted whitespace-nowrap ${className}`}>
-      Sort
+    // Still a real <select>: it keeps the OS picker on a phone and the
+    // keyboard behaviour everywhere. Only the chrome is replaced — appearance
+    // stripped and our own chevron drawn — so it stops looking like a form
+    // control borrowed from another site.
+    <label className={`relative flex items-center gap-2 whitespace-nowrap text-sm text-fg-muted ${className}`}>
+      <span className="eyebrow text-[10px]">Sort</span>
       <select
         value={current}
         onChange={(e) => {
@@ -32,12 +37,17 @@ export function CatalogSort({ current, className = '' }: { current: string; clas
           p.delete('page');
           router.push(`${pathname}?${p.toString()}`, { scroll: false });
         }}
-        className="border border-line rounded-brand bg-surface text-fg text-sm px-2 py-2 focus:outline-none focus:border-primary"
+        className="cursor-pointer appearance-none rounded-brand border border-line bg-surface py-2 pl-3 pr-8 text-sm text-fg focus:border-primary focus:outline-none"
       >
         {OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
         ))}
       </select>
+      <ChevronDown
+        size={14}
+        aria-hidden
+        className="pointer-events-none absolute right-3 text-fg-subtle"
+      />
     </label>
   );
 }

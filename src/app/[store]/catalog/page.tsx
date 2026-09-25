@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
 import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store'
 import { activeLocation, isLocationFirst, onlineStores, storeLabel } from '@/lib/location'
@@ -85,10 +86,22 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     : 'All Products'
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-fg mb-6">
-        {search ? `Results for “${search}”` : categoryName}
-      </h1>
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+      {/* A listing still deserves a proper masthead: what you are looking at,
+          and how much of it. The count used to float as a grey line under the
+          controls, where it read as debug output. */}
+      <header className="mb-10">
+        <p className="eyebrow eyebrow-rule text-primary">
+          {search ? 'Search' : searchParams.category ? 'Category' : 'Shop'}
+        </p>
+        <h1 className="display-lg mt-3 text-fg">
+          {search ? `“${search}”` : categoryName}
+        </h1>
+        <p className="mt-3 text-sm text-fg-muted">
+          {total} {total === 1 ? 'product' : 'products'}
+          {totalPages > 1 && ` · page ${page} of ${totalPages}`}
+        </p>
+      </header>
 
       {/* The store switcher lives in the header, on every page. It used to be
           repeated here as a chip row, which said the same thing twice and cost
@@ -107,15 +120,10 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           again here showed the same list twice on one screen. */}
       {/* Search is in the header on every page now; only availability and
           sort belong to the listing itself. */}
-      <div className="mb-4 hidden items-center justify-between gap-3 sm:flex">
+      <div className="mb-8 hidden items-center justify-between gap-3 border-y border-line py-3 sm:flex">
         <InStockFilter checked={scopedToStock} locked={locationFirst} />
         <CatalogSort current={sort ?? ''} />
       </div>
-
-      <p className="text-sm text-fg-muted mb-4">
-        {total} {total === 1 ? 'product' : 'products'}
-        {totalPages > 1 && ` · page ${page} of ${totalPages}`}
-      </p>
 
       {products.length === 0 && locationFirst && !search && !searchParams.category ? (
         <EmptyStoreNotice
@@ -128,17 +136,39 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       )}
 
       {totalPages > 1 && (
-        <nav className="flex items-center justify-center gap-2 mt-10" aria-label="Pagination">
-          {page > 1 && (
-            <Link href={pageHref(base, sp, page - 1)} scroll className="px-4 py-2 rounded-brand border border-line text-sm hover:border-primary hover:text-primary">
-              ← Previous
+        <nav
+          className="mt-16 flex items-center justify-between gap-4 border-t border-line pt-8"
+          aria-label="Pagination"
+        >
+          {page > 1 ? (
+            <Link
+              href={pageHref(base, sp, page - 1)}
+              scroll
+              className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:text-primary"
+            >
+              <ArrowLeft size={15} className="motion-safe:transition-transform motion-safe:group-hover:-translate-x-1" />
+              Previous
             </Link>
+          ) : (
+            /* Holds the column so the page number stays centred on page one. */
+            <span aria-hidden />
           )}
-          <span className="px-3 py-2 text-sm text-fg-muted">Page {page} of {totalPages}</span>
-          {page < totalPages && (
-            <Link href={pageHref(base, sp, page + 1)} scroll className="px-4 py-2 rounded-brand border border-line text-sm hover:border-primary hover:text-primary">
-              Next →
+
+          <span className="price text-xs uppercase tracking-[0.12em] text-fg-muted">
+            {String(page).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+          </span>
+
+          {page < totalPages ? (
+            <Link
+              href={pageHref(base, sp, page + 1)}
+              scroll
+              className="group inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:text-primary"
+            >
+              Next
+              <ArrowRight size={15} className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1" />
             </Link>
+          ) : (
+            <span aria-hidden />
           )}
         </nav>
       )}

@@ -15,8 +15,12 @@ export default function CartPage({ params }: Props) {
   // for it, so the heading stayed English in every language.
   const locale = activeLocale();
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 lg:pb-8">
-      <h1 className="text-2xl font-bold text-fg mb-6">{translate(locale, 'cart.title')}</h1>
+    // Wider than it was: the basket is two columns now, not a narrow list.
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+      <header className="mb-10">
+        <p className="eyebrow eyebrow-rule text-primary">Basket</p>
+        <h1 className="display-lg mt-3 text-fg">{translate(locale, 'cart.title')}</h1>
+      </header>
       <CartView storeSlug={params.store} />
     </div>
   );
