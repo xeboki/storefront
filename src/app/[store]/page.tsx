@@ -7,6 +7,7 @@ import { CategoryGrid } from '@/components/product/CategoryGrid';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { TrustBar } from '@/components/layout/TrustBar';
 import { EditorialBand } from '@/components/layout/EditorialBand';
+import { CollectionBand } from '@/components/layout/CollectionBand';
 import { onlineStores } from '@/lib/location';
 
 interface Props {
@@ -33,7 +34,15 @@ export default async function StorePage({ params }: Props) {
 
   const products = catalogResult.status === 'fulfilled' ? catalogResult.value.data : [];
   const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : [];
-  const featured = products.filter((p) => p.isActive).slice(0, 8);
+  const active = products.filter((p) => p.isActive);
+  const featured = active.slice(0, 8);
+
+  // The band takes whichever category has the most to show — a composition
+  // built around a department holding two things would be a thin one.
+  const spotlight = categories
+    .filter((c) => c.id !== '_uncategorized')
+    .map((c) => ({ category: c, items: active.filter((p) => p.categoryId === c.id) }))
+    .sort((a, b) => b.items.length - a.items.length)[0];
 
   return (
     <div>
@@ -114,6 +123,14 @@ export default async function StorePage({ params }: Props) {
             <FeaturedProducts products={featured} storeSlug={params.store} />
           </div>
         </section>
+      )}
+
+      {spotlight && spotlight.items.length >= 2 && (
+        <CollectionBand
+          category={spotlight.category}
+          products={spotlight.items}
+          storeSlug={params.store}
+        />
       )}
 
       {/* A different rhythm between the grids, so the page is not three lists
