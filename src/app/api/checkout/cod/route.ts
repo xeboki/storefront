@@ -2,7 +2,9 @@
  * POST /api/checkout/cod
  *
  * Places an order with Cash on Delivery payment.
- * No payment gateway involved — order status is set to pending_payment.
+ * No payment gateway involved. The order is created PENDING and stays that
+ * way: the cash has not been taken yet, and marking it paid at placement
+ * reported it complete and booked revenue nobody had collected.
  * Body: { storeSlug, items, customerId?, guestName?, guestEmail?, deliveryType, notes? }
  */
 import { NextRequest, NextResponse } from 'next/server';
@@ -47,6 +49,9 @@ function toOrderType(deliveryType: 'pickup' | 'delivery' | 'dineIn'): string {
   return deliveryType === 'dineIn' ? 'dine_in' : deliveryType;
 }
 
+/** Shown to the merchant on the order, since orders carry no payment method. */
+const COD_NOTE = 'Payment: cash on delivery — collect at handover.';
+
 export async function POST(req: NextRequest) {
   let body: z.infer<typeof Body>;
   try {
@@ -86,7 +91,10 @@ export async function POST(req: NextRequest) {
       customerId: body.customerId,
       guestName: body.guestName,
       guestEmail: body.guestEmail,
-      notes: body.notes,
+      // No payment-method field exists on the order, so the intent goes in the
+      // notes — otherwise a pending order gives the merchant no clue that the
+      // cash is to be collected at handover.
+      notes: [body.notes?.trim(), COD_NOTE].filter(Boolean).join('\n'),
       tableId: body.tableId,
       deliveryAddress: body.deliveryCity,
       discountCode: body.discountCode,
@@ -99,18 +107,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 422 });
   }
 
-  // Step 2: Mark as COD payment — same pattern the POS uses for cash/manual payments.
-  // This moves the order to pending_payment status so the merchant knows to collect on delivery.
-  try {
-    const paid = await client.ordering.payOrder(order.id, {
-      method: 'cod',
-      amount: order.total,
-    });
-    await sendOrderConfirmation(client, resolved, paid.id);
-    return NextResponse.json({ orderId: paid.id, status: paid.status });
-  } catch (err: unknown) {
-    // Order is created — return it even if payOrder fails so we don't lose the order
-    await sendOrderConfirmation(client, resolved, order.id);
-    return NextResponse.json({ orderId: order.id, status: order.status });
-  }
+  // The order stays PENDING. It used to be pushed through /orders/{id}/pay,
+  // which is the till's "money is in the drawer" endpoint and is documented as
+  // moving an order to `completed` — so a cash-on-delivery pickup placed
+  // seconds ago reported "Delivered — order complete", counted uncollected
+  // cash as revenue, and skipped the whole prepare/ready/collect workflow.
+  //
+  // Cash on delivery means nobody has paid yet. The merchant records the
+  // payment when they actually take it, which completes the order then.
+  await sendOrderConfirmation(client, resolved, order.id);
+  return NextResponse.json({ orderId: order.id, status: order.status });
 }
