@@ -48,12 +48,26 @@ export type ThemeVars = Record<string, string>;
  * merchant's choice has to resolve to one of these or it does nothing.
  */
 const LOADED_FONTS: Record<string, string> = {
+  // Sans
   inter: 'var(--font-inter)',
   poppins: 'var(--font-poppins)',
   roboto: 'var(--font-roboto)',
   lato: 'var(--font-lato)',
+  montserrat: 'var(--font-montserrat)',
+  'dm sans': 'var(--font-dm-sans)',
+  'work sans': 'var(--font-work-sans)',
+  figtree: 'var(--font-figtree)',
+  // Display
   'playfair display': 'var(--font-playfair)',
   playfair: 'var(--font-playfair)',
+  'dm serif display': 'var(--font-dm-serif)',
+  'dm serif': 'var(--font-dm-serif)',
+  'cormorant garamond': 'var(--font-cormorant)',
+  cormorant: 'var(--font-cormorant)',
+  'libre baskerville': 'var(--font-baskerville)',
+  baskerville: 'var(--font-baskerville)',
+  lora: 'var(--font-lora)',
+  'space grotesk': 'var(--font-space-grotesk)',
 };
 
 /**

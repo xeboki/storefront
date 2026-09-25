@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter, Lato, Playfair_Display, Poppins, Roboto } from 'next/font/google';
+import {
+  Cormorant_Garamond, DM_Sans, DM_Serif_Display, Figtree, Inter, Lato,
+  Libre_Baskerville, Lora, Montserrat, Playfair_Display, Poppins, Roboto,
+  Space_Grotesk, Work_Sans,
+} from 'next/font/google';
 import { headers } from 'next/headers';
 import Script from 'next/script';
 import './globals.css';
@@ -20,11 +24,11 @@ import { ColorSchemeProvider, colorSchemeScript } from '@/components/layout/colo
  * A merchant's own font choice still wins: these are only what the presets
  * fall back to.
  */
-const sans = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-});
+/**
+ * Only these two are preloaded — they are what a store gets when it has chosen
+ * nothing, so they are the pair most pages actually render.
+ */
+const sans = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter' });
 
 const display = Playfair_Display({
   subsets: ['latin'],
@@ -33,31 +37,50 @@ const display = Playfair_Display({
   variable: '--font-playfair',
 });
 
-// The rest of what Manager's font picker offers. Only Inter was ever loaded,
-// so a merchant choosing Poppins, Roboto or Lato got the browser's UI font and
-// no hint that their choice had done nothing.
-const poppins = Poppins({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-poppins',
-});
+/**
+ * The rest of Manager's font picker.
+ *
+ * `preload: false` matters more than it looks. next/font declares the
+ * @font-face for every face here, but a browser only downloads a font once
+ * something on the page is actually set in it — so a shop using two faces
+ * fetches two, not fourteen. Preloading them all would put ~400KB of fonts in
+ * front of every first paint to serve a choice the merchant may never make.
+ *
+ * Weights are explicit throughout: some of these are variable and some are
+ * not, and naming them is the version that cannot break when Google changes
+ * which is which.
+ */
+const poppins = Poppins({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-poppins' });
+const roboto = Roboto({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '700'], variable: '--font-roboto' });
+const lato = Lato({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '700'], variable: '--font-lato' });
+const montserrat = Montserrat({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-montserrat' });
+const dmSans = DM_Sans({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '700'], variable: '--font-dm-sans' });
+const workSans = Work_Sans({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600'], variable: '--font-work-sans' });
+const figtree = Figtree({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-figtree' });
+const dmSerif = DM_Serif_Display({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400'], variable: '--font-dm-serif' });
+const cormorant = Cormorant_Garamond({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-cormorant' });
+const baskerville = Libre_Baskerville({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '700'], variable: '--font-baskerville' });
+const lora = Lora({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-lora' });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-space-grotesk' });
 
-const roboto = Roboto({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['400', '500', '700'],
-  variable: '--font-roboto',
-});
-
-const lato = Lato({
-  subsets: ['latin'],
-  display: 'swap',
-  weight: ['400', '700'],
-  variable: '--font-lato',
-});
-
-const FONT_VARS = [display, poppins, roboto, lato].map((f) => f.variable).join(' ');
+// Each loader has to be its own module-scope const — next/font rejects a call
+// inside an object literal, so the list is assembled afterwards.
+const FONT_VARS = [
+  display, poppins, roboto, lato, montserrat, dmSans, workSans, figtree,
+  dmSerif, cormorant, baskerville, lora, spaceGrotesk,
+].map((f) => f.variable).join(' ');
 
 export const metadata: Metadata = {
   title: 'Xeboki Store',
