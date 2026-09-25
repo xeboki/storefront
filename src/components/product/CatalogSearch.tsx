@@ -15,9 +15,15 @@ import { Search, X } from 'lucide-react';
 interface Props {
   initialQuery: string;
   initialInStock: boolean;
+  /**
+   * True in 'location_first' browsing, where the catalog is always scoped to
+   * what the chosen store can sell. Offering the shopper a checkbox that
+   * cannot change anything is worse than not offering it.
+   */
+  lockInStock?: boolean;
 }
 
-export function CatalogSearch({ initialQuery, initialInStock }: Props) {
+export function CatalogSearch({ initialQuery, initialInStock, lockInStock = false }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -53,24 +59,25 @@ export function CatalogSearch({ initialQuery, initialInStock }: Props) {
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-6">
       <div className="relative flex-1">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search products…"
-          className="w-full pl-9 pr-9 py-2.5 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+          className="w-full pl-9 pr-9 py-2.5 border border-line rounded-brand bg-surface text-fg text-sm placeholder:text-fg-subtle focus:outline-none focus:border-primary"
         />
         {query && (
           <button
             onClick={() => setQuery('')}
             aria-label="Clear search"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle hover:text-fg"
           >
             <X size={16} />
           </button>
         )}
       </div>
-      <label className="flex items-center gap-2 text-sm text-slate-600 whitespace-nowrap px-1">
+      {!lockInStock && (
+      <label className="flex items-center gap-2 text-sm text-fg-muted whitespace-nowrap px-1">
         <input
           type="checkbox"
           checked={inStock}
@@ -83,6 +90,7 @@ export function CatalogSearch({ initialQuery, initialInStock }: Props) {
         />
         In stock only
       </label>
+      )}
     </div>
   );
 }

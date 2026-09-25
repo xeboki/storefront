@@ -21,7 +21,7 @@ export function CatalogSort({ current }: { current: string }) {
   const params = useSearchParams();
 
   return (
-    <label className="flex items-center gap-2 text-sm text-slate-600 whitespace-nowrap">
+    <label className="flex items-center gap-2 text-sm text-fg-muted whitespace-nowrap">
       Sort
       <select
         value={current}
@@ -32,7 +32,7 @@ export function CatalogSort({ current }: { current: string }) {
           p.delete('page');
           router.push(`${pathname}?${p.toString()}`, { scroll: false });
         }}
-        className="border border-slate-200 rounded-brand text-sm px-2 py-2 focus:outline-none focus:border-primary"
+        className="border border-line rounded-brand text-sm px-2 py-2 focus:outline-none focus:border-primary"
       >
         {OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>

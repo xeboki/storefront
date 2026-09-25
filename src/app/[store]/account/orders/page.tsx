@@ -36,12 +36,12 @@ export default async function AccountOrdersPage({ params, searchParams }: Props)
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={`/${params.store}/account`}
-          className="text-slate-400 hover:text-primary transition-colors"
+          className="text-fg-subtle hover:text-primary transition-colors"
           aria-label="Back to account"
         >
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">My Orders</h1>
+        <h1 className="text-2xl font-bold text-fg">My Orders</h1>
       </div>
 
       <OrdersListClient

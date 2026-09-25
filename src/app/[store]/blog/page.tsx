@@ -40,8 +40,8 @@ export default async function BlogListPage({ params, searchParams }: Props) {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="text-4xl font-bold text-slate-900">Blog</h1>
-        <p className="text-slate-500 mt-2">
+        <h1 className="text-4xl font-bold text-fg">Blog</h1>
+        <p className="text-fg-muted mt-2">
           News, updates, and stories from {resolved.storeConfig.businessName}
         </p>
       </div>
@@ -54,7 +54,7 @@ export default async function BlogListPage({ params, searchParams }: Props) {
             className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-colors ${
               !searchParams.tag
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-surface text-slate-600 border-slate-200 hover:border-primary'
+                : 'bg-surface text-fg-muted border-line hover:border-primary'
             }`}
           >
             All
@@ -66,7 +66,7 @@ export default async function BlogListPage({ params, searchParams }: Props) {
               className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-colors ${
                 searchParams.tag === tag
                   ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-surface text-slate-600 border-slate-200 hover:border-primary'
+                  : 'bg-surface text-fg-muted border-line hover:border-primary'
               }`}
             >
               {tag}
@@ -77,14 +77,14 @@ export default async function BlogListPage({ params, searchParams }: Props) {
 
       {/* Post grid */}
       {posts.length === 0 ? (
-        <p className="text-slate-400 text-sm">No posts yet.</p>
+        <p className="text-fg-subtle text-sm">No posts yet.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
-            <article key={post.id} className="group flex flex-col rounded-brand border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+            <article key={post.id} className="group flex flex-col rounded-brand border border-line overflow-hidden hover:shadow-md transition-shadow">
               {/* Featured image */}
               <Link href={`/${params.store}/blog/${post.slug}`} className="block">
-                <div className="relative aspect-video bg-slate-100 overflow-hidden">
+                <div className="relative aspect-video bg-surface-alt overflow-hidden">
                   {post.featuredImageUrl ? (
                     <Image
                       src={post.featuredImageUrl}
@@ -121,16 +121,16 @@ export default async function BlogListPage({ params, searchParams }: Props) {
                 )}
 
                 <Link href={`/${params.store}/blog/${post.slug}`}>
-                  <h2 className="font-bold text-slate-900 text-lg leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                  <h2 className="font-bold text-fg text-lg leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
                     {post.title}
                   </h2>
                 </Link>
 
                 {post.excerpt && (
-                  <p className="text-slate-500 text-sm line-clamp-2 flex-1">{post.excerpt}</p>
+                  <p className="text-fg-muted text-sm line-clamp-2 flex-1">{post.excerpt}</p>
                 )}
 
-                <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+                <div className="mt-4 flex items-center gap-3 text-xs text-fg-subtle">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} />
                     {formatDate(post.publishedAt ?? post.createdAt)}

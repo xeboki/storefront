@@ -34,7 +34,7 @@ export function WishlistClient({ storeSlug }: Props) {
 
   if (items.length === 0) {
     return (
-      <div className="py-20 flex flex-col items-center gap-3 text-slate-400">
+      <div className="py-20 flex flex-col items-center gap-3 text-fg-subtle">
         <Heart size={48} className="opacity-30" />
         <p className="text-sm">Your wishlist is empty.</p>
         <Link
@@ -49,13 +49,13 @@ export function WishlistClient({ storeSlug }: Props) {
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-slate-400">{items.length} saved item{items.length !== 1 ? 's' : ''}</p>
-      <ul className="divide-y divide-slate-100 border border-slate-200 rounded-brand overflow-hidden">
+      <p className="text-sm text-fg-subtle">{items.length} saved item{items.length !== 1 ? 's' : ''}</p>
+      <ul className="divide-y divide-line border border-line rounded-brand overflow-hidden">
         {items.map((item) => (
-          <li key={`${item.productId}::${item.variantId ?? ''}`} className="flex items-center gap-4 p-4 hover:bg-slate-50 transition-colors">
+          <li key={`${item.productId}::${item.variantId ?? ''}`} className="flex items-center gap-4 p-4 hover:bg-surface-alt transition-colors">
             {/* Image */}
             <Link href={`/${storeSlug}/product/${item.productId}`} className="flex-shrink-0">
-              <div className="w-16 h-16 rounded-brand overflow-hidden bg-slate-100">
+              <div className="w-16 h-16 rounded-brand overflow-hidden bg-surface-alt">
                 {item.imageUrl ? (
                   <Image
                     src={item.imageUrl}
@@ -65,7 +65,7 @@ export function WishlistClient({ storeSlug }: Props) {
                     className="object-cover w-full h-full"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-300">
+                  <div className="w-full h-full flex items-center justify-center text-fg-subtle">
                     <ShoppingCart size={20} />
                   </div>
                 )}
@@ -76,12 +76,12 @@ export function WishlistClient({ storeSlug }: Props) {
             <div className="flex-1 min-w-0">
               <Link
                 href={`/${storeSlug}/product/${item.productId}`}
-                className="font-semibold text-slate-900 text-sm hover:text-primary transition-colors line-clamp-1"
+                className="font-semibold text-fg text-sm hover:text-primary transition-colors line-clamp-1"
               >
                 {item.name}
               </Link>
               {item.variantId && (
-                <p className="text-xs text-slate-400 mt-0.5">Variant saved</p>
+                <p className="text-xs text-fg-subtle mt-0.5">Variant saved</p>
               )}
               <p className="font-bold text-primary text-sm mt-1">{formatCurrency(item.price)}</p>
             </div>
@@ -90,14 +90,14 @@ export function WishlistClient({ storeSlug }: Props) {
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={() => moveToCart(item)}
-                className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-primary border border-slate-200 hover:border-primary px-3 py-1.5 rounded-brand transition-colors"
+                className="flex items-center gap-1.5 text-xs font-medium text-fg-muted hover:text-primary border border-line hover:border-primary px-3 py-1.5 rounded-brand transition-colors"
               >
                 <ShoppingCart size={13} />
                 Add to Cart
               </button>
               <button
                 onClick={() => removeItem(item.productId, storeSlug, item.variantId)}
-                className="p-1.5 text-slate-400 hover:text-rose-600 transition-colors"
+                className="p-1.5 text-fg-subtle hover:text-rose-600 transition-colors"
                 aria-label="Remove from wishlist"
               >
                 <Trash2 size={15} />

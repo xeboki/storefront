@@ -38,13 +38,13 @@ export default async function BookPage({ params }: Props) {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Book an Appointment</h1>
-        <p className="text-slate-500 mt-1 text-sm">
+        <h1 className="text-3xl font-bold text-fg">Book an Appointment</h1>
+        <p className="text-fg-muted mt-1 text-sm">
           Choose your service, preferred staff, and a time that works for you.
         </p>
       </div>
 
-      <div className="rounded-brand border border-slate-200 p-6 bg-surface">
+      <div className="rounded-brand border border-line p-6 bg-surface">
         <BookingWidget
           storeSlug={params.store}
           services={services}

@@ -18,18 +18,18 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
   const showBuiltIn = footerColumns.length === 0;
 
   return (
-    <footer className="border-t border-slate-200 bg-muted mt-16">
+    <footer className="border-t border-line bg-muted mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
 
           {/* Brand column — always shown */}
           <div className="md:col-span-1">
-            <h3 className="font-bold text-slate-900 mb-3">{storeConfig.businessName}</h3>
+            <h3 className="font-bold text-fg mb-3">{storeConfig.businessName}</h3>
             {storeConfig.supportPhone && (
-              <p className="text-sm text-slate-500">{storeConfig.supportPhone}</p>
+              <p className="text-sm text-fg-muted">{storeConfig.supportPhone}</p>
             )}
             {storeConfig.supportEmail && (
-              <a href={`mailto:${storeConfig.supportEmail}`} className="text-sm text-slate-500 hover:text-primary transition-colors">
+              <a href={`mailto:${storeConfig.supportEmail}`} className="text-sm text-fg-muted hover:text-primary transition-colors">
                 {storeConfig.supportEmail}
               </a>
             )}
@@ -43,7 +43,7 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-slate-400 hover:text-primary transition-colors capitalize font-medium"
+                    className="text-xs text-fg-subtle hover:text-primary transition-colors capitalize font-medium"
                   >
                     {platform}
                   </a>
@@ -55,8 +55,8 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
           {/* Dynamic merchant-configured footer columns */}
           {footerColumns.map((col) => (
             <div key={col.heading}>
-              <h4 className="font-semibold text-slate-700 mb-3">{col.heading}</h4>
-              <ul className="space-y-2 text-sm text-slate-500">
+              <h4 className="font-semibold text-fg mb-3">{col.heading}</h4>
+              <ul className="space-y-2 text-sm text-fg-muted">
                 {col.links.map((link) => (
                   <li key={link.url}>
                     <a
@@ -77,8 +77,8 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
           {showBuiltIn && (
             <>
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Shop</h4>
-                <ul className="space-y-2 text-sm text-slate-500">
+                <h4 className="font-semibold text-fg mb-3">Shop</h4>
+                <ul className="space-y-2 text-sm text-fg-muted">
                   <li>
                     <Link href={`/${storeSlug}/catalog`} className="hover:text-primary transition-colors">
                       All Products
@@ -93,8 +93,8 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
               </div>
 
               <div>
-                <h4 className="font-semibold text-slate-700 mb-3">Account</h4>
-                <ul className="space-y-2 text-sm text-slate-500">
+                <h4 className="font-semibold text-fg mb-3">Account</h4>
+                <ul className="space-y-2 text-sm text-fg-muted">
                   <li>
                     <Link href={`/${storeSlug}/account`} className="hover:text-primary transition-colors">
                       My Orders
@@ -111,9 +111,9 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
           )}
         </div>
 
-        <div className="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+        <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-fg-subtle">
           <p>© {year} {storeConfig.businessName}. All rights reserved.</p>
-          <p>Powered by <span className="font-semibold text-slate-500">Xeboki</span></p>
+          <p>Powered by <span className="font-semibold text-fg-muted">Xeboki</span></p>
         </div>
       </div>
     </footer>

@@ -62,7 +62,7 @@ export default async function ProductPage({ params }: Props) {
         <ProductDetail product={product} storeSlug={params.store} />
         {upsells.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">You might also like</h2>
+            <h2 className="text-xl font-bold text-fg mb-6">You might also like</h2>
             <ProductGrid products={upsells.slice(0, 4)} storeSlug={params.store} />
           </section>
         )}

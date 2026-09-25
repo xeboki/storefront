@@ -30,9 +30,12 @@ export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props)
             {title}
           </h1>
           <p className="mt-4 text-lg text-primary-foreground/80">{subtitle}</p>
+          {/* The hero is bg-primary in BOTH schemes, so its contents key off
+              primary rather than the page surface — otherwise this button goes
+              dark-on-green the moment a shopper switches to dark mode. */}
           <Link
             href={`/${storeSlug}/catalog`}
-            className="mt-8 inline-block px-6 py-3 bg-white text-primary font-semibold rounded-brand hover:bg-white/90 transition-colors"
+            className="mt-8 inline-block px-6 py-3 bg-primary-foreground text-primary font-semibold rounded-brand hover:opacity-90 transition-opacity"
           >
             Shop Now
           </Link>

@@ -42,7 +42,7 @@ export default async function CheckoutPage({ params }: Props) {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Checkout</h1>
+      <h1 className="text-2xl font-bold text-fg mb-6">Checkout</h1>
       <CheckoutView
         storeSlug={params.store}
         storefrontConfig={resolved.storefrontConfig}

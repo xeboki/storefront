@@ -167,6 +167,12 @@ export async function middleware(request: NextRequest) {
     return res
   }
 
+  // ── Theme preview ──────────────────────────────────────────────────────────
+  // `?theme=<preset>` lets Manager deep-link a live preview of a preset before
+  // the merchant saves it. A layout cannot read searchParams, so it travels as
+  // a request header. Visual only, never persisted — safe to leave public.
+  const themePreview = searchParams.get('theme')
+
   // ── Subdomain routing ──────────────────────────────────────────────────────
   let slug: string | null = null
 
@@ -179,17 +185,20 @@ export async function middleware(request: NextRequest) {
     slug = searchParams.get('store') ?? DEV_STORE_SLUG ?? null
   }
 
-  if (!slug) return NextResponse.next()
-  if (pathname.startsWith(`/${slug}`)) return NextResponse.next()
-
-  const rewriteUrl = request.nextUrl.clone()
-  rewriteUrl.pathname = `/${slug}${pathname}`
-
   // The slug has to travel on the REQUEST headers to be readable by
   // `headers()` in a server component. Setting it on the response only sent it
   // back to the browser, so every reader fell through to its 'demo' default.
   const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-store-slug', slug)
+  if (themePreview) requestHeaders.set('x-xeboki-theme', themePreview)
+  if (slug) requestHeaders.set('x-store-slug', slug)
+
+  const passthrough = () => NextResponse.next({ request: { headers: requestHeaders } })
+
+  if (!slug) return passthrough()
+  if (pathname.startsWith(`/${slug}`)) return passthrough()
+
+  const rewriteUrl = request.nextUrl.clone()
+  rewriteUrl.pathname = `/${slug}${pathname}`
 
   return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
 }

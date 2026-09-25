@@ -30,7 +30,7 @@ export function PayPalPaymentPanel({
       }}
     >
       <div className="space-y-4">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-fg-muted">
           You will be redirected to PayPal to complete your payment securely.
         </p>
 

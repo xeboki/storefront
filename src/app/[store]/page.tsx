@@ -47,8 +47,8 @@ export default async function StorePage({ params }: Props) {
         <section className="bg-primary/5 border-b border-primary/10 py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Book an Appointment</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Choose your service, staff, and time — online in seconds.</p>
+              <h2 className="text-lg font-bold text-fg">Book an Appointment</h2>
+              <p className="text-sm text-fg-muted mt-0.5">Choose your service, staff, and time — online in seconds.</p>
             </div>
             <Link
               href={`/${params.store}/book`}
@@ -61,11 +61,11 @@ export default async function StorePage({ params }: Props) {
       )}
 
       {WORK_ORDER_TYPES.has(bt) && !APPOINTMENT_TYPES.has(bt) && (
-        <section className="bg-slate-50 border-b border-slate-200 py-6">
+        <section className="bg-surface-alt border-b border-line py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Track Your Order</h2>
-              <p className="text-sm text-slate-500 mt-0.5">Enter your ticket number to see the status of your repair or job.</p>
+              <h2 className="text-lg font-bold text-fg">Track Your Order</h2>
+              <p className="text-sm text-fg-muted mt-0.5">Enter your ticket number to see the status of your repair or job.</p>
             </div>
             <Link
               href={`/${params.store}/repairs`}
@@ -79,7 +79,7 @@ export default async function StorePage({ params }: Props) {
 
       {categories.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6">
+          <h2 className="text-2xl font-bold text-fg mb-6">
             {APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by Category'}
           </h2>
           <CategoryGrid categories={categories} storeSlug={params.store} />
@@ -89,7 +89,7 @@ export default async function StorePage({ params }: Props) {
       {featured.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-slate-900">
+            <h2 className="text-2xl font-bold text-fg">
               {APPOINTMENT_TYPES.has(bt) ? 'Featured Services' : 'Featured Products'}
             </h2>
             <Link

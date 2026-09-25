@@ -2,27 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Default theme tokens — overridden per-storefront via inline style on <html> */
+/* The real tokens every component reads.
+   A store ships BOTH palettes as `--l-*` / `--d-*` in one inline style on
+   <html>; these two blocks decide which set is live. The literals are the
+   fallback for routes that render outside a store (404, global error). */
 :root {
-  --color-primary: 15 23 42;
-  --color-primary-fg: 255 255 255;
-  --color-secondary: 100 116 139;
-  --color-secondary-fg: 255 255 255;
-  --color-surface: 255 255 255;
-  --color-muted: 241 245 249;
+  --color-primary:     var(--l-primary, 15 23 42);
+  --color-primary-fg:  var(--l-primary-fg, 255 255 255);
+  --color-secondary:   var(--l-secondary, 100 116 139);
+  --color-secondary-fg: var(--l-secondary-fg, 255 255 255);
+  --color-bg:          var(--l-bg, 255 255 255);
+  --color-surface:     var(--l-surface, 255 255 255);
+  --color-surface-alt: var(--l-surface-alt, 241 245 249);
+  --color-border:      var(--l-border, 226 232 240);
+  --color-fg:          var(--l-fg, 15 23 42);
+  --color-fg-muted:    var(--l-fg-muted, 71 85 105);
+  --color-fg-subtle:   var(--l-fg-subtle, 148 163 184);
   --radius: 0.5rem;
+  --heading-tracking: 0;
   --font-sans: 'Inter';
   --font-display: 'Inter';
+  color-scheme: light;
+}
+
+:root.dark {
+  --color-primary:     var(--d-primary, 226 232 240);
+  --color-primary-fg:  var(--d-primary-fg, 15 23 42);
+  --color-secondary:   var(--d-secondary, 148 163 184);
+  --color-secondary-fg: var(--d-secondary-fg, 15 23 42);
+  --color-bg:          var(--d-bg, 2 6 23);
+  --color-surface:     var(--d-surface, 15 23 42);
+  --color-surface-alt: var(--d-surface-alt, 30 41 59);
+  --color-border:      var(--d-border, 30 41 59);
+  --color-fg:          var(--d-fg, 248 250 252);
+  --color-fg-muted:    var(--d-fg-muted, 148 163 184);
+  --color-fg-subtle:   var(--d-fg-subtle, 100 116 139);
+  color-scheme: dark;
 }
 
 @layer base {
   body {
-    @apply bg-surface text-slate-900 antialiased;
+    @apply bg-bg text-fg antialiased;
     font-family: var(--font-sans), system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    letter-spacing: var(--heading-tracking);
+  }
+
+  /* Native controls (select, checkbox, date) follow the theme instead of
+     staying light-on-dark. color-scheme is set per block above. */
+  input, select, textarea {
+    color-scheme: inherit;
   }
 }
 
@@ -36,7 +68,7 @@ input[type="range"].slider-thumb::-webkit-slider-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--color-primary, #1e293b);
+  background: rgb(var(--color-primary));
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   cursor: pointer;
@@ -46,7 +78,7 @@ input[type="range"].slider-thumb::-moz-range-thumb {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--color-primary, #1e293b);
+  background: rgb(var(--color-primary));
   border: 2px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   cursor: pointer;

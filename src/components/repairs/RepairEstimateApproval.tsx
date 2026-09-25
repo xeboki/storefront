@@ -144,7 +144,7 @@ export function RepairEstimateApproval({
   }
 
   if (loading) {
-    return <p className="text-gray-500">Loading your quote…</p>
+    return <p className="text-fg-muted">Loading your quote…</p>
   }
 
   if (error && !estimate) {
@@ -190,7 +190,7 @@ export function RepairEstimateApproval({
   return (
     <div className="space-y-6">
       {expires && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-fg-muted">
           This quote holds until {expires}.
         </p>
       )}
@@ -218,7 +218,7 @@ export function RepairEstimateApproval({
                         {money(line.unit_price * line.quantity)}
                       </span>
                     </span>
-                    <span className="block text-sm text-gray-500 mt-0.5">
+                    <span className="block text-sm text-fg-muted mt-0.5">
                       {line.quantity > 1 && `Quantity ${line.quantity}`}
                       {line.quantity > 1 && line.mandatory && ' · '}
                       {line.mandatory && 'Required for this repair'}
@@ -230,20 +230,20 @@ export function RepairEstimateApproval({
           })}
         </ul>
 
-        <div className="bg-gray-50 px-5 py-4 space-y-1 text-sm border-t">
+        <div className="bg-surface-alt px-5 py-4 space-y-1 text-sm border-t">
           <div className="flex justify-between">
-            <span className="text-gray-500">Work you have chosen</span>
+            <span className="text-fg-muted">Work you have chosen</span>
             <span>{money(subtotal)}</span>
           </div>
           {estimate.discount > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-500">Discount</span>
+              <span className="text-fg-muted">Discount</span>
               <span>−{money(estimate.discount)}</span>
             </div>
           )}
           {estimate.tax_percent > 0 && (
             <div className="flex justify-between">
-              <span className="text-gray-500">
+              <span className="text-fg-muted">
                 Tax ({estimate.tax_percent}%)
               </span>
               <span>{money(total - afterDiscount)}</span>
@@ -257,7 +257,7 @@ export function RepairEstimateApproval({
       </div>
 
       {hasOptional && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-fg-muted">
           Untick anything you would rather not have done. Items marked required
           are needed for the repair to work at all.
         </p>
@@ -291,8 +291,7 @@ export function RepairEstimateApproval({
           type="button"
           disabled={saving || chosen.length === 0}
           onClick={() => void submit(false)}
-          className="flex-1 text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: 'var(--color-primary)' }}
+          className="flex-1 bg-primary text-primary-foreground px-6 py-3 rounded-brand font-medium hover:opacity-90 disabled:opacity-50"
         >
           {saving ? 'Sending…' : `Approve ${money(total)}`}
         </button>
@@ -300,7 +299,7 @@ export function RepairEstimateApproval({
           type="button"
           disabled={saving}
           onClick={() => void submit(true)}
-          className="flex-1 border px-6 py-3 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50"
+          className="flex-1 border px-6 py-3 rounded-lg font-medium hover:bg-surface-alt disabled:opacity-50"
         >
           Decline the whole quote
         </button>
@@ -309,7 +308,7 @@ export function RepairEstimateApproval({
       <div>
         <label
           htmlFor="reason"
-          className="block text-sm font-medium mb-1 text-gray-500"
+          className="block text-sm font-medium mb-1 text-fg-muted"
         >
           If you are declining, it helps to say why (optional)
         </label>

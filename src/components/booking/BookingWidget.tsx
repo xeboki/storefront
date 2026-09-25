@@ -180,21 +180,21 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
   if (step === 'service') {
     return (
       <div className="space-y-4">
-        <h2 className="font-bold text-slate-900 text-lg">Choose a Service</h2>
+        <h2 className="font-bold text-fg text-lg">Choose a Service</h2>
         {services.length === 0 ? (
-          <p className="text-slate-400 text-sm">No services available.</p>
+          <p className="text-fg-subtle text-sm">No services available.</p>
         ) : (
           <ul className="space-y-2">
             {services.map((svc) => (
               <li key={svc.id}>
                 <button
                   onClick={() => { setSelectedService(svc); setStep('staff'); }}
-                  className="w-full flex items-center justify-between p-4 rounded-brand border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                  className="w-full flex items-center justify-between p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-left"
                 >
                   <div>
-                    <p className="font-semibold text-slate-900 text-sm">{svc.name}</p>
+                    <p className="font-semibold text-fg text-sm">{svc.name}</p>
                     {svc.description && (
-                      <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{svc.description}</p>
+                      <p className="text-xs text-fg-muted mt-0.5 line-clamp-1">{svc.description}</p>
                     )}
                   </div>
                   <span className="font-bold text-primary ml-4 whitespace-nowrap">
@@ -215,25 +215,25 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <button onClick={() => setStep('service')} className="text-slate-400 hover:text-primary transition-colors">
+          <button onClick={() => setStep('service')} className="text-fg-subtle hover:text-primary transition-colors">
             <ChevronLeft size={20} />
           </button>
-          <h2 className="font-bold text-slate-900 text-lg">Choose Staff</h2>
+          <h2 className="font-bold text-fg text-lg">Choose Staff</h2>
         </div>
-        <p className="text-sm text-slate-500">
-          Service: <span className="font-medium text-slate-700">{selectedService?.name}</span>
+        <p className="text-sm text-fg-muted">
+          Service: <span className="font-medium text-fg">{selectedService?.name}</span>
         </p>
 
         <button
           onClick={() => { setSelectedStaff(null); setStep('datetime'); }}
-          className="w-full flex items-center gap-3 p-4 rounded-brand border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors text-left"
+          className="w-full flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-left"
         >
-          <div className="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
-            <User size={18} className="text-slate-400" />
+          <div className="w-9 h-9 rounded-full bg-surface-alt flex items-center justify-center flex-shrink-0">
+            <User size={18} className="text-fg-subtle" />
           </div>
           <div>
-            <p className="font-semibold text-slate-900 text-sm">Any available staff</p>
-            <p className="text-xs text-slate-400">We&apos;ll assign the next available person</p>
+            <p className="font-semibold text-fg text-sm">Any available staff</p>
+            <p className="text-xs text-fg-subtle">We&apos;ll assign the next available person</p>
           </div>
         </button>
 
@@ -241,14 +241,14 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
           <button
             key={s.id}
             onClick={() => { setSelectedStaff(s); setStep('datetime'); }}
-            className="w-full flex items-center gap-3 p-4 rounded-brand border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors text-left"
+            className="w-full flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-left"
           >
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-sm">
               {s.name.charAt(0).toUpperCase()}
             </div>
             <div>
-              <p className="font-semibold text-slate-900 text-sm">{s.name}</p>
-              {s.role && <p className="text-xs text-slate-400">{s.role}</p>}
+              <p className="font-semibold text-fg text-sm">{s.name}</p>
+              {s.role && <p className="text-xs text-fg-subtle">{s.role}</p>}
             </div>
           </button>
         ))}
@@ -262,15 +262,15 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
     return (
       <div className="space-y-5">
         <div className="flex items-center gap-2">
-          <button onClick={() => setStep('staff')} className="text-slate-400 hover:text-primary transition-colors">
+          <button onClick={() => setStep('staff')} className="text-fg-subtle hover:text-primary transition-colors">
             <ChevronLeft size={20} />
           </button>
-          <h2 className="font-bold text-slate-900 text-lg">Pick a Date & Time</h2>
+          <h2 className="font-bold text-fg text-lg">Pick a Date & Time</h2>
         </div>
 
         {/* Week navigator */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+          <div className="flex items-center justify-between text-xs text-fg-subtle px-1">
             <button
               onClick={() => setViewStart(addDays(viewStart, -7))}
               disabled={viewStart <= today}
@@ -278,7 +278,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
             >
               <ChevronLeft size={16} />
             </button>
-            <span className="font-medium text-slate-600">
+            <span className="font-medium text-fg-muted">
               {viewStart.toLocaleDateString([], { month: 'long', year: 'numeric' })}
             </span>
             <button
@@ -316,8 +316,8 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
                     isSelected
                       ? 'bg-primary text-primary-foreground'
                       : isPast || isUnavailable
-                      ? 'text-slate-300 cursor-not-allowed'
-                      : 'text-slate-700 hover:bg-primary/10 hover:text-primary border border-slate-200',
+                      ? 'text-fg-subtle cursor-not-allowed'
+                      : 'text-fg hover:bg-primary/10 hover:text-primary border border-line',
                   )}
                 >
                   <span className="uppercase">{day.toLocaleDateString([], { weekday: 'short' })}</span>
@@ -331,13 +331,13 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
         {/* Time slots */}
         {selectedDate && (
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+            <p className="text-sm font-semibold text-fg flex items-center gap-1.5">
               <Clock size={14} />
               Available times
             </p>
 
             {loadingSlots ? (
-              <p className="text-sm text-slate-400 py-4">Checking availability…</p>
+              <p className="text-sm text-fg-subtle py-4">Checking availability…</p>
             ) : slotsError ? (
               <p className="text-sm text-red-600 py-4">{slotsError}</p>
             ) : selectedDay && !selectedDay.is_open ? (
@@ -345,11 +345,11 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
               // identical from an empty grid, and a customer reads them very
               // differently — one means "come another day", the other means
               // "try another time".
-              <p className="text-sm text-slate-500 py-4">
+              <p className="text-sm text-fg-muted py-4">
                 We&apos;re closed on this day. Please choose another date.
               </p>
             ) : slots.length === 0 ? (
-              <p className="text-sm text-slate-500 py-4">
+              <p className="text-sm text-fg-muted py-4">
                 No times available on this day.
               </p>
             ) : (
@@ -370,10 +370,10 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
                       className={clsx(
                         'py-2 px-2 rounded-brand border text-xs font-medium transition-colors',
                         !slot.available
-                          ? 'bg-slate-50 text-slate-300 border-slate-100 line-through cursor-not-allowed'
+                          ? 'bg-surface-alt text-fg-subtle border-line line-through cursor-not-allowed'
                           : isSelected
                           ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-surface text-slate-700 border-slate-200 hover:border-primary',
+                          : 'bg-surface text-fg border-line hover:border-primary',
                       )}
                     >
                       {formatSlot(iso)}
@@ -405,49 +405,49 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
     return (
       <div className="space-y-5">
         <div className="flex items-center gap-2">
-          <button onClick={() => setStep('datetime')} className="text-slate-400 hover:text-primary transition-colors">
+          <button onClick={() => setStep('datetime')} className="text-fg-subtle hover:text-primary transition-colors">
             <ChevronLeft size={20} />
           </button>
-          <h2 className="font-bold text-slate-900 text-lg">Confirm Booking</h2>
+          <h2 className="font-bold text-fg text-lg">Confirm Booking</h2>
         </div>
 
-        <div className="rounded-brand border border-slate-200 p-4 space-y-3 text-sm">
+        <div className="rounded-brand border border-line p-4 space-y-3 text-sm">
           <div className="flex justify-between">
-            <span className="text-slate-500">Service</span>
-            <span className="font-semibold text-slate-900">{selectedService?.name}</span>
+            <span className="text-fg-muted">Service</span>
+            <span className="font-semibold text-fg">{selectedService?.name}</span>
           </div>
           {selectedStaff && (
             <div className="flex justify-between">
-              <span className="text-slate-500">Staff</span>
-              <span className="font-semibold text-slate-900">{selectedStaff.name}</span>
+              <span className="text-fg-muted">Staff</span>
+              <span className="font-semibold text-fg">{selectedStaff.name}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-slate-500">Date</span>
-            <span className="font-semibold text-slate-900">
+            <span className="text-fg-muted">Date</span>
+            <span className="font-semibold text-fg">
               {apptDate?.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-500">Time</span>
-            <span className="font-semibold text-slate-900">{apptDate ? formatSlot(selectedSlot!) : ''}</span>
+            <span className="text-fg-muted">Time</span>
+            <span className="font-semibold text-fg">{apptDate ? formatSlot(selectedSlot!) : ''}</span>
           </div>
-          <div className="flex justify-between border-t border-slate-100 pt-3">
-            <span className="text-slate-500">Price</span>
+          <div className="flex justify-between border-t border-line pt-3">
+            <span className="text-fg-muted">Price</span>
             <span className="font-bold text-primary">{formatCurrency(selectedService?.price ?? 0)}</span>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
-            Notes <span className="text-slate-400 font-normal">(optional)</span>
+          <label className="block text-xs font-medium text-fg-muted mb-1">
+            Notes <span className="text-fg-subtle font-normal">(optional)</span>
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Any special requests or info for your appointment…"
-            className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
+            className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
           />
         </div>
 
@@ -478,8 +478,8 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
   return (
     <div className="flex flex-col items-center text-center py-8 space-y-4">
       <CheckCircle size={56} className="text-emerald-500" />
-      <h2 className="text-xl font-bold text-slate-900">Appointment Booked!</h2>
-      <p className="text-sm text-slate-500 max-w-xs">
+      <h2 className="text-xl font-bold text-fg">Appointment Booked!</h2>
+      <p className="text-sm text-fg-muted max-w-xs">
         Your appointment for <strong>{selectedService?.name}</strong> has been confirmed. We&apos;ll see you then!
       </p>
       <div className="flex gap-3 mt-2">

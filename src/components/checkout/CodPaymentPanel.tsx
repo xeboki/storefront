@@ -99,7 +99,7 @@ export function CodPaymentPanel({
         </p>
       </div>
 
-      <div className="flex justify-between text-sm font-semibold text-slate-900 border-t border-slate-100 pt-4">
+      <div className="flex justify-between text-sm font-semibold text-fg border-t border-line pt-4">
         <span>Amount due</span>
         <span>{formatCurrency(total)}</span>
       </div>

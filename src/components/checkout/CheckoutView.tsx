@@ -251,7 +251,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
 
   if (items.length === 0) {
     return (
-      <p className="text-center text-slate-500 py-16">
+      <p className="text-center text-fg-muted py-16">
         Your cart is empty.{' '}
         <a href={`/${storeSlug}/catalog`} className="text-primary hover:underline">
           Go shopping
@@ -509,18 +509,18 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
 
         {/* 1 — Contact */}
         <section>
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
             Contact
           </h2>
 
           {customer ? (
-            <div className="flex items-center gap-3 p-4 rounded-brand border border-slate-200 bg-slate-50">
+            <div className="flex items-center gap-3 p-4 rounded-brand border border-line bg-surface-alt">
               <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
                 {customer.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900 truncate">{customer.name}</p>
-                <p className="text-xs text-slate-500 truncate">{customer.email}</p>
+                <p className="text-sm font-semibold text-fg truncate">{customer.name}</p>
+                <p className="text-xs text-fg-muted truncate">{customer.email}</p>
               </div>
               <span className="text-xs text-emerald-600 font-medium bg-emerald-50 border border-emerald-200 rounded px-2 py-0.5">
                 Signed in
@@ -528,7 +528,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex gap-2 text-sm text-slate-500 mb-1">
+              <div className="flex gap-2 text-sm text-fg-muted mb-1">
                 <span>Checking out as guest.</span>
                 <a
                   href={`/${storeSlug}/login?next=/${storeSlug}/checkout`}
@@ -539,7 +539,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                  <label className="block text-xs font-medium text-fg-muted mb-1">
                     Full name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -547,11 +547,11 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                     value={guestName}
                     onChange={(e) => setGuestName(e.target.value)}
                     placeholder="Jane Smith"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">
+                  <label className="block text-xs font-medium text-fg-muted mb-1">
                     Email <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -559,7 +559,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                     value={guestEmail}
                     onChange={(e) => setGuestEmail(e.target.value)}
                     placeholder="jane@example.com"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                    className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -569,7 +569,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
 
         {/* 2 — Fulfillment */}
         <section>
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
             Fulfillment
           </h2>
           <div className={`grid grid-cols-${fulfillmentOptions.length} gap-3`}>
@@ -581,7 +581,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                   'py-2.5 px-4 rounded-brand border text-sm font-medium transition-colors',
                   deliveryType === key
                     ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-surface text-slate-700 border-slate-200 hover:border-primary',
+                    : 'bg-surface text-fg border-line hover:border-primary',
                 )}
               >
                 {key === 'dineIn' && <Utensils size={12} className="inline mr-1.5" />}
@@ -593,7 +593,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
           {/* Delivery city (city/location-based routing) */}
           {deliveryType === 'delivery' && (
             <div className="mt-3">
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label className="block text-xs font-medium text-fg-muted mb-1">
                 Delivery city / area
               </label>
               <input
@@ -601,7 +601,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                 value={deliveryCity}
                 onChange={(e) => setDeliveryCity(e.target.value)}
                 placeholder="e.g. London"
-                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
               />
               {deliveryCity.trim() !== '' && (
                 deliveryBranch ? (
@@ -621,13 +621,13 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
           {/* Pickup branch (click & collect) */}
           {deliveryType === 'pickup' && _pickupBranches.length > 0 && (
             <div className="mt-3">
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label className="block text-xs font-medium text-fg-muted mb-1">
                 Collect from
               </label>
               <select
                 value={pickupLocationId}
                 onChange={(e) => setPickupLocationId(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm bg-surface focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 border border-line rounded-brand text-sm bg-surface focus:outline-none focus:border-primary"
               >
                 {_pickupBranches.map((b) => (
                   <option key={b.locationId} value={b.locationId}>
@@ -637,10 +637,10 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                 ))}
               </select>
               {pickupBranch?.pickupAddress && (
-                <p className="text-xs text-slate-500 mt-1.5">{pickupBranch.pickupAddress}</p>
+                <p className="text-xs text-fg-muted mt-1.5">{pickupBranch.pickupAddress}</p>
               )}
               {pickupBranch?.pickupInstructions && (
-                <p className="text-xs text-slate-400 mt-0.5">{pickupBranch.pickupInstructions}</p>
+                <p className="text-xs text-fg-subtle mt-0.5">{pickupBranch.pickupInstructions}</p>
               )}
             </div>
           )}
@@ -648,29 +648,29 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
           {/* Table number for dine-in */}
           {deliveryType === 'dineIn' && (
             <div className="mt-3">
-              <label className="block text-xs font-medium text-slate-600 mb-1">
-                Table number <span className="text-slate-400 font-normal">(optional)</span>
+              <label className="block text-xs font-medium text-fg-muted mb-1">
+                Table number <span className="text-fg-subtle font-normal">(optional)</span>
               </label>
               <input
                 type="text"
                 value={tableNumber}
                 onChange={(e) => setTableNumber(e.target.value)}
                 placeholder="e.g. Table 4"
-                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
               />
             </div>
           )}
 
           <div className="mt-3">
-            <label className="block text-xs font-medium text-slate-600 mb-1">
-              Order notes <span className="text-slate-400 font-normal">(optional)</span>
+            <label className="block text-xs font-medium text-fg-muted mb-1">
+              Order notes <span className="text-fg-subtle font-normal">(optional)</span>
             </label>
             <textarea
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Special instructions…"
-              className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
+              className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
             />
           </div>
         </section>
@@ -679,7 +679,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
         <section>
           <button
             onClick={() => setShowDiscount(!showDiscount)}
-            className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-primary transition-colors"
           >
             <Tag size={14} />
             Have a discount code?
@@ -708,7 +708,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                     onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === 'Enter' && applyDiscount()}
                     placeholder="DISCOUNT CODE"
-                    className="flex-1 px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary uppercase"
+                    className="flex-1 px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary uppercase"
                   />
                   <button
                     onClick={applyDiscount}
@@ -728,7 +728,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
         <section>
           <button
             onClick={() => setShowGiftCard(!showGiftCard)}
-            className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-primary transition-colors"
+            className="flex items-center gap-2 text-sm font-medium text-fg-muted hover:text-primary transition-colors"
           >
             <Gift size={14} />
             Have a gift card?
@@ -757,7 +757,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                     onChange={(e) => setGiftCardCode(e.target.value.toUpperCase())}
                     onKeyDown={(e) => e.key === 'Enter' && applyGiftCard()}
                     placeholder="GIFT CARD CODE"
-                    className="flex-1 px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary uppercase"
+                    className="flex-1 px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary uppercase"
                   />
                   <button
                     onClick={applyGiftCard}
@@ -797,7 +797,7 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
 
         {/* 5 — Payment method */}
         <section>
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-3">
+          <h2 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
             Payment method
           </h2>
           <div className="space-y-2">
@@ -809,12 +809,12 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                   'w-full flex items-center gap-3 p-4 rounded-brand border text-left transition-colors',
                   paymentMethod === m.id
                     ? 'border-primary bg-primary/5'
-                    : 'border-slate-200 bg-surface hover:border-slate-300',
+                    : 'border-line bg-surface hover:border-line',
                 )}
               >
                 <span className={clsx(
                   'w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
-                  paymentMethod === m.id ? 'border-primary' : 'border-slate-300',
+                  paymentMethod === m.id ? 'border-primary' : 'border-line',
                 )}>
                   {paymentMethod === m.id && <span className="w-2 h-2 rounded-full bg-primary block" />}
                 </span>
@@ -824,11 +824,11 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                 <span className="flex-1 min-w-0">
                   <span className={clsx(
                     'block text-sm font-semibold',
-                    paymentMethod === m.id ? 'text-primary' : 'text-slate-900',
+                    paymentMethod === m.id ? 'text-primary' : 'text-fg',
                   )}>
                     {m.label}
                   </span>
-                  <span className="block text-xs text-slate-500">{m.description}</span>
+                  <span className="block text-xs text-fg-muted">{m.description}</span>
                 </span>
               </button>
             ))}
@@ -882,25 +882,25 @@ interface OrderSummaryProps {
 
 function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, taxRate = 0, taxInclusive = false, sticky }: OrderSummaryProps) {
   return (
-    <div className={clsx('rounded-brand border border-slate-200 p-5 space-y-4', sticky && 'sticky top-24')}>
-      <h2 className="font-bold text-slate-900">Order Summary</h2>
-      <ul className="divide-y divide-slate-100 text-sm">
+    <div className={clsx('rounded-brand border border-line p-5 space-y-4', sticky && 'sticky top-24')}>
+      <h2 className="font-bold text-fg">Order Summary</h2>
+      <ul className="divide-y divide-line text-sm">
         {items.map((item) => (
           <li key={`${item.productId}::${item.variantId ?? ''}`} className="flex justify-between gap-2 py-2">
-            <span className="text-slate-700 flex-1 min-w-0 truncate">
+            <span className="text-fg flex-1 min-w-0 truncate">
               {item.name}
-              {item.variantLabel && <span className="text-slate-400"> ({item.variantLabel})</span>}
-              <span className="text-slate-400"> × {item.quantity}</span>
+              {item.variantLabel && <span className="text-fg-subtle"> ({item.variantLabel})</span>}
+              <span className="text-fg-subtle"> × {item.quantity}</span>
             </span>
-            <span className="font-medium text-slate-900 whitespace-nowrap">
+            <span className="font-medium text-fg whitespace-nowrap">
               {formatCurrency(item.price * item.quantity)}
             </span>
           </li>
         ))}
       </ul>
 
-      <div className="space-y-1.5 text-sm border-t border-slate-100 pt-3">
-        <div className="flex justify-between text-slate-600">
+      <div className="space-y-1.5 text-sm border-t border-line pt-3">
+        <div className="flex justify-between text-fg-muted">
           <span>Subtotal</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
@@ -910,7 +910,7 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
             <span>−{formatCurrency(discountAmount)}</span>
           </div>
         )}
-        <div className="flex justify-between text-slate-600">
+        <div className="flex justify-between text-fg-muted">
           <span>Shipping</span>
           <span>{shipping > 0 ? formatCurrency(shipping) : 'Free'}</span>
         </div>
@@ -926,12 +926,12 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
             <span>−{formatCurrency(giftCardApplied)}</span>
           </div>
         )}
-        <div className="flex justify-between font-bold text-slate-900 text-base border-t border-slate-100 pt-2 mt-1">
+        <div className="flex justify-between font-bold text-fg text-base border-t border-line pt-2 mt-1">
           <span>Total</span>
           <span>{formatCurrency(orderTotal)}</span>
         </div>
         {taxRate > 0 && (
-          <p className="text-xs text-slate-400 pt-0.5">
+          <p className="text-xs text-fg-subtle pt-0.5">
             {taxInclusive
               ? `Includes ${taxRate}% local tax`
               : `Plus ${taxRate}% local tax where applicable`}

@@ -66,8 +66,8 @@ export function ProductCard({ product, storeSlug }: Props) {
 
   return (
     <Link href={href} className="group block">
-      <div className="rounded-brand overflow-hidden border border-slate-200 bg-surface hover:shadow-md transition-shadow">
-        <div className="relative aspect-square bg-slate-100">
+      <div className="rounded-brand overflow-hidden border border-line bg-surface hover:shadow-md transition-shadow">
+        <div className="relative aspect-square bg-surface-alt">
           {product.imageUrl ? (
             <Image
               src={product.imageUrl}
@@ -77,14 +77,14 @@ export function ProductCard({ product, storeSlug }: Props) {
               sizes="(max-width: 768px) 50vw, 25vw"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-slate-300">
+            <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
               <ShoppingCart size={48} />
             </div>
           )}
 
           {!product.isActive && (
-            <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-              <span className="text-sm font-semibold text-slate-500 bg-white px-3 py-1 rounded-full border">
+            <div className="absolute inset-0 bg-surface/70 flex items-center justify-center">
+              <span className="text-sm font-semibold text-fg-muted bg-surface px-3 py-1 rounded-full border">
                 Sold Out
               </span>
             </div>
@@ -98,7 +98,7 @@ export function ProductCard({ product, storeSlug }: Props) {
               'absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-colors',
               isWishlisted
                 ? 'bg-rose-50 text-rose-500'
-                : 'bg-white/90 text-slate-400 hover:text-rose-500',
+                : 'bg-surface/90 text-fg-subtle hover:text-rose-500',
             )}
           >
             <Heart size={14} className={isWishlisted ? 'fill-rose-500' : ''} />
@@ -106,10 +106,10 @@ export function ProductCard({ product, storeSlug }: Props) {
         </div>
 
         <div className="p-3">
-          <h3 className="font-medium text-slate-900 line-clamp-2 text-sm">{product.name}</h3>
+          <h3 className="font-medium text-fg line-clamp-2 text-sm">{product.name}</h3>
 
           <div className="mt-2 flex items-center justify-between gap-2">
-            <span className="font-bold text-slate-900">
+            <span className="font-bold text-fg">
               {product.hasVariants
                 ? `From ${formatCurrency(product.price ?? 0)}`
                 : formatCurrency(product.price ?? 0)}

@@ -157,15 +157,14 @@ export function RepairLookup({
             className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2"
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-fg-muted mt-1">
             We ask for both so nobody else can look up your repair.
           </p>
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="w-full text-white px-6 py-3 rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
-          style={{ backgroundColor: 'var(--color-primary)' }}
+          className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-brand font-medium hover:opacity-90 disabled:opacity-50"
         >
           {loading ? 'Checking…' : 'Check status'}
         </button>
@@ -182,13 +181,13 @@ export function RepairLookup({
 
       {repair && (
         <div className="border rounded-xl overflow-hidden shadow-sm">
-          <div className="bg-gray-50 px-6 py-4 border-b">
+          <div className="bg-surface-alt px-6 py-4 border-b">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm text-gray-500">Ticket</p>
+                <p className="text-sm text-fg-muted">Ticket</p>
                 <p className="text-xl font-bold">{repair.ticketNumber}</p>
                 {repair.device && (
-                  <p className="text-sm text-gray-600 mt-1">{repair.device}</p>
+                  <p className="text-sm text-fg-muted mt-1">{repair.device}</p>
                 )}
               </div>
               <span
@@ -220,7 +219,7 @@ export function RepairLookup({
                         }}
                       />
                       <span
-                        className={`text-xs ${done ? 'font-medium' : 'text-gray-400'}`}
+                        className={`text-xs ${done ? 'font-medium' : 'text-fg-subtle'}`}
                       >
                         {step.label}
                       </span>
@@ -234,13 +233,13 @@ export function RepairLookup({
           <dl className="px-6 py-4 space-y-2 text-sm">
             {received && (
               <div className="flex justify-between">
-                <dt className="text-gray-500">Booked in</dt>
+                <dt className="text-fg-muted">Booked in</dt>
                 <dd>{received}</dd>
               </div>
             )}
             {due && (
               <div className="flex justify-between">
-                <dt className="text-gray-500">Expected ready</dt>
+                <dt className="text-fg-muted">Expected ready</dt>
                 <dd>{due}</dd>
               </div>
             )}

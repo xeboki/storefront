@@ -1,6 +1,16 @@
 import type { Config } from 'tailwindcss';
 
+/**
+ * Every colour here reads a CSS variable, and those variables are written twice
+ * per store — once for :root and once for :root.dark — by src/lib/theme.ts.
+ * That is what lets a shopper switch to dark without a round trip, and a
+ * merchant switch preset without a rebuild.
+ *
+ * Use the semantic names (bg, fg, surface, border) rather than slate-N in
+ * components: a literal neutral cannot follow the theme into dark mode.
+ */
 const config: Config = {
+  darkMode: 'class',
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,7 +19,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // CSS variable–driven theme — overridden per storefront
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
           foreground: 'rgb(var(--color-primary-fg) / <alpha-value>)',
@@ -18,8 +27,18 @@ const config: Config = {
           DEFAULT: 'rgb(var(--color-secondary) / <alpha-value>)',
           foreground: 'rgb(var(--color-secondary-fg) / <alpha-value>)',
         },
-        surface: 'rgb(var(--color-surface) / <alpha-value>)',
-        muted: 'rgb(var(--color-muted) / <alpha-value>)',
+        // Page and panel neutrals — these are what change between light and dark.
+        bg: 'rgb(var(--color-bg) / <alpha-value>)',
+        surface: {
+          DEFAULT: 'rgb(var(--color-surface) / <alpha-value>)',
+          alt: 'rgb(var(--color-surface-alt) / <alpha-value>)',
+        },
+        fg: {
+          DEFAULT: 'rgb(var(--color-fg) / <alpha-value>)',
+          muted: 'rgb(var(--color-fg-muted) / <alpha-value>)',
+          subtle: 'rgb(var(--color-fg-subtle) / <alpha-value>)',
+        },
+        line: 'rgb(var(--color-border) / <alpha-value>)',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
@@ -27,6 +46,11 @@ const config: Config = {
       },
       borderRadius: {
         brand: 'var(--radius)',
+        'brand-lg': 'calc(var(--radius) * 1.75)',
+        'brand-sm': 'calc(var(--radius) * 0.5)',
+      },
+      letterSpacing: {
+        heading: 'var(--heading-tracking)',
       },
     },
   },

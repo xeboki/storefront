@@ -24,7 +24,7 @@ export default async function AccountPage({ params }: Props) {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">My Account</h1>
+      <h1 className="text-2xl font-bold text-fg mb-6">My Account</h1>
       <AccountDashboard
         session={session}
         storeSlug={params.store}

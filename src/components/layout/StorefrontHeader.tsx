@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, User, Menu, X, Search, Heart, Calendar, Wrench } from 'lucide-react';
+import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -28,7 +29,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
   const customNavLinks: NavLink[] = storefrontConfig?.navLinks ?? [];
 
   return (
-    <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-slate-200">
+    <header className="sticky top-0 z-40 bg-surface/95 backdrop-blur border-b border-line">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -49,16 +50,16 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-            <Link href={`/${storeSlug}/catalog`} className="text-slate-600 hover:text-primary transition-colors">
+            <Link href={`/${storeSlug}/catalog`} className="text-fg-muted hover:text-primary transition-colors">
               {t('nav.shop')}
             </Link>
             {hasAppointments && (
-              <Link href={`/${storeSlug}/book`} className="text-slate-600 hover:text-primary transition-colors">
+              <Link href={`/${storeSlug}/book`} className="text-fg-muted hover:text-primary transition-colors">
                 Book
               </Link>
             )}
             {hasWorkOrders && (
-              <Link href={`/${storeSlug}/repairs`} className="text-slate-600 hover:text-primary transition-colors">
+              <Link href={`/${storeSlug}/repairs`} className="text-fg-muted hover:text-primary transition-colors">
                 Track Order
               </Link>
             )}
@@ -69,14 +70,14 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
                 href={link.url}
                 target={link.openInNewTab ? '_blank' : undefined}
                 rel={link.openInNewTab ? 'noopener noreferrer' : undefined}
-                className="text-slate-600 hover:text-primary transition-colors"
+                className="text-fg-muted hover:text-primary transition-colors"
               >
                 {link.label}
               </a>
             ))}
 
             {customer && (
-              <Link href={`/${storeSlug}/account`} className="text-slate-600 hover:text-primary transition-colors">
+              <Link href={`/${storeSlug}/account`} className="text-fg-muted hover:text-primary transition-colors">
                 My Account
               </Link>
             )}
@@ -86,7 +87,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
           <div className="flex items-center gap-1">
             <Link
               href={`/${storeSlug}/catalog`}
-              className="p-2 text-slate-600 hover:text-primary transition-colors"
+              className="p-2 text-fg-muted hover:text-primary transition-colors"
               aria-label="Search"
             >
               <Search size={20} />
@@ -95,7 +96,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
             {hasAppointments && (
               <Link
                 href={`/${storeSlug}/book`}
-                className="p-2 text-slate-600 hover:text-primary transition-colors hidden md:block"
+                className="p-2 text-fg-muted hover:text-primary transition-colors hidden md:block"
                 aria-label="Book appointment"
               >
                 <Calendar size={20} />
@@ -105,7 +106,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
             {customer && (
               <Link
                 href={`/${storeSlug}/account/wishlist`}
-                className="p-2 text-slate-600 hover:text-primary transition-colors"
+                className="p-2 text-fg-muted hover:text-primary transition-colors"
                 aria-label="Wishlist"
               >
                 <Heart size={20} />
@@ -115,7 +116,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
             {customer ? (
               <Link
                 href={`/${storeSlug}/account`}
-                className="p-2 text-slate-600 hover:text-primary transition-colors"
+                className="p-2 text-fg-muted hover:text-primary transition-colors"
                 aria-label="Account"
               >
                 <User size={20} />
@@ -123,15 +124,17 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
             ) : (
               <Link
                 href={`/${storeSlug}/login`}
-                className="hidden md:block text-sm font-medium text-slate-600 hover:text-primary transition-colors px-2"
+                className="hidden md:block text-sm font-medium text-fg-muted hover:text-primary transition-colors px-2"
               >
                 {t('nav.signIn')}
               </Link>
             )}
 
+            <ColorSchemeToggle className="hidden md:inline-flex" />
+
             <Link
               href={`/${storeSlug}/cart`}
-              className="relative p-2 text-slate-600 hover:text-primary transition-colors"
+              className="relative p-2 text-fg-muted hover:text-primary transition-colors"
               aria-label="Cart"
             >
               <ShoppingCart size={20} />
@@ -143,7 +146,7 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
             </Link>
 
             <button
-              className="md:hidden p-2 text-slate-600"
+              className="md:hidden p-2 text-fg-muted"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label="Menu"
             >
@@ -155,34 +158,39 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-surface px-4 py-3 space-y-1">
-          <Link href={`/${storeSlug}/catalog`} className="flex items-center gap-2 py-2.5 text-slate-700 font-medium" onClick={() => setMobileOpen(false)}>
-            <Search size={16} className="text-slate-400" /> Shop
+        <div className="md:hidden border-t border-line bg-surface px-4 py-3 space-y-1">
+          <Link href={`/${storeSlug}/catalog`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+            <Search size={16} className="text-fg-subtle" /> Shop
           </Link>
           {hasAppointments && (
-            <Link href={`/${storeSlug}/book`} className="flex items-center gap-2 py-2.5 text-slate-700 font-medium" onClick={() => setMobileOpen(false)}>
-              <Calendar size={16} className="text-slate-400" /> Book Appointment
+            <Link href={`/${storeSlug}/book`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+              <Calendar size={16} className="text-fg-subtle" /> Book Appointment
             </Link>
           )}
           {hasWorkOrders && (
-            <Link href={`/${storeSlug}/repairs`} className="flex items-center gap-2 py-2.5 text-slate-700 font-medium" onClick={() => setMobileOpen(false)}>
-              <Wrench size={16} className="text-slate-400" /> Track Order
+            <Link href={`/${storeSlug}/repairs`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+              <Wrench size={16} className="text-fg-subtle" /> Track Order
             </Link>
           )}
           {customer ? (
             <>
-              <Link href={`/${storeSlug}/account`} className="flex items-center gap-2 py-2.5 text-slate-700 font-medium" onClick={() => setMobileOpen(false)}>
-                <User size={16} className="text-slate-400" /> My Account
+              <Link href={`/${storeSlug}/account`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+                <User size={16} className="text-fg-subtle" /> My Account
               </Link>
-              <Link href={`/${storeSlug}/account/appointments`} className="flex items-center gap-2 py-2.5 text-slate-700 font-medium" onClick={() => setMobileOpen(false)}>
-                <Calendar size={16} className="text-slate-400" /> My Appointments
+              <Link href={`/${storeSlug}/account/appointments`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+                <Calendar size={16} className="text-fg-subtle" /> My Appointments
               </Link>
             </>
           ) : (
-            <Link href={`/${storeSlug}/login`} className="flex items-center gap-2 py-2.5 text-slate-700 font-medium" onClick={() => setMobileOpen(false)}>
-              <User size={16} className="text-slate-400" /> Sign in
+            <Link href={`/${storeSlug}/login`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+              <User size={16} className="text-fg-subtle" /> Sign in
             </Link>
           )}
+
+          <div className="flex items-center justify-between border-t border-line pt-3 mt-1">
+            <span className="text-sm text-fg-muted">Appearance</span>
+            <ColorSchemeToggle />
+          </div>
         </div>
       )}
     </header>

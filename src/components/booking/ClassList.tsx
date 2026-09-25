@@ -114,11 +114,11 @@ export function ClassList({ storeSlug }: Props) {
   }
 
   if (classes === null) {
-    return <p className="text-sm text-slate-500">Loading classes…</p>;
+    return <p className="text-sm text-fg-muted">Loading classes…</p>;
   }
 
   if (classes.length === 0) {
-    return <p className="text-sm text-slate-500">No classes are scheduled right now.</p>;
+    return <p className="text-sm text-fg-muted">No classes are scheduled right now.</p>;
   }
 
   return (
@@ -133,20 +133,20 @@ export function ClassList({ storeSlug }: Props) {
             key={session.id}
             className={clsx(
               'rounded-brand border p-4 bg-surface',
-              soldOut && !isBooked ? 'border-slate-200 opacity-70' : 'border-slate-200',
+              soldOut && !isBooked ? 'border-line opacity-70' : 'border-line',
             )}
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="font-semibold text-slate-900 truncate">
+                <p className="font-semibold text-fg truncate">
                   {session.serviceName}
                 </p>
-                <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1">
+                <p className="text-sm text-fg-muted mt-0.5 flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5 shrink-0" />
                   {formatWhen(session)}
                   {session.staffName ? ` · ${session.staffName}` : ''}
                 </p>
-                <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1">
+                <p className="text-sm text-fg-muted mt-0.5 flex items-center gap-1">
                   <Users className="h-3.5 w-3.5 shrink-0" />
                   {soldOut
                     ? 'Fully booked'
@@ -156,7 +156,7 @@ export function ClassList({ storeSlug }: Props) {
 
               <div className="text-right shrink-0">
                 {session.price > 0 && (
-                  <p className="font-semibold text-slate-900 mb-2">
+                  <p className="font-semibold text-fg mb-2">
                     {formatCurrency(session.price)}
                   </p>
                 )}
@@ -174,8 +174,8 @@ export function ClassList({ storeSlug }: Props) {
                     className={clsx(
                       'rounded-brand px-4 py-2 text-sm font-medium transition',
                       soldOut || busy
-                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                        : 'bg-brand text-white hover:opacity-90',
+                        ? 'bg-surface-alt text-fg-subtle cursor-not-allowed'
+                        : 'bg-primary text-primary-foreground hover:opacity-90',
                     )}
                   >
                     {busy ? 'Booking…' : soldOut ? 'Full' : 'Book'}

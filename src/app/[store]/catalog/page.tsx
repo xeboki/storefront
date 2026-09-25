@@ -6,6 +6,7 @@ import { CategoryFilterBar } from '@/components/product/CategoryFilterBar'
 import { CatalogSearch } from '@/components/product/CatalogSearch'
 import { CatalogSort } from '@/components/product/CatalogSort'
 import { ProductGrid } from '@/components/product/ProductGrid'
+import { EmptyStoreNotice } from '@/components/product/EmptyStoreNotice'
 
 interface Props {
   params: { store: string }
@@ -42,10 +43,16 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   const onlineStores = (store.storefrontConfig?.fulfillmentLocations ?? [])
     .filter((l) => l.deliveryEnabled || l.pickupEnabled)
   const locationFirst = catalogMode === 'location_first' && onlineStores.length > 0
-  const activeLoc = locationFirst
-    ? (onlineStores.find((s) => s.locationId === searchParams.loc)?.locationId
-       ?? onlineStores[0].locationId)
+  const activeStore = locationFirst
+    ? (onlineStores.find((s) => s.locationId === searchParams.loc) ?? onlineStores[0])
     : undefined
+  const activeLoc = activeStore?.locationId
+
+  // 'location_first' means a shopper picks a store and sees what that store can
+  // actually sell them. Passing the location alone only scopes the stock FIGURE
+  // — every product still came back, so a branch holding nothing listed the
+  // whole 158-product catalogue and none of it was fulfillable there.
+  const scopedToStock = locationFirst || inStockOnly
 
   // Search / category / paging all happen SERVER-SIDE against the API, so the
   // catalog is no longer capped at a client-loaded slice.
@@ -53,7 +60,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
     loadCatalog(store.apiKey, {
       categoryId: searchParams.category,
       search,
-      inStockOnly,
+      inStockOnly: scopedToStock,
       sort,
       locationId: activeLoc,
       page,
@@ -81,14 +88,14 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+      <h1 className="text-2xl font-bold text-fg mb-6">
         {search ? `Results for “${search}”` : categoryName}
       </h1>
 
       {/* Location-first: pick a store; the catalog shows its own stock. */}
       {locationFirst && (
-        <div className="mb-5 rounded-brand border border-slate-200 bg-slate-50 p-3">
-          <p className="text-xs font-medium text-slate-500 mb-2">Shopping at</p>
+        <div className="mb-5 rounded-brand border border-line bg-surface-alt p-3">
+          <p className="text-xs font-medium text-fg-muted mb-2">Shopping at</p>
           <div className="flex flex-wrap gap-2">
             {onlineStores.map((s) => {
               const params2 = new URLSearchParams()
@@ -103,7 +110,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
                     'px-3 py-1.5 rounded-full text-sm border transition-colors ' +
                     (active
                       ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-primary')
+                      : 'bg-surface text-fg border-line hover:border-primary')
                   }
                 >
                   {s.locationName || s.city || 'Store'}
@@ -117,28 +124,40 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       <CategoryFilterBar categories={categories} activeId={searchParams.category} storeSlug={params.store} />
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex-1">
-          <CatalogSearch initialQuery={search ?? ''} initialInStock={inStockOnly} />
+          <CatalogSearch
+            initialQuery={search ?? ''}
+            initialInStock={scopedToStock}
+            lockInStock={locationFirst}
+          />
         </div>
         <CatalogSort current={sort ?? ''} />
       </div>
 
-      <p className="text-sm text-slate-500 mb-4">
+      <p className="text-sm text-fg-muted mb-4">
         {total} {total === 1 ? 'product' : 'products'}
         {totalPages > 1 && ` · page ${page} of ${totalPages}`}
       </p>
 
-      <ProductGrid products={products} storeSlug={params.store} />
+      {products.length === 0 && locationFirst && !search && !searchParams.category ? (
+        <EmptyStoreNotice
+          storeName={activeStore?.locationName || activeStore?.city || 'this store'}
+          others={onlineStores.filter((s) => s.locationId !== activeLoc)}
+          base={base}
+        />
+      ) : (
+        <ProductGrid products={products} storeSlug={params.store} />
+      )}
 
       {totalPages > 1 && (
         <nav className="flex items-center justify-center gap-2 mt-10" aria-label="Pagination">
           {page > 1 && (
-            <Link href={pageHref(base, sp, page - 1)} scroll className="px-4 py-2 rounded-brand border border-slate-200 text-sm hover:border-primary hover:text-primary">
+            <Link href={pageHref(base, sp, page - 1)} scroll className="px-4 py-2 rounded-brand border border-line text-sm hover:border-primary hover:text-primary">
               ← Previous
             </Link>
           )}
-          <span className="px-3 py-2 text-sm text-slate-500">Page {page} of {totalPages}</span>
+          <span className="px-3 py-2 text-sm text-fg-muted">Page {page} of {totalPages}</span>
           {page < totalPages && (
-            <Link href={pageHref(base, sp, page + 1)} scroll className="px-4 py-2 rounded-brand border border-slate-200 text-sm hover:border-primary hover:text-primary">
+            <Link href={pageHref(base, sp, page + 1)} scroll className="px-4 py-2 rounded-brand border border-line text-sm hover:border-primary hover:text-primary">
               Next →
             </Link>
           )}

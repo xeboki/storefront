@@ -98,33 +98,33 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
   return (
     <div className="space-y-4">
       {addresses.length === 0 && !showForm && (
-        <p className="text-slate-400 text-sm">No saved addresses.</p>
+        <p className="text-fg-subtle text-sm">No saved addresses.</p>
       )}
 
       {addresses.map((addr) => (
         <div
           key={addr.id}
-          className="flex items-start justify-between p-4 rounded-brand border border-slate-200 bg-surface"
+          className="flex items-start justify-between p-4 rounded-brand border border-line bg-surface"
         >
           <div className="space-y-0.5 text-sm">
             <div className="flex items-center gap-2">
-              {addr.label && <span className="font-semibold text-slate-800">{addr.label}</span>}
+              {addr.label && <span className="font-semibold text-fg">{addr.label}</span>}
               {addr.isDefault && (
                 <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                   <Star size={10} /> Default
                 </span>
               )}
             </div>
-            <p className="text-slate-600">{addr.line1}</p>
-            {addr.line2 && <p className="text-slate-600">{addr.line2}</p>}
-            <p className="text-slate-600">
+            <p className="text-fg-muted">{addr.line1}</p>
+            {addr.line2 && <p className="text-fg-muted">{addr.line2}</p>}
+            <p className="text-fg-muted">
               {addr.city}{addr.state ? `, ${addr.state}` : ''} {addr.postcode}
             </p>
-            <p className="text-slate-400">{addr.country}</p>
+            <p className="text-fg-subtle">{addr.country}</p>
           </div>
           <button
             onClick={() => handleDelete(addr.id)}
-            className="p-1.5 text-slate-400 hover:text-rose-500 transition-colors"
+            className="p-1.5 text-fg-subtle hover:text-rose-500 transition-colors"
             aria-label="Delete address"
           >
             <Trash2 size={16} />
@@ -143,7 +143,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
                 placeholder="Label (e.g. Home, Work)"
                 value={form.label}
                 onChange={(e) => setForm({ ...form, label: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
               />
             </div>
             <div className="col-span-2">
@@ -153,7 +153,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
                 placeholder="Address line 1"
                 value={form.line1}
                 onChange={(e) => setForm({ ...form, line1: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
               />
             </div>
             <div className="col-span-2">
@@ -161,7 +161,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
                 placeholder="Address line 2"
                 value={form.line2}
                 onChange={(e) => setForm({ ...form, line2: e.target.value })}
-                className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
               />
             </div>
             <input
@@ -169,30 +169,30 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
               placeholder="City"
               value={form.city}
               onChange={(e) => setForm({ ...form, city: e.target.value })}
-              className="px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+              className="px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
             />
             <input
               placeholder="State / Province"
               value={form.state}
               onChange={(e) => setForm({ ...form, state: e.target.value })}
-              className="px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+              className="px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
             />
             <input
               required
               placeholder="ZIP / Postal Code"
               value={form.postcode}
               onChange={(e) => setForm({ ...form, postcode: e.target.value })}
-              className="px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+              className="px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
             />
             <input
               required
               placeholder="Country"
               value={form.country}
               onChange={(e) => setForm({ ...form, country: e.target.value })}
-              className="px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+              className="px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-slate-600">
+          <label className="flex items-center gap-2 text-sm text-fg-muted">
             <input
               type="checkbox"
               checked={form.isDefault}
@@ -212,7 +212,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
             <button
               type="button"
               onClick={() => { setShowForm(false); setForm(EMPTY_FORM); }}
-              className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900"
+              className="px-4 py-2 text-sm text-fg-muted hover:text-fg"
             >
               Cancel
             </button>

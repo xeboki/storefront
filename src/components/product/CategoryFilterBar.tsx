@@ -22,7 +22,7 @@ export function CategoryFilterBar({ categories, activeId, storeSlug }: Props) {
           'whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium border transition-colors',
           !activeId
             ? 'bg-primary text-primary-foreground border-primary'
-            : 'bg-surface text-slate-600 border-slate-200 hover:border-primary hover:text-primary',
+            : 'bg-surface text-fg-muted border-line hover:border-primary hover:text-primary',
         )}
       >
         All
@@ -35,7 +35,7 @@ export function CategoryFilterBar({ categories, activeId, storeSlug }: Props) {
             'whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium border transition-colors',
             activeId === cat.id
               ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-surface text-slate-600 border-slate-200 hover:border-primary hover:text-primary',
+              : 'bg-surface text-fg-muted border-line hover:border-primary hover:text-primary',
           )}
         >
           {cat.name}

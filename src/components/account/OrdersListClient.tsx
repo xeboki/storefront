@@ -50,7 +50,7 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
               'flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium border transition-colors',
               initialStatus === f.key || (!initialStatus && !f.key)
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'bg-surface text-slate-600 border-slate-200 hover:border-primary hover:text-primary',
+                : 'bg-surface text-fg-muted border-line hover:border-primary hover:text-primary',
             )}
           >
             {f.label}
@@ -59,14 +59,14 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
       </div>
 
       {/* Count */}
-      <p className="text-sm text-slate-400">
+      <p className="text-sm text-fg-subtle">
         {total} order{total !== 1 ? 's' : ''}
         {initialStatus ? ` · ${initialStatus}` : ''}
       </p>
 
       {/* Order list */}
       {orders.length === 0 ? (
-        <div className="py-16 flex flex-col items-center gap-3 text-slate-400">
+        <div className="py-16 flex flex-col items-center gap-3 text-fg-subtle">
           <Package size={40} className="opacity-30" />
           <p className="text-sm">No orders found.</p>
           <Link
@@ -77,29 +77,29 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
           </Link>
         </div>
       ) : (
-        <ul className="divide-y divide-slate-100 border border-slate-200 rounded-brand overflow-hidden">
+        <ul className="divide-y divide-line border border-line rounded-brand overflow-hidden">
           {orders.map((order) => (
             <li key={order.id}>
               <Link
                 href={`/${storeSlug}/orders/${order.id}`}
-                className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors gap-4"
+                className="flex items-center justify-between p-4 hover:bg-surface-alt transition-colors gap-4"
               >
                 {/* Left: order info */}
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-400">
+                  <div className="w-10 h-10 rounded-lg bg-surface-alt flex-shrink-0 flex items-center justify-center text-fg-subtle">
                     <Package size={18} />
                   </div>
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-900 text-sm">
+                    <p className="font-semibold text-fg text-sm">
                       #{order.orderNumber ?? order.id.slice(-6).toUpperCase()}
                     </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-fg-subtle mt-0.5">
                       {formatDate(order.createdAt)}
                       {order.orderType && (
                         <span className="ml-2 capitalize">{order.orderType}</span>
                       )}
                     </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-fg-subtle mt-0.5">
                       {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                     </p>
                   </div>
@@ -107,7 +107,7 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
 
                 {/* Right: total + status */}
                 <div className="text-right flex-shrink-0">
-                  <p className="font-bold text-slate-900 text-sm">
+                  <p className="font-bold text-fg text-sm">
                     {formatCurrency(order.total)}
                   </p>
                   <span className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full font-medium ${statusBadge(order.status)}`}>
@@ -130,7 +130,7 @@ function statusBadge(status: string): string {
     case 'pending':    return 'bg-amber-50 text-amber-700';
     case 'ready':      return 'bg-blue-50 text-blue-700';
     case 'preparing':  return 'bg-violet-50 text-violet-700';
-    default:           return 'bg-slate-100 text-slate-600';
+    default:           return 'bg-surface-alt text-fg-muted';
   }
 }
 

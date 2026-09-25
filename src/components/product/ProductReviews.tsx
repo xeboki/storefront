@@ -26,7 +26,7 @@ function StarRow({ rating, size = 16 }: { rating: number; size?: number }) {
         <Star
           key={i}
           size={size}
-          className={i < rating ? 'text-amber-400 fill-amber-400' : 'text-slate-200 fill-slate-200'}
+          className={i < rating ? 'text-amber-400 fill-amber-400' : 'text-line fill-line'}
         />
       ))}
     </div>
@@ -96,11 +96,11 @@ export function ProductReviews({ storeSlug, productId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-xl font-bold text-slate-900">Reviews</h2>
+          <h2 className="text-xl font-bold text-fg">Reviews</h2>
           {reviews.length > 0 && (
             <div className="flex items-center gap-1.5">
               <StarRow rating={Math.round(avgRating)} size={14} />
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-fg-muted">
                 {avgRating.toFixed(1)} ({total})
               </span>
             </div>
@@ -120,12 +120,12 @@ export function ProductReviews({ storeSlug, productId }: Props) {
 
       {/* Review form */}
       {showForm && (
-        <form onSubmit={submitReview} className="rounded-brand border border-slate-200 p-5 space-y-4">
-          <h3 className="font-semibold text-slate-900">Your Review</h3>
+        <form onSubmit={submitReview} className="rounded-brand border border-line p-5 space-y-4">
+          <h3 className="font-semibold text-fg">Your Review</h3>
 
           {/* Star picker */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1.5">Rating</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1.5">Rating</label>
             <div className="flex items-center gap-1">
               {Array.from({ length: 5 }, (_, i) => (
                 <button
@@ -141,7 +141,7 @@ export function ProductReviews({ storeSlug, productId }: Props) {
                       'transition-colors',
                       i < (hoverRating || rating)
                         ? 'text-amber-400 fill-amber-400'
-                        : 'text-slate-300 fill-slate-300',
+                        : 'text-line fill-line',
                     )}
                   />
                 </button>
@@ -150,28 +150,28 @@ export function ProductReviews({ storeSlug, productId }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">
-              Title <span className="text-slate-400 font-normal">(optional)</span>
+            <label className="block text-xs font-medium text-fg-muted mb-1">
+              Title <span className="text-fg-subtle font-normal">(optional)</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Summarise your experience"
-              className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+              className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">
-              Review <span className="text-slate-400 font-normal">(optional)</span>
+            <label className="block text-xs font-medium text-fg-muted mb-1">
+              Review <span className="text-fg-subtle font-normal">(optional)</span>
             </label>
             <textarea
               rows={3}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Tell others what you think…"
-              className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
+              className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
             />
           </div>
 
@@ -188,7 +188,7 @@ export function ProductReviews({ storeSlug, productId }: Props) {
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-brand hover:border-slate-300 transition-colors"
+              className="px-4 py-2 border border-line text-fg-muted text-sm font-medium rounded-brand hover:border-line transition-colors"
             >
               Cancel
             </button>
@@ -206,28 +206,28 @@ export function ProductReviews({ storeSlug, productId }: Props) {
       {loading ? (
         <div className="space-y-3">
           {[1, 2].map((i) => (
-            <div key={i} className="animate-pulse rounded-brand border border-slate-100 p-4 space-y-2">
-              <div className="h-3 bg-slate-100 rounded w-1/4" />
-              <div className="h-3 bg-slate-100 rounded w-3/4" />
+            <div key={i} className="animate-pulse rounded-brand border border-line p-4 space-y-2">
+              <div className="h-3 bg-surface-alt rounded w-1/4" />
+              <div className="h-3 bg-surface-alt rounded w-3/4" />
             </div>
           ))}
         </div>
       ) : reviews.length === 0 ? (
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-fg-subtle">
           No reviews yet.{customer ? ' Be the first to leave one.' : ''}
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {reviews.map((review) => (
             <li key={review.id} className="py-4 space-y-1">
               <div className="flex items-center gap-2">
                 <StarRow rating={review.rating} size={14} />
                 {review.title && (
-                  <span className="font-semibold text-slate-900 text-sm">{review.title}</span>
+                  <span className="font-semibold text-fg text-sm">{review.title}</span>
                 )}
               </div>
-              {review.body && <p className="text-sm text-slate-600">{review.body}</p>}
-              <p className="text-xs text-slate-400">
+              {review.body && <p className="text-sm text-fg-muted">{review.body}</p>}
+              <p className="text-xs text-fg-subtle">
                 {review.customerName ?? 'Anonymous'} · {formatDate(review.createdAt)}
               </p>
             </li>

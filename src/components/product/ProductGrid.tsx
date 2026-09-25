@@ -9,7 +9,7 @@ interface Props {
 export function ProductGrid({ products, storeSlug }: Props) {
   if (products.length === 0) {
     return (
-      <div className="text-center py-16 text-slate-400">
+      <div className="text-center py-16 text-fg-subtle">
         <p className="text-lg font-medium">No products found</p>
         <p className="text-sm mt-1">Check back soon!</p>
       </div>

@@ -1,61 +1,124 @@
 /**
- * Converts a StorefrontConfig into CSS custom properties injected at runtime.
+ * Turns a StorefrontConfig into the CSS custom properties the whole shop is
+ * painted from.
  *
- * Uses RGB triplets (without the rgb() wrapper) so Tailwind's opacity modifier works:
+ * Two things decide how a storefront looks:
+ *   1. the preset (`config.theme`) — neutrals, radius, type pairing, structure
+ *   2. the merchant's own brand colours and fonts — always layered on top
+ *
+ * Both light and dark are emitted every time, so a shopper can switch without a
+ * round trip. Dark is a `:root.dark` block, which is why these go out as a
+ * stylesheet rather than an inline style attribute — an inline style cannot be
+ * overridden by a class.
+ *
+ * Every colour is an "R G B" triplet so Tailwind's opacity modifier works:
  *   bg-primary/50  →  background: rgb(var(--color-primary) / 0.5)
- *
- * StorefrontConfig fields used: primaryColor, secondaryColor, font
  */
 import type { StorefrontConfig } from '@xeboki/sdk';
+import {
+  liftForDark,
+  parseHex,
+  readableOn,
+  triplet,
+  type Rgb,
+} from './themes/color';
+import {
+  resolvePreset,
+  type CardStyle,
+  type HeroStyle,
+  type Palette,
+  type ThemePreset,
+} from './themes/presets';
 
-const DEFAULTS = {
-  primaryColor: '#0f172a',    // slate-900
-  secondaryColor: '#64748b',  // slate-500
-  font: 'Inter',
-};
+const FALLBACK_PRIMARY: Rgb = [15, 23, 42]; // slate-900
+const FALLBACK_SECONDARY: Rgb = [100, 116, 139]; // slate-500
 
-function hexToRgbTriplet(hex: string): string {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16);
-  const g = parseInt(clean.substring(2, 4), 16);
-  const b = parseInt(clean.substring(4, 6), 16);
-  return `${r} ${g} ${b}`;
+/** The structural choices a preset makes, for components that branch on them. */
+export interface ThemeShape {
+  presetId: string;
+  cardStyle: CardStyle;
+  heroStyle: HeroStyle;
 }
 
-/** Derives foreground color (black or white) based on background luminance */
-function contrastFg(hex: string): string {
-  const clean = hex.replace('#', '');
-  const r = parseInt(clean.substring(0, 2), 16);
-  const g = parseInt(clean.substring(2, 4), 16);
-  const b = parseInt(clean.substring(4, 6), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5 ? '15 23 42' : '255 255 255';
+export type ThemeVars = Record<string, string>;
+
+/** Quotes a family name so `Playfair Display` survives into the CSS. */
+function fontStack(family: string | null | undefined, fallback: string): string {
+  const name = (family ?? '').trim();
+  if (!name) return fallback;
+  return /^['"]/.test(name) || !/\s/.test(name) ? name : `'${name}'`;
 }
 
-export interface ThemeVars {
-  '--color-primary': string;
-  '--color-primary-fg': string;
-  '--color-secondary': string;
-  '--color-secondary-fg': string;
-  '--font-sans': string;
-}
-
-export function buildThemeVars(config: StorefrontConfig | null): ThemeVars {
-  const primary = config?.primaryColor ?? DEFAULTS.primaryColor;
-  const secondary = config?.secondaryColor ?? DEFAULTS.secondaryColor;
-  const font = config?.font ?? DEFAULTS.font;
-
+/**
+ * One palette, written under a prefix.
+ *
+ * Both palettes ship as plain custom properties in a single inline style on
+ * <html> — `--l-*` for light, `--d-*` for dark — and globals.css points the
+ * real `--color-*` tokens at one set or the other depending on `.dark`. The
+ * alternative, a <style> tag holding `:root` and `:root.dark` blocks, put a
+ * React-owned node in <head>, where react-hot-toast's runtime `<style
+ * id="_goober">` lands first and breaks hydration.
+ */
+function paletteVars(prefix: string, p: Palette, accent: Rgb, accent2: Rgb): ThemeVars {
   return {
-    '--color-primary': hexToRgbTriplet(primary),
-    '--color-primary-fg': contrastFg(primary),
-    '--color-secondary': hexToRgbTriplet(secondary),
-    '--color-secondary-fg': contrastFg(secondary),
-    '--font-sans': font,
+    [`--${prefix}-bg`]: triplet(p.bg),
+    [`--${prefix}-surface`]: triplet(p.surface),
+    [`--${prefix}-surface-alt`]: triplet(p.surfaceAlt),
+    [`--${prefix}-border`]: triplet(p.border),
+    [`--${prefix}-fg`]: triplet(p.fg),
+    [`--${prefix}-fg-muted`]: triplet(p.fgMuted),
+    [`--${prefix}-fg-subtle`]: triplet(p.fgSubtle),
+    [`--${prefix}-primary`]: triplet(accent),
+    [`--${prefix}-primary-fg`]: triplet(readableOn(accent)),
+    [`--${prefix}-secondary`]: triplet(accent2),
+    [`--${prefix}-secondary-fg`]: triplet(readableOn(accent2)),
   };
 }
 
-export function themeVarsToStyle(vars: ThemeVars): string {
-  return Object.entries(vars)
-    .map(([k, v]) => `${k}:${v}`)
-    .join(';');
+export interface Theme {
+  /** Both palettes plus the shared tokens — goes straight on <html style>. */
+  vars: ThemeVars;
+  shape: ThemeShape;
+}
+
+export function buildTheme(config: StorefrontConfig | null): Theme {
+  const preset: ThemePreset = resolvePreset(config?.theme);
+
+  const primary = parseHex(config?.primaryColor) ?? FALLBACK_PRIMARY;
+  const secondary = parseHex(config?.secondaryColor) ?? FALLBACK_SECONDARY;
+
+  return {
+    vars: {
+      ...paletteVars('l', preset.light, primary, secondary),
+      // A brand colour is chosen against white. On a near-black page the deep
+      // ones vanish, so dark mode gets a lifted copy rather than the same hex.
+      ...paletteVars(
+        'd',
+        preset.dark,
+        liftForDark(primary, preset.dark.bg),
+        liftForDark(secondary, preset.dark.bg),
+      ),
+      '--radius': preset.radius,
+      '--heading-tracking': preset.headingTracking,
+      '--font-sans': fontStack(config?.font, preset.fontSans),
+      '--font-display': fontStack(
+        // Falls back to the body font a merchant chose before the preset's, so
+        // setting one font still changes the headings.
+        config?.headingFont ?? config?.font,
+        preset.fontDisplay,
+      ),
+    },
+    shape: {
+      presetId: preset.id,
+      cardStyle: preset.cardStyle,
+      heroStyle: preset.heroStyle,
+    },
+  };
+}
+
+/**
+ * Legacy name — still returns the style object React's `style` prop wants.
+ */
+export function buildThemeVars(config: StorefrontConfig | null): ThemeVars {
+  return buildTheme(config).vars;
 }

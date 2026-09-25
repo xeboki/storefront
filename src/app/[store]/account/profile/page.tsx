@@ -55,17 +55,17 @@ export default function AccountProfilePage({ params }: Props) {
       <div className="flex items-center gap-3 mb-6">
         <Link
           href={`/${params.store}/account`}
-          className="text-slate-400 hover:text-primary transition-colors"
+          className="text-fg-subtle hover:text-primary transition-colors"
           aria-label="Back to account"
         >
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="text-2xl font-bold text-slate-900">Edit Profile</h1>
+        <h1 className="text-2xl font-bold text-fg">Edit Profile</h1>
       </div>
 
       <form onSubmit={handleSave} className="space-y-5">
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
+          <label className="block text-xs font-medium text-fg-muted mb-1">
             Full name
           </label>
           <input
@@ -74,33 +74,33 @@ export default function AccountProfilePage({ params }: Props) {
             onChange={(e) => setName(e.target.value)}
             required
             placeholder="Your name"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2.5 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
+          <label className="block text-xs font-medium text-fg-muted mb-1">
             Email
           </label>
           <input
             type="email"
             value={customer.email ?? ''}
             disabled
-            className="w-full px-3 py-2.5 border border-slate-100 rounded-brand text-sm text-slate-400 bg-slate-50 cursor-not-allowed"
+            className="w-full px-3 py-2.5 border border-line rounded-brand text-sm text-fg-subtle bg-surface-alt cursor-not-allowed"
           />
-          <p className="text-xs text-slate-400 mt-1">Email address cannot be changed here.</p>
+          <p className="text-xs text-fg-subtle mt-1">Email address cannot be changed here.</p>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-slate-600 mb-1">
-            Phone <span className="text-slate-400 font-normal">(optional)</span>
+          <label className="block text-xs font-medium text-fg-muted mb-1">
+            Phone <span className="text-fg-subtle font-normal">(optional)</span>
           </label>
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="+1 (555) 000-0000"
-            className="w-full px-3 py-2.5 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2.5 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
           />
         </div>
 

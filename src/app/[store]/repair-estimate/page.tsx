@@ -45,7 +45,7 @@ export default async function RepairEstimatePage({ params, searchParams }: Props
     return (
       <main className="container mx-auto px-4 py-12 max-w-lg text-center">
         <h1 className="text-2xl font-bold mb-2">Quote link incomplete</h1>
-        <p className="text-gray-500">
+        <p className="text-fg-muted">
           This link is missing part of its address. Please open the quote from
           the email the shop sent you, or ring them for a new one.
         </p>
@@ -57,7 +57,7 @@ export default async function RepairEstimatePage({ params, searchParams }: Props
     <main className="container mx-auto px-4 py-12 max-w-2xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Your repair quote</h1>
-        <p className="text-gray-500">
+        <p className="text-fg-muted">
           {store?.storeConfig.businessName
             ? `${store.storeConfig.businessName} has looked at your item and priced the work.`
             : 'The shop has looked at your item and priced the work.'}

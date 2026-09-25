@@ -4,12 +4,12 @@
  */
 export default function RootPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50">
+    <main className="min-h-screen flex items-center justify-center bg-surface-alt">
       <div className="text-center space-y-4 p-8">
-        <h1 className="text-3xl font-bold text-slate-900">Xeboki Store</h1>
-        <p className="text-slate-500">
+        <h1 className="text-3xl font-bold text-fg">Xeboki Store</h1>
+        <p className="text-fg-muted">
           Visit your merchant's store at{' '}
-          <span className="font-mono text-slate-700">yourstore.xeboki.store</span>
+          <span className="font-mono text-fg">yourstore.xeboki.store</span>
         </p>
       </div>
     </main>

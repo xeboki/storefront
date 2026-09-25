@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import Script from 'next/script';
 import { loadStore } from '@/lib/sdk/store';
-import { buildThemeVars, themeVarsToStyle } from '@/lib/theme';
+
 import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
@@ -57,11 +56,6 @@ export default async function StoreLayout({ params, children }: Props) {
   if (!resolved) notFound();
 
   const { storeConfig, storefrontConfig, slug } = resolved;
-  // themeVars is already a { '--color-*': value } object — the shape React's
-  // style prop wants. Passing the semicolon-joined string form (via
-  // themeVarsToStyle) crashed every store page: React's style prop rejects a
-  // string at runtime, cast or no cast.
-  const themeVars = buildThemeVars(storefrontConfig);
   const locale = resolveLocale(null);
 
   const orgJsonLd = storefrontConfig?.structuredDataEnabled
@@ -69,21 +63,18 @@ export default async function StoreLayout({ params, children }: Props) {
     : null;
 
   return (
-    <html lang={locale} style={themeVars as React.CSSProperties}>
-      <head>
-        {orgJsonLd && (
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
-          />
-        )}
-        <AnalyticsScripts
-          ga4Id={storefrontConfig?.ga4MeasurementId}
-          metaPixelId={storefrontConfig?.metaPixelId}
+    <>
+      {orgJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
-      </head>
-      <body className="min-h-screen flex flex-col bg-white">
-        <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
+      )}
+      <AnalyticsScripts
+        ga4Id={storefrontConfig?.ga4MeasurementId}
+        metaPixelId={storefrontConfig?.metaPixelId}
+      />
+      <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
           <LocaleProvider locale={locale}>
           {resolved.isTestMode && (
             <div style={{ background: '#F59E0B', color: '#000', textAlign: 'center', padding: '8px 16px', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>
@@ -98,8 +89,7 @@ export default async function StoreLayout({ params, children }: Props) {
           <main className="flex-1">{children}</main>
           <StorefrontFooter storeConfig={storeConfig} storefrontConfig={storefrontConfig} storeSlug={slug} />
           </LocaleProvider>
-        </StoreProviders>
-      </body>
-    </html>
+      </StoreProviders>
+    </>
   );
 }

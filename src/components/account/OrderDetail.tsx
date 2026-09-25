@@ -93,27 +93,27 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
       {/* Back link */}
       <Link
         href={isGuest ? `/${storeSlug}` : `/${storeSlug}/account`}
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-primary transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-fg-muted hover:text-primary transition-colors"
       >
         <ArrowLeft size={16} />
         {isGuest ? 'Back to store' : 'Back to account'}
       </Link>
 
       {/* Order header */}
-      <div className="p-5 rounded-brand border border-slate-200 space-y-3">
+      <div className="p-5 rounded-brand border border-line space-y-3">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h2 className="font-bold text-slate-900 text-lg">
+            <h2 className="font-bold text-fg text-lg">
               Order #{order.orderNumber ?? order.id.slice(-6).toUpperCase()}
             </h2>
-            <p className="text-sm text-slate-400 mt-0.5">{formatDate(order.createdAt)}</p>
+            <p className="text-sm text-fg-subtle mt-0.5">{formatDate(order.createdAt)}</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${statusBadge(order.status)}`}>
               {STATUS_LABELS[order.status] ?? order.status}
             </span>
             {order.orderType && (
-              <span className="text-xs text-slate-400 capitalize hidden sm:block">
+              <span className="text-xs text-fg-subtle capitalize hidden sm:block">
                 {order.orderType === 'pickup' ? 'Store Pickup' : order.orderType}
               </span>
             )}
@@ -122,7 +122,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
 
         {/* Live refresh indicator */}
         {!isTerminal && (
-          <div className="flex items-center gap-2 text-xs text-slate-400">
+          <div className="flex items-center gap-2 text-xs text-fg-subtle">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
@@ -142,8 +142,8 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
 
       {/* Progress tracker — hidden when cancelled */}
       {!isCancelled && (
-        <div className="p-5 rounded-brand border border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-700 mb-5">Order Progress</h3>
+        <div className="p-5 rounded-brand border border-line">
+          <h3 className="text-sm font-semibold text-fg mb-5">Order Progress</h3>
 
           {/* Step dots + connecting lines */}
           <div className="relative flex items-center">
@@ -158,7 +158,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                         done
                           ? 'bg-primary text-primary-foreground'
-                          : 'bg-slate-100 text-slate-400'
+                          : 'bg-surface-alt text-fg-subtle'
                       } ${active ? 'ring-4 ring-primary/20' : ''}`}
                     >
                       {done && i < stepIndex ? (
@@ -176,7 +176,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
                     <div className="flex-1 h-0.5 mx-2 transition-colors">
                       <div
                         className={`h-full transition-all duration-500 ${
-                          i < stepIndex ? 'bg-primary' : 'bg-slate-200'
+                          i < stepIndex ? 'bg-primary' : 'bg-surface-alt'
                         }`}
                       />
                     </div>
@@ -195,8 +195,8 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
                     i === stepIndex
                       ? 'text-primary font-semibold'
                       : i < stepIndex
-                      ? 'text-slate-500'
-                      : 'text-slate-300'
+                      ? 'text-fg-muted'
+                      : 'text-fg-subtle'
                   }`}
                 >
                   {step.label}
@@ -206,7 +206,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
           </div>
 
           {/* ETA / status message */}
-          <p className="text-xs text-slate-500 mt-3 text-center">
+          <p className="text-xs text-fg-muted mt-3 text-center">
             {STATUS_MESSAGES[order.status] ?? ''}
           </p>
         </div>
@@ -221,48 +221,48 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
 
       {/* Delivery / notes info */}
       {(order.deliveryAddress || order.notes) && (
-        <div className="p-5 rounded-brand border border-slate-200 space-y-3 text-sm">
+        <div className="p-5 rounded-brand border border-line space-y-3 text-sm">
           {order.deliveryAddress && (
             <div>
-              <p className="font-semibold text-slate-700 mb-1">Delivery address</p>
-              <p className="text-slate-500">{order.deliveryAddress}</p>
+              <p className="font-semibold text-fg mb-1">Delivery address</p>
+              <p className="text-fg-muted">{order.deliveryAddress}</p>
             </div>
           )}
           {order.notes && (
             <div>
-              <p className="font-semibold text-slate-700 mb-1">Order notes</p>
-              <p className="text-slate-500">{order.notes}</p>
+              <p className="font-semibold text-fg mb-1">Order notes</p>
+              <p className="text-fg-muted">{order.notes}</p>
             </div>
           )}
         </div>
       )}
 
       {/* Line items */}
-      <div className="rounded-brand border border-slate-200 overflow-hidden">
-        <div className="px-5 py-3 bg-slate-50 border-b border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-700">
+      <div className="rounded-brand border border-line overflow-hidden">
+        <div className="px-5 py-3 bg-surface-alt border-b border-line">
+          <h3 className="text-sm font-semibold text-fg">
             Items ({order.items.reduce((n, i) => n + i.quantity, 0)})
           </h3>
         </div>
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-line">
           {order.items.map((item, idx) => (
             <li key={idx} className="flex items-center gap-4 p-4">
-              <div className="w-12 h-12 rounded-lg bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-300">
+              <div className="w-12 h-12 rounded-lg bg-surface-alt flex-shrink-0 flex items-center justify-center text-fg-subtle">
                 <Package size={20} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900">{item.productName}</p>
+                <p className="text-sm font-semibold text-fg">{item.productName}</p>
                 {item.variantLabel && (
-                  <p className="text-xs text-slate-400">{item.variantLabel}</p>
+                  <p className="text-xs text-fg-subtle">{item.variantLabel}</p>
                 )}
                 {item.modifierNames.length > 0 && (
-                  <p className="text-xs text-slate-400">{item.modifierNames.join(', ')}</p>
+                  <p className="text-xs text-fg-subtle">{item.modifierNames.join(', ')}</p>
                 )}
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-fg-subtle mt-0.5">
                   {formatCurrency(item.unitPrice)} × {item.quantity}
                 </p>
               </div>
-              <p className="text-sm font-bold text-slate-900 whitespace-nowrap">
+              <p className="text-sm font-bold text-fg whitespace-nowrap">
                 {formatCurrency(item.totalPrice)}
               </p>
             </li>
@@ -270,13 +270,13 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
         </ul>
 
         {/* Totals */}
-        <div className="px-5 py-4 border-t border-slate-200 space-y-2 text-sm bg-slate-50/60">
-          <div className="flex justify-between text-slate-600">
+        <div className="px-5 py-4 border-t border-line space-y-2 text-sm bg-surface-alt/60">
+          <div className="flex justify-between text-fg-muted">
             <span>Subtotal</span>
             <span>{formatCurrency(order.subtotal)}</span>
           </div>
           {order.tax > 0 && (
-            <div className="flex justify-between text-slate-600">
+            <div className="flex justify-between text-fg-muted">
               <span>Tax</span>
               <span>{formatCurrency(order.tax)}</span>
             </div>
@@ -288,7 +288,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
             </div>
           )}
           {order.shipping > 0 && (
-            <div className="flex justify-between text-slate-600">
+            <div className="flex justify-between text-fg-muted">
               <span>Shipping</span>
               <span>{formatCurrency(order.shipping)}</span>
             </div>
@@ -299,7 +299,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
               <span>−{formatCurrency(order.loyaltyDiscount)}</span>
             </div>
           )}
-          <div className="flex justify-between font-bold text-slate-900 text-base pt-3 border-t border-slate-200">
+          <div className="flex justify-between font-bold text-fg text-base pt-3 border-t border-line">
             <span>Total</span>
             <span>{formatCurrency(order.total)}</span>
           </div>
@@ -320,7 +320,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
 
       {/* Guest CTA */}
       {isGuest && (
-        <p className="text-sm text-center text-slate-500">
+        <p className="text-sm text-center text-fg-muted">
           <Link
             href={`/${storeSlug}/register`}
             className="text-primary hover:underline font-medium"
@@ -348,7 +348,7 @@ function statusBadge(status: string): string {
     case 'ready':      return 'bg-blue-50 text-blue-700 border border-blue-200';
     case 'preparing':  return 'bg-violet-50 text-violet-700 border border-violet-200';
     case 'confirmed':  return 'bg-sky-50 text-sky-700 border border-sky-200';
-    default:           return 'bg-slate-100 text-slate-600 border border-slate-200';
+    default:           return 'bg-surface-alt text-fg-muted border border-line';
   }
 }
 

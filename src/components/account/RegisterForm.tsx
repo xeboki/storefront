@@ -57,36 +57,36 @@ export function RegisterForm({ storeSlug }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+        <label className="block text-sm font-medium text-fg mb-1">Full Name</label>
         <input
           type="text"
           required
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+          className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
           placeholder="Jane Smith"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+        <label className="block text-sm font-medium text-fg mb-1">Email</label>
         <input
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+          className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
           placeholder="you@example.com"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+        <label className="block text-sm font-medium text-fg mb-1">Password</label>
         <input
           type="password"
           required
           minLength={8}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+          className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
           placeholder="At least 8 characters"
         />
       </div>

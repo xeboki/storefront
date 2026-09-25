@@ -24,7 +24,7 @@ export default async function AddressesPage({ params }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">My Addresses</h1>
+      <h1 className="text-2xl font-bold text-fg mb-6">My Addresses</h1>
       <AddressBook
         initialAddresses={addresses}
         customerId={session.customerId}

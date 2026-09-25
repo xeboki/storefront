@@ -75,8 +75,8 @@ export function CheckoutForm({ storeSlug, orderId }: Props) {
       {/* Left: Stripe payment element */}
       <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-6">
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">Payment</label>
-          <div className="p-4 border border-slate-200 rounded-brand">
+          <label className="block text-sm font-semibold text-fg mb-2">Payment</label>
+          <div className="p-4 border border-line rounded-brand">
             <PaymentElement />
           </div>
         </div>
@@ -87,7 +87,7 @@ export function CheckoutForm({ storeSlug, orderId }: Props) {
           className={clsx(
             'w-full py-3 px-6 rounded-brand font-semibold text-primary-foreground transition-opacity',
             loading || !stripe
-              ? 'bg-slate-300 cursor-not-allowed'
+              ? 'bg-fg-subtle cursor-not-allowed'
               : 'bg-primary hover:opacity-90',
           )}
         >
@@ -97,28 +97,28 @@ export function CheckoutForm({ storeSlug, orderId }: Props) {
 
       {/* Right: order summary */}
       <div className="lg:col-span-2">
-        <div className="rounded-brand border border-slate-200 p-5 space-y-4 sticky top-24">
-          <h2 className="font-bold text-slate-900">Order Summary</h2>
-          <ul className="divide-y divide-slate-100 text-sm">
+        <div className="rounded-brand border border-line p-5 space-y-4 sticky top-24">
+          <h2 className="font-bold text-fg">Order Summary</h2>
+          <ul className="divide-y divide-line text-sm">
             {items.map((item) => (
               <li
                 key={`${item.productId}::${item.variantId ?? ''}`}
                 className="flex justify-between gap-2 py-2"
               >
-                <span className="text-slate-700 flex-1 min-w-0">
+                <span className="text-fg flex-1 min-w-0">
                   {item.name}
                   {item.variantLabel && (
-                    <span className="text-slate-400"> ({item.variantLabel})</span>
+                    <span className="text-fg-subtle"> ({item.variantLabel})</span>
                   )}
-                  <span className="text-slate-400"> × {item.quantity}</span>
+                  <span className="text-fg-subtle"> × {item.quantity}</span>
                 </span>
-                <span className="font-medium text-slate-900 whitespace-nowrap">
+                <span className="font-medium text-fg whitespace-nowrap">
                   {formatCurrency(item.price * item.quantity)}
                 </span>
               </li>
             ))}
           </ul>
-          <div className="border-t border-slate-100 pt-3 flex justify-between font-bold text-slate-900">
+          <div className="border-t border-line pt-3 flex justify-between font-bold text-fg">
             <span>Total</span>
             <span>{formatCurrency(subtotal)}</span>
           </div>

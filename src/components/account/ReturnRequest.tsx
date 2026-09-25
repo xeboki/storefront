@@ -69,18 +69,18 @@ export function ReturnRequest({ orderId, storeSlug, eligible }: Props) {
   if (!eligible && returns.length === 0) return null;
 
   return (
-    <div className="mt-6 rounded-brand border border-slate-200 p-5">
+    <div className="mt-6 rounded-brand border border-line p-5">
       <div className="flex items-center gap-2 mb-3">
-        <RotateCcw size={16} className="text-slate-500" />
-        <h3 className="font-semibold text-slate-900">Returns</h3>
+        <RotateCcw size={16} className="text-fg-muted" />
+        <h3 className="font-semibold text-fg">Returns</h3>
       </div>
 
       {returns.length > 0 && (
         <ul className="space-y-2 mb-4 text-sm">
           {returns.map((r) => (
             <li key={r.returnId} className="flex justify-between gap-3">
-              <span className="text-slate-600 flex-1 min-w-0 truncate">{r.reason}</span>
-              <span className="text-slate-900 font-medium whitespace-nowrap">
+              <span className="text-fg-muted flex-1 min-w-0 truncate">{r.reason}</span>
+              <span className="text-fg font-medium whitespace-nowrap">
                 {STATUS_COPY[r.status] ?? r.status}
               </span>
             </li>
@@ -104,7 +104,7 @@ export function ReturnRequest({ orderId, storeSlug, eligible }: Props) {
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="What’s wrong / why are you returning this?"
-            className="w-full px-3 py-2 border border-slate-200 rounded-brand text-sm focus:outline-none focus:border-primary"
+            className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary"
           />
           <div className="flex gap-2">
             <button
@@ -114,7 +114,7 @@ export function ReturnRequest({ orderId, storeSlug, eligible }: Props) {
             >
               {submitting ? 'Submitting…' : 'Submit return'}
             </button>
-            <button onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-slate-500 hover:text-slate-700">
+            <button onClick={() => setOpen(false)} className="px-4 py-2 text-sm text-fg-muted hover:text-fg">
               Cancel
             </button>
           </div>
