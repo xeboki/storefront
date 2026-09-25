@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store';
+import { loadStore, loadCatalog, loadCategories, loadProduct } from '@/lib/sdk/store';
 import { HeroSection } from '@/components/layout/HeroSection';
 import { FeaturedProducts } from '@/components/product/FeaturedProducts';
 import { CategoryGrid } from '@/components/product/CategoryGrid';
@@ -35,11 +35,38 @@ export default async function StorePage({ params }: Props) {
   const products = catalogResult.status === 'fulfilled' ? catalogResult.value.data : [];
   const categories = categoriesResult.status === 'fulfilled' ? categoriesResult.value.data : [];
   const active = products.filter((p) => p.isActive);
-  const featured = active.slice(0, 8);
+
+  // The merchant's own pick, in the order they arranged it. These ids have
+  // been in the config, the API response and the SDK type all along and
+  // nothing read them, so curating a home page did nothing at all — the shop
+  // always showed whichever eight products happened to come back first.
+  // Fetched by id rather than looked up in `active`: that list is one page of
+  // the catalogue, so a curated product further down it silently failed to
+  // match and the whole selection fell back — which is indistinguishable from
+  // the bug this replaces. loadProduct is cached per id.
+  const chosenIds = (storefrontConfig?.featuredProductIds ?? []).slice(0, 8);
+  const curated = chosenIds.length
+    ? (await Promise.all(chosenIds.map((id) => loadProduct(apiKey, id).catch(() => null))))
+        // An id that no longer resolves — deleted, deactivated, not in this
+        // branch's catalogue — is skipped rather than left as a hole.
+        .filter((p): p is NonNullable<typeof p> => Boolean(p) && p!.isActive)
+    : [];
+
+  // A selection that is empty, or entirely stale, falls back so the section
+  // never renders blank.
+  const featured = curated.length > 0 ? curated : active.slice(0, 8);
 
   // The band takes whichever category has the most to show — a composition
   // built around a department holding two things would be a thin one.
-  const spotlight = categories
+  // Same for categories: the merchant's chosen set, else everything.
+  const chosenCategoryIds = storefrontConfig?.featuredCategoryIds ?? [];
+  const shownCategories = chosenCategoryIds.length > 0
+    ? chosenCategoryIds
+        .map((id) => categories.find((c) => c.id === id))
+        .filter((c): c is NonNullable<typeof c> => Boolean(c))
+    : categories;
+
+  const spotlight = shownCategories
     .filter((c) => c.id !== '_uncategorized')
     .map((c) => ({ category: c, items: active.filter((p) => p.categoryId === c.id) }))
     .sort((a, b) => b.items.length - a.items.length)[0];
@@ -94,7 +121,7 @@ export default async function StorePage({ params }: Props) {
           looks before trusting a name they do not know. */}
       <TrustBar storefrontConfig={storefrontConfig} currency={storeConfig.currencyCode} />
 
-      {categories.length > 0 && (
+      {shownCategories.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
           <SectionHeader
             eyebrow="Browse"
@@ -107,7 +134,7 @@ export default async function StorePage({ params }: Props) {
             href={`/${params.store}/catalog`}
             linkLabel="All products"
           />
-          <CategoryGrid categories={categories} storeSlug={params.store} />
+          <CategoryGrid categories={shownCategories} storeSlug={params.store} />
         </section>
       )}
 
