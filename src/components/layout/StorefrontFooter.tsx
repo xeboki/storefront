@@ -19,7 +19,22 @@ export function StorefrontFooter({
 
   const footerColumns = storefrontConfig?.footerColumns ?? [];
   const socialLinks   = storefrontConfig?.socialLinks ?? {};
-  const hasSocial     = Object.keys(socialLinks).length > 0;
+  // Three settings the Design screen has always written and this footer has
+  // never read: the tagline, and the two switches for social and the address.
+  // Absent means on, which is what the CMS shows a merchant by default.
+  const showSocial    = storefrontConfig?.footerShowSocial !== false;
+  const hasSocial     = showSocial && Object.keys(socialLinks).length > 0;
+  const tagline       = (storefrontConfig?.footerTagline || '').trim();
+
+  // The shop's own address, when it is worth printing. A record with nothing
+  // but a postcode in it is not — it reads as a data-entry accident.
+  const addr = (storeConfig.address ?? {}) as Record<string, unknown>;
+  const addressLine = [addr.street, addr.city, addr.state, addr.zip_code, addr.country]
+    .map((part) => String(part ?? '').trim())
+    .filter(Boolean)
+    .join(', ');
+  const showAddress = storefrontConfig?.footerShowAddress !== false
+    && Boolean(String(addr.street ?? '').trim() || String(addr.city ?? '').trim());
 
   // Built-in columns shown when merchant hasn't configured custom footer columns
   const showBuiltIn = footerColumns.length === 0;
@@ -57,6 +72,12 @@ export function StorefrontFooter({
           {/* Brand column — always shown */}
           <div className="md:col-span-1">
             <h3 className="font-bold text-fg mb-3">{storeName(storeConfig)}</h3>
+            {tagline && (
+              <p className="mb-3 max-w-xs text-sm leading-relaxed text-fg-muted">{tagline}</p>
+            )}
+            {showAddress && (
+              <p className="mb-3 max-w-xs text-sm leading-relaxed text-fg-muted">{addressLine}</p>
+            )}
             {storeConfig.supportPhone && (
               <p className="text-sm text-fg-muted">{storeConfig.supportPhone}</p>
             )}

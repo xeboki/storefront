@@ -16,7 +16,10 @@
  */
 import type { StorefrontConfig } from '@xeboki/sdk';
 import {
+  ensureContrast,
   liftForDark,
+  luminance,
+  mix,
   parseHex,
   readableOn,
   triplet,
@@ -109,6 +112,35 @@ function paletteVars(prefix: string, p: Palette, accent: Rgb, accent2: Rgb): The
   };
 }
 
+/**
+ * A whole light palette derived from one background colour.
+ *
+ * The Design screen has had a background picker since it shipped and the
+ * storefront never read it, so a merchant could set the page background and
+ * watch nothing change. Honouring one colour means deriving the rest: drop the
+ * chosen colour in on its own and the text, the cards and the rules are all
+ * still set for the preset's background, which is how a themeable storefront
+ * ends up with grey-on-grey.
+ *
+ * The direction of every tint flips on how dark the choice is — a shop that
+ * picks charcoal needs its surfaces lighter than the page, not darker.
+ */
+function paletteFromBackground(bg: Rgb, base: Palette): Palette {
+  const dark = luminance(bg) < 0.4;
+  const toward: Rgb = dark ? [255, 255, 255] : [0, 0, 0];
+  const fg = readableOn(bg);
+  return {
+    ...base,
+    bg,
+    surface: mix(bg, toward, 0.04),
+    surfaceAlt: mix(bg, toward, 0.08),
+    border: mix(bg, fg, 0.16),
+    fg,
+    fgMuted: mix(fg, bg, 0.35),
+    fgSubtle: mix(fg, bg, 0.55),
+  };
+}
+
 export interface Theme {
   /** Both palettes plus the shared tokens — goes straight on <html style>. */
   vars: ThemeVars;
@@ -121,9 +153,21 @@ export function buildTheme(config: StorefrontConfig | null): Theme {
   const primary = parseHex(config?.primaryColor) ?? FALLBACK_PRIMARY;
   const secondary = parseHex(config?.secondaryColor) ?? FALLBACK_SECONDARY;
 
+  // The merchant's own page background, when they set one. Only the light
+  // palette: dark mode is a shopper's choice about their screen, and painting
+  // their dark mode in a colour picked against white is how it stops being
+  // dark mode.
+  const chosenBg = parseHex(config?.backgroundColor);
+  const light = chosenBg ? paletteFromBackground(chosenBg, preset.light) : preset.light;
+  // A brand colour chosen against white can disappear on a background the
+  // merchant picked afterwards, so it is lifted against whatever they chose —
+  // but only then, so no existing store's brand colour shifts underneath it.
+  const lightPrimary = chosenBg ? ensureContrast(primary, light.bg) : primary;
+  const lightSecondary = chosenBg ? ensureContrast(secondary, light.bg) : secondary;
+
   return {
     vars: {
-      ...paletteVars('l', preset.light, primary, secondary),
+      ...paletteVars('l', light, lightPrimary, lightSecondary),
       // A brand colour is chosen against white. On a near-black page the deep
       // ones vanish, so dark mode gets a lifted copy rather than the same hex.
       ...paletteVars(

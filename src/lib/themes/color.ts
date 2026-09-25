@@ -68,6 +68,23 @@ export function mix(a: Rgb, b: Rgb, t: number): Rgb {
 }
 
 /**
+ * Moves an accent until it reads against whatever page it sits on.
+ *
+ * `liftForDark` only ever mixes toward white, which is right for dark mode and
+ * wrong for a merchant who picked a pale background: a pale accent on cream
+ * would be lifted paler still. This picks the direction from the surface.
+ */
+export function ensureContrast(accent: Rgb, surface: Rgb, min = 3): Rgb {
+  const target: Rgb = luminance(surface) > 0.4 ? [0, 0, 0] : WHITE;
+  let out = accent;
+  for (let step = 0; step <= 10; step++) {
+    out = mix(accent, target, step * 0.08);
+    if (contrastRatio(out, surface) >= min) return out;
+  }
+  return out;
+}
+
+/**
  * Lifts an accent until it reads against a dark page.
  *
  * A merchant's brand colour is chosen against white. Painted on a near-black

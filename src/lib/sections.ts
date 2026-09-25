@@ -7,7 +7,9 @@ export type SectionKey =
   | 'categories'
   | 'featured'
   | 'collection'
-  | 'editorial';
+  | 'editorial'
+  /** Not a band: the hero's second button, switched the same way. */
+  | 'heroSecondaryCta';
 
 /**
  * Is this band shown?
@@ -18,7 +20,7 @@ export type SectionKey =
  * deliberately; silence is not a decision.
  */
 export function showSection(
-  config: StorefrontConfig | null,
+  config: StorefrontConfig | null | undefined,
   key: SectionKey,
 ): boolean {
   return config?.sections?.[key] !== false;

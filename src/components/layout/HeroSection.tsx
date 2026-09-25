@@ -3,6 +3,7 @@ import { storeName } from '@/lib/store-name';
 import { ArrowRight } from 'lucide-react';
 import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 import { ProductImage } from '@/components/product/ProductImage';
+import { showSection } from '@/lib/sections';
 
 interface Props {
   storefrontConfig: StorefrontConfig | null;
@@ -37,6 +38,33 @@ export function HeroSection({
   const title = storefrontConfig?.heroTitle || storeName(storeConfig);
   const subtitle = storefrontConfig?.heroSubtitle || 'Shop our latest products';
   const bgImage = storefrontConfig?.heroImageUrl;
+
+  // The Design screen has written these two since it shipped and nothing ever
+  // read them, so a merchant could set a call to action and watch the hero go
+  // on saying "Shop now". A relative path is kept inside this store's prefix —
+  // a merchant typing "/catalog" means their catalogue, not the site root.
+  const inStore = (url: string, fallback: string) => {
+    const trimmed = url.trim();
+    if (!trimmed) return fallback;
+    if (/^(https?:)?\/\//.test(trimmed) || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
+      return trimmed;
+    }
+    const path = trimmed.replace(/^\/+/, '');
+    // The Design screen shipped with '/products' pre-filled in the CTA URL
+    // field, and this storefront's catalogue is at /catalog. Every shop that
+    // saved that screen without editing the box holds a link to a page that
+    // does not exist — which nobody noticed, because nothing read the field.
+    return `/${storeSlug}/${path === 'products' ? 'catalog' : path}`;
+  };
+
+  const ctaLabel = (storefrontConfig?.heroCtaText || '').trim() || 'Shop now';
+  const ctaHref = inStore(storefrontConfig?.heroCtaUrl || '', `/${storeSlug}/catalog`);
+  // The second button is a band like any other, so it is switched off the same
+  // way. A blank label cannot mean "hide": every store configured before this
+  // existed has one, and they would all silently lose the button.
+  const showSecond = showSection(storefrontConfig, 'heroSecondaryCta');
+  const secondLabel = (storefrontConfig?.heroSecondaryCtaText || '').trim() || 'Find a store';
+  const secondHref = inStore(storefrontConfig?.heroSecondaryCtaUrl || '', `/${storeSlug}/locations`);
 
   // `minimal` is a short band for shops whose product photography should start
   // above the fold; `split` centres the copy on a narrower measure. Both were
@@ -99,21 +127,23 @@ export function HeroSection({
             variant === 'split' ? 'justify-center' : ''
           }`}>
             <Link
-              href={`/${storeSlug}/catalog`}
+              href={ctaHref}
               className="lift group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-slate-900 shadow-lg"
             >
-              Shop now
+              {ctaLabel}
               <ArrowRight
                 size={16}
                 className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
               />
             </Link>
-            <Link
-              href={`/${storeSlug}/locations`}
-              className="inline-flex items-center gap-2 rounded-full border border-white/35 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:border-white/80 hover:bg-white/10"
-            >
-              Find a store
-            </Link>
+            {showSecond && (
+              <Link
+                href={secondHref}
+                className="inline-flex items-center gap-2 rounded-full border border-white/35 px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:border-white/80 hover:bg-white/10"
+              >
+                {secondLabel}
+              </Link>
+            )}
           </div>
         </div>
       </div>
