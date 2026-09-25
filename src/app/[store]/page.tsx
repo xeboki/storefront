@@ -9,6 +9,8 @@ import { TrustBar } from '@/components/layout/TrustBar';
 import { EditorialBand } from '@/components/layout/EditorialBand';
 import { CollectionBand } from '@/components/layout/CollectionBand';
 import { onlineStores } from '@/lib/location';
+import { showSection } from '@/lib/sections';
+import { buildTheme } from '@/lib/theme';
 
 interface Props {
   params: { store: string };
@@ -44,6 +46,12 @@ export default async function StorePage({ params }: Props) {
   // the catalogue, so a curated product further down it silently failed to
   // match and the whole selection fell back — which is indistinguishable from
   // the bug this replaces. loadProduct is cached per id.
+  const presetHero = buildTheme(storefrontConfig).shape.heroStyle;
+  const chosen = (storefrontConfig?.heroStyle || '').trim();
+  const heroVariant = (['banner', 'split', 'minimal'].includes(chosen)
+    ? chosen
+    : presetHero) as 'banner' | 'split' | 'minimal';
+
   const chosenIds = (storefrontConfig?.featuredProductIds ?? []).slice(0, 8);
   const curated = chosenIds.length
     ? (await Promise.all(chosenIds.map((id) => loadProduct(apiKey, id).catch(() => null))))
@@ -80,7 +88,14 @@ export default async function StorePage({ params }: Props) {
         </div>
       )}
 
-      <HeroSection storefrontConfig={storefrontConfig} storeConfig={storeConfig} storeSlug={params.store} />
+      {/* The merchant's choice wins; otherwise the theme preset's, which has
+          carried a heroStyle since presets existed and was never read. */}
+      <HeroSection
+        storefrontConfig={storefrontConfig}
+        storeConfig={storeConfig}
+        storeSlug={params.store}
+        variant={heroVariant}
+      />
 
       {/* Business-type CTAs */}
       {APPOINTMENT_TYPES.has(bt) && (
@@ -119,9 +134,11 @@ export default async function StorePage({ params }: Props) {
 
       {/* Reassurance, immediately under the hero, where a first-time buyer
           looks before trusting a name they do not know. */}
-      <TrustBar storefrontConfig={storefrontConfig} currency={storeConfig.currencyCode} />
+      {showSection(storefrontConfig, 'trustBar') && (
+        <TrustBar storefrontConfig={storefrontConfig} currency={storeConfig.currencyCode} />
+      )}
 
-      {shownCategories.length > 0 && (
+      {shownCategories.length > 0 && showSection(storefrontConfig, 'categories') && (
         <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
           <SectionHeader
             eyebrow="Browse"
@@ -138,7 +155,7 @@ export default async function StorePage({ params }: Props) {
         </section>
       )}
 
-      {featured.length > 0 && (
+      {featured.length > 0 && showSection(storefrontConfig, 'featured') && (
         <section className="border-t border-line">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
             <SectionHeader
@@ -152,7 +169,7 @@ export default async function StorePage({ params }: Props) {
         </section>
       )}
 
-      {spotlight && spotlight.items.length >= 2 && (
+      {spotlight && spotlight.items.length >= 2 && showSection(storefrontConfig, 'collection') && (
         <CollectionBand
           category={spotlight.category}
           products={spotlight.items}
@@ -162,12 +179,14 @@ export default async function StorePage({ params }: Props) {
 
       {/* A different rhythm between the grids, so the page is not three lists
           stacked on top of each other. */}
+      {showSection(storefrontConfig, 'editorial') && (
       <EditorialBand
         storeConfig={storeConfig}
         storeSlug={params.store}
         imageUrl={storefrontConfig?.heroImageUrl}
         stores={onlineStores(storefrontConfig)}
       />
+      )}
     </div>
   );
 }

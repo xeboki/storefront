@@ -8,6 +8,8 @@ interface Props {
   storefrontConfig: StorefrontConfig | null;
   storeConfig: StoreConfig;
   storeSlug: string;
+  /** From the theme preset, overridden by the merchant's own setting. */
+  variant?: 'banner' | 'split' | 'minimal';
 }
 
 /**
@@ -29,10 +31,23 @@ interface Props {
  * gradient. A scrim plus white is what makes the headline legible over
  * anything a merchant uploads, which is the only guarantee worth having here.
  */
-export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props) {
+export function HeroSection({
+  storefrontConfig, storeConfig, storeSlug, variant = 'banner',
+}: Props) {
   const title = storefrontConfig?.heroTitle || storeName(storeConfig);
   const subtitle = storefrontConfig?.heroSubtitle || 'Shop our latest products';
   const bgImage = storefrontConfig?.heroImageUrl;
+
+  // `minimal` is a short band for shops whose product photography should start
+  // above the fold; `split` centres the copy on a narrower measure. Both were
+  // declared in the presets from the start and never read.
+  const height =
+    variant === 'minimal'
+      ? 'py-12 sm:py-16 lg:py-20'
+      : variant === 'split'
+      ? 'py-14 sm:py-20 md:py-24 lg:py-28'
+      : 'py-16 sm:py-20 md:py-28 lg:px-8 lg:py-36';
+  const column = variant === 'split' ? 'mx-auto max-w-2xl text-center' : 'max-w-xl';
 
   return (
     <section className="relative isolate overflow-hidden bg-primary">
@@ -64,8 +79,8 @@ export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props)
         </div>
       )}
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 md:py-28 lg:px-8 lg:py-36">
-        <div className="max-w-xl">
+      <div className={`relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${height}`}>
+        <div className={column}>
           <p className="eyebrow eyebrow-rule text-white/70">
             {storeName(storeConfig)}
           </p>
@@ -73,12 +88,16 @@ export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props)
           <h1 className="display-xl mt-5 text-white drop-shadow-sm">{title}</h1>
 
           {subtitle && (
-            <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">
+            <p className={`mt-5 text-lg leading-relaxed text-white/85 ${
+              variant === 'split' ? 'mx-auto max-w-lg' : 'max-w-md'
+            }`}>
               {subtitle}
             </p>
           )}
 
-          <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
+          <div className={`mt-7 flex flex-wrap items-center gap-3 sm:mt-9 ${
+            variant === 'split' ? 'justify-center' : ''
+          }`}>
             <Link
               href={`/${storeSlug}/catalog`}
               className="lift group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-slate-900 shadow-lg"
