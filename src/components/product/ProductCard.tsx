@@ -73,7 +73,7 @@ export function ProductCard({ product, storeSlug }: Props) {
 
   return (
     <Link href={href} className="group block">
-      <div className="rounded-brand overflow-hidden border border-line bg-surface hover:shadow-md transition-shadow">
+      <div className="lift rounded-brand overflow-hidden border border-line bg-surface hover:border-primary/40 hover:shadow-lg">
         <div className="relative aspect-square bg-surface-alt">
           <ProductImage
             src={product.imageUrl}

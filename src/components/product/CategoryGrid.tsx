@@ -18,7 +18,7 @@ export function CategoryGrid({ categories, storeSlug }: Props) {
         <Link
           key={category.id}
           href={`/${storeSlug}/catalog?category=${category.id}`}
-          className="group flex flex-col items-center justify-center gap-2 rounded-brand border border-line bg-surface p-4 text-center text-sm font-medium text-fg transition-colors hover:border-primary hover:bg-surface-alt"
+          className="lift group flex flex-col items-center justify-center gap-2 rounded-brand border border-line bg-surface p-4 text-center text-sm font-medium text-fg hover:border-primary hover:bg-surface-alt"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-brand bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
             <CategoryIcon icon={category.icon} name={category.name} />

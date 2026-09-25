@@ -112,14 +112,14 @@ export function CatalogFilterSheet({
           <button
             type="button"
             aria-label="Close"
-            className="absolute inset-0 bg-black/40"
+            className="animate-fade absolute inset-0 bg-black/40"
             onClick={() => setPanel(null)}
           />
           <div
             role="dialog"
             aria-modal="true"
             aria-label={panel === 'filter' ? 'Filter products' : 'Sort products'}
-            className="relative max-h-[80vh] overflow-y-auto rounded-t-brand-lg border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]"
+            className="animate-sheet relative max-h-[80vh] overflow-y-auto rounded-t-brand-lg border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]"
           >
             <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-4 py-3">
               <h2 className="font-semibold text-fg">

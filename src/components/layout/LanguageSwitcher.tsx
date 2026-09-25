@@ -72,7 +72,7 @@ export function LanguageSwitcher({ locales, active, className = '' }: Props) {
           />
           <ul
             role="listbox"
-            className="absolute right-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-brand border border-line bg-surface py-1 shadow-lg"
+            className="animate-sheet absolute right-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-brand border border-line bg-surface py-1 shadow-lg"
           >
             {locales.map((code) => {
               const lang = describe(code);

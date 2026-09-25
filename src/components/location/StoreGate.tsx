@@ -68,7 +68,7 @@ export function StoreGate({ stores, storeSlug, businessName }: Props) {
       aria-labelledby="store-gate-title"
       className="fixed inset-0 z-[60] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
     >
-      <div className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-brand-lg border border-line bg-surface p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-brand-lg sm:pb-6">
+      <div className="animate-sheet max-h-[85vh] w-full max-w-md overflow-y-auto rounded-t-brand-lg border border-line bg-surface p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] shadow-xl sm:rounded-brand-lg sm:pb-6">
         <span className="flex h-11 w-11 items-center justify-center rounded-brand bg-primary/10 text-primary">
           <MapPin size={22} aria-hidden />
         </span>

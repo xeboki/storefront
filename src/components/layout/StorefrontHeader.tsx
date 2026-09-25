@@ -25,6 +25,7 @@ import { MobileTabBar } from './MobileTabBar';
 import { ScrollRail } from './ScrollRail';
 import { ProductImage } from '@/components/product/ProductImage';
 import { useHydrated } from '@/lib/use-hydrated';
+import { useScrollDirection } from '@/lib/use-scroll-direction';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, APPOINTMENT_TYPES, WORK_ORDER_TYPES } from '@/stores/storeConfigStore';
@@ -58,6 +59,10 @@ export function StorefrontHeader({
   const customer = useAuthStore((s) => s.customer);
   const businessType = useStoreConfigStore((s) => s.businessType);
   const t = useT();
+  // The category rail is for choosing where to go; once a shopper is reading,
+  // it is just a band of text between them and the page. It folds away on the
+  // way down and comes back the moment they head up.
+  const { hidden: railHidden, scrolled } = useScrollDirection();
 
   const hasAppointments = APPOINTMENT_TYPES.has(businessType);
   const hasWorkOrders = WORK_ORDER_TYPES.has(businessType);
@@ -86,7 +91,13 @@ export function StorefrontHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
+      <header
+        className={clsx(
+          'sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur',
+          'transition-shadow duration-300',
+          scrolled && 'shadow-sm',
+        )}
+      >
         {/* Row 1 — brand · search · utilities */}
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:gap-6 lg:px-8">
           <Link
@@ -161,8 +172,15 @@ export function StorefrontHeader({
         {(rail.length > 0 || customNavLinks.length > 0) && (
           <nav
             aria-label="Categories"
-            className="hidden border-t border-line sm:block"
+            // grid-rows trick: animating to `auto` is not possible, and a fixed
+            // max-height would either clip a wrapped rail or leave dead space.
+            className={clsx(
+              'hidden border-t border-line sm:grid',
+              'motion-safe:transition-[grid-template-rows,opacity] motion-safe:duration-300 motion-safe:ease-out',
+              railHidden ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
+            )}
           >
+            <div className="overflow-hidden">
             <ScrollRail
               fade="from-surface"
               className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
@@ -203,6 +221,7 @@ export function StorefrontHeader({
                 </a>
               ))}
             </ScrollRail>
+            </div>
           </nav>
         )}
       </header>
@@ -215,10 +234,10 @@ export function StorefrontHeader({
           <button
             type="button"
             aria-label="Close menu"
-            className="absolute inset-0 bg-black/40"
+            className="animate-fade absolute inset-0 bg-black/40"
             onClick={() => setMobileOpen(false)}
           />
-          <div className="relative max-h-[85vh] overflow-y-auto rounded-t-brand-lg border-t border-line bg-surface pb-[calc(1rem+env(safe-area-inset-bottom))]">
+          <div className="animate-sheet relative max-h-[85vh] overflow-y-auto rounded-t-brand-lg border-t border-line bg-surface pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <div className="sticky top-0 flex items-center justify-between border-b border-line bg-surface px-4 py-3">
               <span className="font-semibold text-fg">{t('nav.menu')}</span>
               <button
