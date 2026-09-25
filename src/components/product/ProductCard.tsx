@@ -17,9 +17,11 @@ import type { OrderingProduct } from '@xeboki/sdk';
 interface Props {
   product: OrderingProduct;
   storeSlug: string;
+  /** Position in its grid, shown as a catalogue index. */
+  index?: number;
 }
 
-export function ProductCard({ product, storeSlug }: Props) {
+export function ProductCard({ product, storeSlug, index }: Props) {
   const money = useMoney();
   // A card only ever quick-adds a product with no variations, so its own pool
   // is the right question. "Sold Out" used to mean `isActive === false` alone,
@@ -72,17 +74,17 @@ export function ProductCard({ product, storeSlug }: Props) {
   const href = `/${storeSlug}/product/${product.id}`;
 
   return (
-    <Link href={href} className="group block">
-      {/* No card chrome. A bordered, shadowed box makes a grid read as a
-          dashboard; letting the image sit on the page and carrying the
-          hierarchy in the type is what makes a shop look considered. */}
+    <Link href={href} className="group relative block">
+      {/* The whole card is the image. Title and price sit ON it, revealed on
+          approach, so a grid reads as a wall of photographs rather than a
+          table of rows with pictures in the first column. */}
       <div className="relative aspect-[4/5] overflow-hidden rounded-brand bg-surface-alt">
         <ProductImage
           src={product.imageUrl}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          className="object-cover motion-safe:transition-transform motion-safe:duration-[600ms] motion-safe:ease-out motion-safe:group-hover:scale-[1.04]"
+          className="object-cover motion-safe:transition-transform motion-safe:duration-[900ms] motion-safe:ease-out motion-safe:group-hover:scale-[1.06]"
           fallback={
             <div className="absolute inset-0 flex items-center justify-center text-fg-subtle/40">
               <ShoppingCart size={40} strokeWidth={1} />
@@ -90,10 +92,28 @@ export function ProductCard({ product, storeSlug }: Props) {
           }
         />
 
+        {/* A scrim only where the type sits, so the picture stays a picture. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 via-black/45 to-transparent opacity-0 motion-safe:transition-opacity motion-safe:duration-500 group-hover:opacity-100 lg:block"
+        />
+
+        {index !== undefined && (
+          // A drop shadow rather than mix-blend-difference: blending against
+          // arbitrary photography is a gamble, and on the pale shots the
+          // number simply disappeared.
+          <span
+            className="price absolute left-4 top-4 text-[11px] font-medium tracking-[0.2em] text-white"
+            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.55)' }}
+          >
+            {String(index + 1).padStart(2, '0')}
+          </span>
+        )}
+
         {!sellable && (
           <>
-            <span aria-hidden className="absolute inset-0 bg-bg/50" />
-            <span className="absolute left-3 top-3 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
+            <span aria-hidden className="absolute inset-0 bg-bg/55" />
+            <span className="absolute left-4 top-4 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
               Sold out
             </span>
           </>
@@ -103,50 +123,52 @@ export function ProductCard({ product, storeSlug }: Props) {
           onClick={handleToggleWishlist}
           aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
           className={clsx(
-            'absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition',
+            'absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition',
             isWishlisted
               ? 'bg-rose-500/90 text-white'
-              : 'bg-bg/50 text-fg opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+              : 'bg-black/25 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
           )}
         >
-          <Heart size={14} className={isWishlisted ? 'fill-white' : ''} />
+          <Heart size={15} className={isWishlisted ? 'fill-white' : ''} />
         </button>
 
-        {/* The buy action rises out of the image on hover, so the grid stays
-            quiet until someone is actually interested in one of them. */}
-        {sellable && !product.hasVariants && (
-          <button
-            onClick={handleAddToCart}
-            className="absolute inset-x-2 bottom-2 hidden h-10 items-center justify-center gap-2 rounded-brand bg-fg text-xs font-semibold uppercase tracking-[0.12em] text-bg opacity-0 motion-safe:transition-all motion-safe:duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus-visible:opacity-100 sm:flex motion-safe:translate-y-2"
-          >
-            <ShoppingCart size={14} />
-            Add to cart
-          </button>
-        )}
+        {/* Desktop: the details ride up out of the bottom edge. */}
+        <div className="absolute inset-x-0 bottom-0 hidden p-4 lg:block">
+          <div className="motion-safe:translate-y-3 motion-safe:opacity-0 motion-safe:transition-all motion-safe:duration-500 motion-safe:group-hover:translate-y-0 motion-safe:group-hover:opacity-100">
+            {product.categoryName && (
+              <p className="eyebrow text-[9px] text-white/60">{product.categoryName}</p>
+            )}
+            <div className="mt-1 flex items-end justify-between gap-3">
+              <h3 className="line-clamp-1 text-sm font-medium text-white">{product.name}</h3>
+              <span className="price flex-shrink-0 text-sm font-medium text-white">
+                {product.hasVariants && <span className="mr-1 text-xs font-normal opacity-70">From</span>}
+                {money(product.price ?? 0)}
+              </span>
+            </div>
+            {sellable && !product.hasVariants && (
+              <button
+                onClick={handleAddToCart}
+                className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-brand bg-white text-[11px] font-semibold uppercase tracking-[0.14em] text-black"
+              >
+                <ShoppingCart size={13} />
+                Add to cart
+              </button>
+            )}
+          </div>
+        </div>
       </div>
 
-      <div className="pt-4">
+      {/* Phone and tablet: no hover to reveal anything with, so the details
+          stay in the flow underneath. */}
+      <div className="pt-3 lg:hidden">
         {product.categoryName && (
-          <p className="eyebrow text-[10px] tracking-[0.16em]">{product.categoryName}</p>
+          <p className="eyebrow text-[9px]">{product.categoryName}</p>
         )}
-        <h3 className="mt-1.5 line-clamp-1 text-sm font-medium text-fg transition-colors group-hover:text-primary">
-          {product.name}
-        </h3>
-        <p className="price mt-1 text-sm text-fg-muted">
+        <h3 className="mt-1 line-clamp-1 text-sm font-medium text-fg">{product.name}</h3>
+        <p className="price mt-0.5 text-sm text-fg-muted">
           {product.hasVariants && <span className="mr-1 text-xs">From</span>}
           {money(product.price ?? 0)}
         </p>
-
-        {/* Phones never get a hover, so variants and small screens get a plain
-            line of text instead of an action they cannot reach. */}
-        {sellable && !product.hasVariants && (
-          <button
-            onClick={handleAddToCart}
-            className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary sm:hidden"
-          >
-            Add to cart
-          </button>
-        )}
       </div>
     </Link>
   );

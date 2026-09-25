@@ -17,7 +17,11 @@ export function ProductGrid({ products, storeSlug }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+    // `stagger` drops every second column on wide screens. A grid where every
+    // top edge lines up reads as a spreadsheet; breaking the baseline is what
+    // makes a wall of products look arranged rather than dumped. The extra
+    // bottom padding is the room the offset column needs.
+    <div className="stagger grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 lg:gap-x-6 lg:pb-14">
       {products.map((product, index) => (
         <div
           key={product.id}
@@ -27,7 +31,7 @@ export function ProductGrid({ products, storeSlug }: Props) {
           // starts reading as the page being slow.
           style={{ animationDelay: `${Math.min(index, 11) * 40}ms` }}
         >
-          <ProductCard product={product} storeSlug={storeSlug} />
+          <ProductCard product={product} storeSlug={storeSlug} index={index} />
         </div>
       ))}
     </div>

@@ -4,6 +4,7 @@ import { loadStore, loadCategories } from '@/lib/sdk/store';
 
 import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
+import { Marquee } from '@/components/layout/Marquee';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
@@ -98,6 +99,8 @@ export default async function StoreLayout({ params, children }: Props) {
               ⚠ TEST MODE — No real payments are processed. Use Stripe test cards only.
             </div>
           )}
+          <Marquee text={storefrontConfig?.announcementBar} />
+
           <StorefrontHeader
             storeConfig={storeConfig}
             storefrontConfig={storefrontConfig}
