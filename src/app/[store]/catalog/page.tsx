@@ -10,6 +10,7 @@ import { CatalogFilterSheet } from '@/components/product/CatalogFilterSheet'
 import { ProductGrid } from '@/components/product/ProductGrid'
 import { EmptyStoreNotice } from '@/components/product/EmptyStoreNotice'
 import { storeName } from '@/lib/store-name'
+import { sectionWords } from '@/lib/section-copy'
 
 interface Props {
   params: { store: string }
@@ -82,9 +83,17 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   if (sort) sp.set('sort', sort)
   if (locationFirst && activeLoc) sp.set('loc', activeLoc)
 
+  // The unfiltered listing is the one page a merchant might want to call
+  // something else — 'The whole cellar', 'Every service'. A category listing
+  // is named by the category and a search by what was typed, so neither takes
+  // an override: replacing those with fixed words would make them wrong.
+  const masthead = sectionWords(store.storefrontConfig, 'catalog', {
+    eyebrow: 'Shop',
+    title: 'All Products',
+  })
   const categoryName = searchParams.category
     ? categories.find((c) => c.id === searchParams.category)?.name ?? 'Products'
-    : 'All Products'
+    : masthead.title
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-8 sm:px-6 sm:pb-24 lg:px-8 lg:pt-14">
@@ -93,7 +102,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           controls, where it read as debug output. */}
       <header className="mb-10">
         <p className="eyebrow eyebrow-rule text-primary">
-          {search ? 'Search' : searchParams.category ? 'Category' : 'Shop'}
+          {search ? 'Search' : searchParams.category ? 'Category' : masthead.eyebrow}
         </p>
         <h1 className="display-lg mt-3 text-fg">
           {search ? `“${search}”` : categoryName}
