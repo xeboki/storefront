@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { storeName } from '@/lib/store-name';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { MapPin } from 'lucide-react';
+import { sectionWords } from '@/lib/section-copy';
+import { showSection } from '@/lib/sections';
 import type { StoreConfig, StorefrontConfig, StorePaymentMethod } from '@xeboki/sdk';
 
 interface Props {
@@ -16,6 +18,15 @@ export function StorefrontFooter({
   storeConfig, storefrontConfig, storeSlug, paymentMethods = [],
 }: Props) {
   const year = new Date().getFullYear();
+
+  // The closing band is a band like the ones on the home page, so its words
+  // come from the same place. 'Come and see it in person' is not true for a
+  // shop that only ships.
+  const closing = sectionWords(storefrontConfig, 'footerCta', {
+    eyebrow: 'Visit',
+    title: 'Come and see it in person',
+    linkLabel: 'Store locations',
+  });
 
   const footerColumns = storefrontConfig?.footerColumns ?? [];
   const socialLinks   = storefrontConfig?.socialLinks ?? {};
@@ -48,23 +59,28 @@ export function StorefrontFooter({
     <footer className="border-t border-line bg-surface-alt/40">
       {/* A closing line before the housekeeping — the page needs somewhere to
           land rather than stopping at the last product. */}
+      {showSection(storefrontConfig, 'footerCta') && (
       <div className="border-b border-line">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-10 sm:px-6 sm:py-14 lg:flex-row lg:items-end lg:justify-between lg:px-8">
           <div>
-            <p className="eyebrow eyebrow-rule text-primary">Visit</p>
-            <h2 className="display-lg mt-3 max-w-lg text-fg">
-              Come and see it in person
-            </h2>
+            {closing.eyebrow && (
+              <p className="eyebrow eyebrow-rule text-primary">{closing.eyebrow}</p>
+            )}
+            <h2 className="display-lg mt-3 max-w-lg text-fg">{closing.title}</h2>
+            {closing.lede && (
+              <p className="mt-3 max-w-lg text-fg-muted">{closing.lede}</p>
+            )}
           </div>
           <Link
             href={`/${storeSlug}/locations`}
             className="group inline-flex flex-shrink-0 items-center gap-2 border-b border-fg/30 pb-1 text-sm font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:border-primary hover:text-primary"
           >
             <MapPin size={15} />
-            Store locations
+            {closing.linkLabel}
           </Link>
         </div>
       </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">

@@ -8,6 +8,8 @@ export type SectionKey =
   | 'featured'
   | 'collection'
   | 'editorial'
+  /** The closing band above the footer. */
+  | 'footerCta'
   /** Not a band: the hero's second button, switched the same way. */
   | 'heroSecondaryCta';
 
