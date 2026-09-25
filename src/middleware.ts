@@ -123,11 +123,18 @@ function checkRateLimit(
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams, hostname } = request.nextUrl
 
-  // Skip Next.js internals and static files
+  // Skip Next.js internals and static files.
+  //
+  // `/sitemap.xml` and `/robots.txt` are the exception: they contain a dot, so
+  // the catch-all below sent them straight through without the store rewrite,
+  // and since the routes live at app/[store]/ nothing served them — both
+  // 404'd on every storefront. They are exactly the two files a crawler asks
+  // for by name, so they must be rewritten like any other page.
+  const CRAWLER_FILES = new Set(['/sitemap.xml', '/robots.txt'])
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
-    pathname.includes('.')
+    (pathname.includes('.') && !CRAWLER_FILES.has(pathname))
   ) {
     return NextResponse.next()
   }
@@ -220,6 +227,9 @@ export async function middleware(request: NextRequest) {
 
   if (!slug) return passthrough()
   if (pathname.startsWith(`/${slug}`)) return passthrough()
+  // robots.ts is only ever a route at the app root, so it must NOT be rewritten
+  // under the slug — it reads the store from the header set just above.
+  if (pathname === '/robots.txt') return passthrough()
 
   const rewriteUrl = request.nextUrl.clone()
   rewriteUrl.pathname = `/${slug}${pathname}`

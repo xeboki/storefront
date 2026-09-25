@@ -1,14 +1,17 @@
 import type { MetadataRoute } from 'next';
+import { storeSlug } from '@/lib/store-slug';
 import { loadStore, loadCatalog, loadCategories, loadBlogPosts, loadCustomPages } from '@/lib/sdk/store';
+import { locationSlugs } from '@/lib/location';
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store';
 
 export default async function sitemap({
   params,
 }: {
-  params: { store: string };
+  params?: { store?: string };
 }): Promise<MetadataRoute.Sitemap> {
-  const { store } = params;
+  const store = storeSlug(params);
+  if (!store) return [];
 
   const resolved = await loadStore(store).catch(() => null);
   if (!resolved) return [];
@@ -39,6 +42,20 @@ export default async function sitemap({
       ? [{ url: `${base}/blog`, changeFrequency: 'weekly' as const, priority: 0.8 }]
       : []),
   ];
+
+  // One entry per branch. These are the pages a local search is meant to find,
+  // so they are worth more than a category listing.
+  const branches = [...locationSlugs(resolved.storefrontConfig).keys()];
+  const locationRoutes: MetadataRoute.Sitemap = branches.length > 0
+    ? [
+        { url: `${base}/locations`, changeFrequency: 'monthly' as const, priority: 0.8 },
+        ...branches.map((slug) => ({
+          url: `${base}/l/${slug}`,
+          changeFrequency: 'monthly' as const,
+          priority: 0.8,
+        })),
+      ]
+    : [];
 
   const categoryRoutes: MetadataRoute.Sitemap = categories
     .filter((c) => c.id !== '_uncategorized')
@@ -73,6 +90,7 @@ export default async function sitemap({
 
   return [
     ...staticRoutes,
+    ...locationRoutes,
     ...categoryRoutes,
     ...productRoutes,
     ...blogRoutes,

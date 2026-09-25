@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, Menu, X, Search, Heart, Calendar, Wrench } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, Heart, Calendar, Wrench, MapPin } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { StorePicker } from './StorePicker';
 import { useState } from 'react';
@@ -59,6 +59,11 @@ export function StorefrontHeader({
             <Link href={`/${storeSlug}/catalog`} className="text-fg-muted hover:text-primary transition-colors">
               {t('nav.shop')}
             </Link>
+            {stores.length > 1 && (
+              <Link href={`/${storeSlug}/locations`} className="text-fg-muted hover:text-primary transition-colors">
+                Stores
+              </Link>
+            )}
             {hasAppointments && (
               <Link href={`/${storeSlug}/book`} className="text-fg-muted hover:text-primary transition-colors">
                 Book
@@ -139,6 +144,7 @@ export function StorefrontHeader({
             <StorePicker
               stores={stores}
               activeId={activeLocationId}
+              storeSlug={storeSlug}
               className="hidden md:block"
             />
 
@@ -174,6 +180,11 @@ export function StorefrontHeader({
           <Link href={`/${storeSlug}/catalog`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
             <Search size={16} className="text-fg-subtle" /> Shop
           </Link>
+          {stores.length > 1 && (
+            <Link href={`/${storeSlug}/locations`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
+              <MapPin size={16} className="text-fg-subtle" /> Our stores
+            </Link>
+          )}
           {hasAppointments && (
             <Link href={`/${storeSlug}/book`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
               <Calendar size={16} className="text-fg-subtle" /> Book Appointment
@@ -202,7 +213,7 @@ export function StorefrontHeader({
           {stores.length > 0 && (
             <div className="flex items-center justify-between border-t border-line pt-3 mt-1">
               <span className="text-sm text-fg-muted">Shopping at</span>
-              <StorePicker stores={stores} activeId={activeLocationId} />
+              <StorePicker stores={stores} activeId={activeLocationId} storeSlug={storeSlug} />
             </div>
           )}
 

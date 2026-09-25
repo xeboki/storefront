@@ -46,6 +46,49 @@ export function generateOrganization(
   };
 }
 
+/**
+ * One branch as its own LocalBusiness, with a `branchOf` pointing at the shop.
+ *
+ * A chain that publishes only the business-level Organization gives search
+ * engines one address for every store, which is exactly the problem a
+ * per-location page exists to solve.
+ */
+export function generateLocalBranch(
+  storeSlug: string,
+  storefrontConfig: StorefrontConfig | null,
+  storeConfig: StoreConfig,
+  branch: {
+    slug: string;
+    name: string;
+    city: string;
+    address: string;
+    serviceArea: string[];
+  },
+) {
+  const base = storeUrl(storeSlug, storefrontConfig);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    '@id': `${base}/l/${branch.slug}`,
+    name: `${storeConfig.businessName} — ${branch.name}`,
+    url: `${base}/l/${branch.slug}`,
+    branchOf: { '@type': 'Organization', name: storeConfig.businessName, url: base },
+    ...(storefrontConfig?.logoUrl && { logo: storefrontConfig.logoUrl }),
+    ...(storeConfig.supportPhone && { telephone: storeConfig.supportPhone }),
+    ...(storeConfig.supportEmail && { email: storeConfig.supportEmail }),
+    ...((branch.address || branch.city) && {
+      address: {
+        '@type': 'PostalAddress',
+        ...(branch.address && { streetAddress: branch.address }),
+        ...(branch.city && { addressLocality: branch.city }),
+      },
+    }),
+    ...(branch.serviceArea.length > 0 && {
+      areaServed: branch.serviceArea.map((city) => ({ '@type': 'City', name: city })),
+    }),
+  };
+}
+
 // ── Product ───────────────────────────────────────────────────────────────────
 
 export function generateProduct(

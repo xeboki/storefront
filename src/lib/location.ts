@@ -78,3 +78,80 @@ export function activeLocationId(
 export function storeLabel(store: FulfillmentLocation | null): string {
   return store?.locationName || store?.city || 'Store';
 }
+
+// ── URLs ────────────────────────────────────────────────────────────────────
+//
+// A branch needs a URL of its own, not a `?loc=<uuid>` query param: a query
+// param cannot rank, cannot carry its own title, and cannot hold that branch's
+// LocalBusiness data. Slugs come from the name a merchant already typed.
+
+function slugify(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * `{slug: location}` for every branch a shopper can order from.
+ *
+ * Two branches can carry the same name — "Gulberg" twice in different cities is
+ * ordinary — so a collision falls back to the city, then to a counter. Built
+ * from the config's own order, so the same branch keeps the same URL as long as
+ * the merchant does not reorder them.
+ */
+export function locationSlugs(
+  config: StorefrontConfig | null,
+): Map<string, FulfillmentLocation> {
+  const out = new Map<string, FulfillmentLocation>();
+  for (const store of onlineStores(config)) {
+    const base = slugify(store.locationName || store.city || '') || 'store';
+    let slug = base;
+    if (out.has(slug)) {
+      const withCity = slugify(`${store.locationName} ${store.city}`);
+      slug = withCity && !out.has(withCity) ? withCity : slug;
+    }
+    let n = 2;
+    while (out.has(slug)) slug = `${base}-${n++}`;
+    out.set(slug, store);
+  }
+  return out;
+}
+
+/** This branch's slug, or null if it is not orderable online. */
+export function slugFor(
+  config: StorefrontConfig | null,
+  locationId: string | null | undefined,
+): string | null {
+  if (!locationId) return null;
+  for (const [slug, store] of locationSlugs(config)) {
+    if (store.locationId === locationId) return slug;
+  }
+  return null;
+}
+
+/** The branch a `/l/{slug}` URL names. */
+export function locationBySlug(
+  config: StorefrontConfig | null,
+  slug: string,
+): FulfillmentLocation | null {
+  return locationSlugs(config).get(slug) ?? null;
+}
+
+/**
+ * Everywhere this branch delivers, in one list: the cities it serves plus its
+ * own, deduped case-insensitively and in the merchant's own spelling.
+ */
+export function serviceArea(store: FulfillmentLocation): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const city of [store.city, ...store.servedCities]) {
+    const key = city?.trim().toLowerCase();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(city.trim());
+  }
+  return out;
+}

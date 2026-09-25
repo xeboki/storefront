@@ -8,6 +8,8 @@ import type { FulfillmentLocation } from '@xeboki/sdk';
 interface Props {
   stores: FulfillmentLocation[];
   activeId: string | null;
+  /** Set to offer a way through to the full finder. */
+  storeSlug?: string;
   className?: string;
 }
 
@@ -22,7 +24,7 @@ function label(s: FulfillmentLocation) {
  * onwards there was nothing on screen saying which branch's shelves these
  * were — and checkout could quietly pick a different one.
  */
-export function StorePicker({ stores, activeId, className = '' }: Props) {
+export function StorePicker({ stores, activeId, storeSlug, className = '' }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   if (stores.length === 0) return null;
@@ -91,6 +93,16 @@ export function StorePicker({ stores, activeId, className = '' }: Props) {
                 </li>
               );
             })}
+            {storeSlug && stores.length > 1 && (
+              <li className="mt-1 border-t border-line">
+                <a
+                  href={`/${storeSlug}/locations`}
+                  className="block px-3 py-2 text-sm font-medium text-primary hover:bg-surface-alt"
+                >
+                  See all stores
+                </a>
+              </li>
+            )}
           </ul>
         </>
       )}
