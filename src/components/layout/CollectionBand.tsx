@@ -2,11 +2,14 @@ import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import type { OrderingCategory, OrderingProduct } from '@xeboki/sdk';
 import { ProductImage } from '@/components/product/ProductImage';
+import type { SectionWords } from '@/lib/section-copy';
 
 interface Props {
   category: OrderingCategory;
   products: OrderingProduct[];
   storeSlug: string;
+  /** The merchant's wording. Blank fields fall back to the category's name. */
+  words: SectionWords;
 }
 
 /**
@@ -18,11 +21,14 @@ interface Props {
  * and it costs no photography to look deliberate, which matters for a shop
  * that has not shot a campaign.
  */
-export function CollectionBand({ category, products, storeSlug }: Props) {
+export function CollectionBand({ category, products, storeSlug, words }: Props) {
   const picks = products.slice(0, 3);
   if (picks.length === 0) return null;
 
   const href = `/${storeSlug}/catalog?category=${category.id}`;
+  // The name is the artwork here, so an override replaces it everywhere it is
+  // set — the ghost type, the phone heading and the link all read the same word.
+  const heading = words.title || category.name;
 
   return (
     <section className="relative overflow-hidden border-t border-line py-14 sm:py-20 lg:py-32">
@@ -33,8 +39,10 @@ export function CollectionBand({ category, products, storeSlug }: Props) {
               design element, it is an empty band with two cards in it — which
               is exactly how it looked. */}
           <div className="lg:hidden">
-            <p className="eyebrow eyebrow-rule text-primary">Collection</p>
-            <h2 className="display-lg mt-3 text-fg">{category.name}</h2>
+            {words.eyebrow && (
+              <p className="eyebrow eyebrow-rule text-primary">{words.eyebrow}</p>
+            )}
+            <h2 className="display-lg mt-3 text-fg">{heading}</h2>
           </div>
 
           {/* Wide screens: the name at the size of an image. aria-hidden
@@ -43,8 +51,8 @@ export function CollectionBand({ category, products, storeSlug }: Props) {
             aria-hidden
             className="display-hero pointer-events-none hidden select-none whitespace-nowrap text-fg/[0.07] lg:block"
           >
-            {category.name}
-            <span className="text-outline ml-4">{category.name}</span>
+            {heading}
+            <span className="text-outline ml-4">{heading}</span>
           </h2>
 
           {/* Pulled up into the type on wide screens only — there is nothing
@@ -81,7 +89,7 @@ export function CollectionBand({ category, products, storeSlug }: Props) {
               href={href}
               className="group inline-flex items-center gap-2 border-b border-fg/30 pb-1 text-sm font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:border-primary hover:text-primary"
             >
-              All {category.name}
+              {words.linkLabel || `All ${heading}`}
               <ArrowUpRight
                 size={16}
                 className="motion-safe:transition-transform motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"

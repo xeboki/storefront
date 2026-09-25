@@ -10,6 +10,7 @@ import { EditorialBand } from '@/components/layout/EditorialBand';
 import { CollectionBand } from '@/components/layout/CollectionBand';
 import { onlineStores } from '@/lib/location';
 import { showSection } from '@/lib/sections';
+import { sectionWords } from '@/lib/section-copy';
 import { buildTheme } from '@/lib/theme';
 
 interface Props {
@@ -141,15 +142,15 @@ export default async function StorePage({ params }: Props) {
       {shownCategories.length > 0 && showSection(storefrontConfig, 'categories') && (
         <section className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
           <SectionHeader
-            eyebrow="Browse"
-            title={APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by category'}
-            lede={
-              APPOINTMENT_TYPES.has(bt)
+            {...sectionWords(storefrontConfig, 'categories', {
+              eyebrow: 'Browse',
+              title: APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by category',
+              lede: APPOINTMENT_TYPES.has(bt)
                 ? 'Book any of the services this store offers.'
-                : 'Every department in the store, in one place.'
-            }
+                : 'Every department in the store, in one place.',
+              linkLabel: 'All products',
+            })}
             href={`/${params.store}/catalog`}
-            linkLabel="All products"
           />
           <CategoryGrid categories={shownCategories} storeSlug={params.store} />
         </section>
@@ -159,9 +160,12 @@ export default async function StorePage({ params }: Props) {
         <section className="border-t border-line">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:py-20 lg:py-32 sm:px-6 lg:px-8">
             <SectionHeader
-              eyebrow="Handpicked"
-              title={APPOINTMENT_TYPES.has(bt) ? 'Featured services' : 'Featured products'}
-              lede="Chosen by the store this week."
+              {...sectionWords(storefrontConfig, 'featured', {
+                eyebrow: 'Handpicked',
+                title: APPOINTMENT_TYPES.has(bt) ? 'Featured services' : 'Featured products',
+                lede: 'Chosen by the store this week.',
+                linkLabel: 'View all',
+              })}
               href={`/${params.store}/catalog`}
             />
             <FeaturedProducts products={featured} storeSlug={params.store} />
@@ -174,6 +178,7 @@ export default async function StorePage({ params }: Props) {
           category={spotlight.category}
           products={spotlight.items}
           storeSlug={params.store}
+          words={sectionWords(storefrontConfig, 'collection', { eyebrow: 'Collection' })}
         />
       )}
 
@@ -185,6 +190,10 @@ export default async function StorePage({ params }: Props) {
         storeSlug={params.store}
         imageUrl={storefrontConfig?.heroImageUrl}
         stores={onlineStores(storefrontConfig)}
+        words={sectionWords(storefrontConfig, 'editorial', {
+          eyebrow: 'The store',
+          linkLabel: 'Find a store',
+        })}
       />
       )}
     </div>

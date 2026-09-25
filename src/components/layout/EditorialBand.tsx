@@ -3,6 +3,7 @@ import { storeName } from '@/lib/store-name';
 import { ArrowRight } from 'lucide-react';
 import type { FulfillmentLocation, StoreConfig } from '@xeboki/sdk';
 import { ProductImage } from '@/components/product/ProductImage';
+import type { SectionWords } from '@/lib/section-copy';
 
 interface Props {
   storeConfig: StoreConfig;
@@ -10,6 +11,8 @@ interface Props {
   imageUrl?: string | null;
   /** Branches, to say something true rather than marketing filler. */
   stores: FulfillmentLocation[];
+  /** The merchant's wording. A blank field falls back to the copy below. */
+  words: SectionWords;
 }
 
 /**
@@ -23,7 +26,7 @@ interface Props {
  * founding year or a story: a storefront that writes copy on a merchant's
  * behalf will eventually say something untrue about them.
  */
-export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores }: Props) {
+export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores, words }: Props) {
   const cities = [...new Set(stores.map((s) => s.city).filter(Boolean))];
   const count = stores.length;
 
@@ -52,15 +55,18 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores }: Prop
             image beside it, and on a phone — where the image is above, not
             beside — it just left a hole under the last line. */}
         <div className="flex flex-col px-4 py-14 sm:px-8 sm:py-20 lg:justify-center lg:px-16 lg:py-24">
-          <p className="eyebrow eyebrow-rule text-primary">The store</p>
-          <h2 className="display-lg mt-4 text-fg">{storeName(storeConfig)}</h2>
+          {words.eyebrow && (
+            <p className="eyebrow eyebrow-rule text-primary">{words.eyebrow}</p>
+          )}
+          <h2 className="display-lg mt-4 text-fg">{words.title || storeName(storeConfig)}</h2>
 
           <p className="mt-4 max-w-md text-fg-muted sm:mt-5">
-            {count > 0
-              ? `Shop online and collect in ${
-                  cities.length === 1 ? cities[0] : `${count} ${count === 1 ? 'store' : 'stores'}`
-                }. Everything you see is stock the shop is holding right now.`
-              : 'Everything you see here is stock the shop is holding right now — no backorders, no surprises at checkout.'}
+            {words.lede ||
+              (count > 0
+                ? `Shop online and collect in ${
+                    cities.length === 1 ? cities[0] : `${count} ${count === 1 ? 'store' : 'stores'}`
+                  }. Everything you see is stock the shop is holding right now.`
+                : 'Everything you see here is stock the shop is holding right now — no backorders, no surprises at checkout.')}
           </p>
 
           <dl className="mt-8 grid grid-cols-2 gap-8 border-t border-line pt-6 sm:mt-10 sm:max-w-sm sm:pt-8">
@@ -83,7 +89,7 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores }: Prop
               href={`/${storeSlug}/locations`}
               className="group inline-flex items-center gap-2 border-b border-fg/30 pb-1 text-sm font-semibold uppercase tracking-[0.12em] text-fg transition-colors hover:border-primary hover:text-primary"
             >
-              Find a store
+              {words.linkLabel || 'Find a store'}
               <ArrowRight
                 size={15}
                 className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
