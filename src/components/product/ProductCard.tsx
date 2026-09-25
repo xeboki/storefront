@@ -73,8 +73,8 @@ export function ProductCard({ product, storeSlug }: Props) {
 
   return (
     <Link href={href} className="group block">
-      <div className="lift rounded-brand overflow-hidden border border-line bg-surface hover:border-primary/40 hover:shadow-lg">
-        <div className="relative aspect-square bg-surface-alt">
+      <div className="lift flex h-full flex-col overflow-hidden rounded-brand-lg border border-line bg-surface hover:border-primary/40 hover:shadow-xl">
+        <div className="relative aspect-[4/5] overflow-hidden bg-surface-alt">
           <ProductImage
             src={product.imageUrl}
             alt={product.name}
@@ -88,12 +88,16 @@ export function ProductCard({ product, storeSlug }: Props) {
             }
           />
 
+          {/* A corner badge and a faded image, rather than a scrim with a pill
+              floating in the middle of the picture — that read as an error
+              state and hid the product a shopper was trying to look at. */}
           {!sellable && (
-            <div className="absolute inset-0 bg-surface/70 flex items-center justify-center">
-              <span className="text-sm font-semibold text-fg-muted bg-surface px-3 py-1 rounded-full border">
-                Sold Out
+            <>
+              <span aria-hidden className="absolute inset-0 bg-surface/55" />
+              <span className="absolute left-3 top-3 rounded-full bg-fg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-bg">
+                Sold out
               </span>
-            </div>
+            </>
           )}
 
           {/* Wishlist button */}
@@ -101,7 +105,7 @@ export function ProductCard({ product, storeSlug }: Props) {
             onClick={handleToggleWishlist}
             aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
             className={clsx(
-              'absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-sm transition-colors',
+              'absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors',
               isWishlisted
                 ? 'bg-rose-50 text-rose-500'
                 : 'bg-surface/90 text-fg-subtle hover:text-rose-500',
@@ -111,20 +115,26 @@ export function ProductCard({ product, storeSlug }: Props) {
           </button>
         </div>
 
-        <div className="p-3">
-          <h3 className="font-medium text-fg line-clamp-2 text-sm">{product.name}</h3>
+        <div className="flex flex-1 flex-col p-4">
+          {product.categoryName && (
+            <p className="eyebrow mb-1.5 text-[10px]">{product.categoryName}</p>
+          )}
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-fg">
+            {product.name}
+          </h3>
 
-          <div className="mt-2 flex items-center justify-between gap-2">
-            <span className="font-bold text-fg">
-              {product.hasVariants
-                ? `From ${money(product.price ?? 0)}`
-                : money(product.price ?? 0)}
+          <div className="mt-auto flex items-end justify-between gap-2 pt-3">
+            <span className="price text-base font-semibold text-fg">
+              {product.hasVariants && (
+                <span className="mr-1 text-xs font-normal text-fg-muted">From</span>
+              )}
+              {money(product.price ?? 0)}
             </span>
 
             {sellable && !product.hasVariants && (
               <button
                 onClick={handleAddToCart}
-                className="p-1.5 rounded-brand bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
                 aria-label="Add to cart"
               >
                 <ShoppingCart size={16} />

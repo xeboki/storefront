@@ -46,9 +46,19 @@
     font-family: var(--font-sans), system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  /* The display face is for page and section titles only. Applying it to
+     every heading put a serif on 14px product names and card labels, where it
+     reads as a mistake rather than a choice. h3 and below stay in the body
+     face and earn their hierarchy from weight and colour. */
+  h1, h2 {
     font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
     letter-spacing: var(--heading-tracking);
+  }
+
+  /* Tabular figures so a column of prices lines up on the decimal instead of
+     dancing as digits change width. */
+  .price, table td, table th {
+    font-variant-numeric: tabular-nums;
   }
 
   /* Native controls (select, checkbox, date) follow the theme instead of
@@ -142,4 +152,50 @@ input[type="range"].slider-thumb::-moz-range-thumb {
   outline: 2px solid rgb(var(--color-primary));
   outline-offset: 2px;
   border-radius: var(--radius);
+}
+
+/* ── Type scale ──────────────────────────────────────────────────────────────
+   Four steps, used everywhere, so a page has a hierarchy rather than three
+   near-identical bold lines. The shop had exactly 48/700, 24/700, 16/700 and
+   14/500 — all in one face — which is why every section looked the same
+   weight as the one above it. */
+
+/* Small, letterspaced label above a heading. Does the work a second heading
+   size would otherwise be asked to do. */
+.eyebrow {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(var(--color-fg-muted));
+}
+
+/* Hero. Clamped so it is dramatic on a desktop without wrapping to five lines
+   on a phone. */
+.display-xl {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.02;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Section titles. */
+.display-lg {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.1;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+/* A short rule that sits beside an eyebrow, as an editorial page would set it. */
+.eyebrow-rule::before {
+  content: "";
+  display: inline-block;
+  width: 2rem;
+  height: 1px;
+  margin-right: 0.75rem;
+  vertical-align: middle;
+  background: currentColor;
+  opacity: 0.5;
 }

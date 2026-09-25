@@ -42,10 +42,30 @@ export interface ThemeShape {
 
 export type ThemeVars = Record<string, string>;
 
-/** Quotes a family name so `Playfair Display` survives into the CSS. */
+/**
+ * The families the root layout actually loads, by the name Manager's picker
+ * stores. A face that is not loaded renders as the browser's UI font, so a
+ * merchant's choice has to resolve to one of these or it does nothing.
+ */
+const LOADED_FONTS: Record<string, string> = {
+  inter: 'var(--font-inter)',
+  poppins: 'var(--font-poppins)',
+  roboto: 'var(--font-roboto)',
+  lato: 'var(--font-lato)',
+  'playfair display': 'var(--font-playfair)',
+  playfair: 'var(--font-playfair)',
+};
+
+/**
+ * Resolves a merchant's font name to a loaded family, falling back to the
+ * preset's. An unrecognised name is still quoted through — a deployment may
+ * add a face we do not know about here.
+ */
 function fontStack(family: string | null | undefined, fallback: string): string {
   const name = (family ?? '').trim();
   if (!name) return fallback;
+  const loaded = LOADED_FONTS[name.toLowerCase()];
+  if (loaded) return loaded;
   return /^['"]/.test(name) || !/\s/.test(name) ? name : `'${name}'`;
 }
 
@@ -101,12 +121,12 @@ export function buildTheme(config: StorefrontConfig | null): Theme {
       '--radius': preset.radius,
       '--heading-tracking': preset.headingTracking,
       '--font-sans': fontStack(config?.font, preset.fontSans),
-      '--font-display': fontStack(
-        // Falls back to the body font a merchant chose before the preset's, so
-        // setting one font still changes the headings.
-        config?.headingFont ?? config?.font,
-        preset.fontDisplay,
-      ),
+      // A merchant's heading font, or the preset's — NOT their body font.
+      // Falling through to `font` made sense when every preset paired a face
+      // with itself; now that presets pair a serif display with a sans body,
+      // a merchant who set only a body font had the pairing silently replaced
+      // by one face used twice.
+      '--font-display': fontStack(config?.headingFont, preset.fontDisplay),
     },
     shape: {
       presetId: preset.id,

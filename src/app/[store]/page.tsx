@@ -4,6 +4,8 @@ import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store';
 import { HeroSection } from '@/components/layout/HeroSection';
 import { FeaturedProducts } from '@/components/product/FeaturedProducts';
 import { CategoryGrid } from '@/components/product/CategoryGrid';
+import { SectionHeader } from '@/components/layout/SectionHeader';
+import { TrustBar } from '@/components/layout/TrustBar';
 
 interface Props {
   params: { store: string };
@@ -77,29 +79,38 @@ export default async function StorePage({ params }: Props) {
         </section>
       )}
 
+      {/* Reassurance, immediately under the hero, where a first-time buyer
+          looks before trusting a name they do not know. */}
+      <TrustBar storefrontConfig={storefrontConfig} currency={storeConfig.currencyCode} />
+
       {categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h2 className="text-2xl font-bold text-fg mb-6">
-            {APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by Category'}
-          </h2>
+        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+          <SectionHeader
+            eyebrow="Browse"
+            title={APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by category'}
+            lede={
+              APPOINTMENT_TYPES.has(bt)
+                ? 'Book any of the services this store offers.'
+                : 'Every department in the store, in one place.'
+            }
+            href={`/${params.store}/catalog`}
+            linkLabel="All products"
+          />
           <CategoryGrid categories={categories} storeSlug={params.store} />
         </section>
       )}
 
       {featured.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-fg">
-              {APPOINTMENT_TYPES.has(bt) ? 'Featured Services' : 'Featured Products'}
-            </h2>
-            <Link
+        <section className="border-t border-line bg-surface-alt/40">
+          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+            <SectionHeader
+              eyebrow="Handpicked"
+              title={APPOINTMENT_TYPES.has(bt) ? 'Featured services' : 'Featured products'}
+              lede="Chosen by the store this week."
               href={`/${params.store}/catalog`}
-              className="text-sm font-medium text-primary hover:opacity-80 transition-opacity"
-            >
-              View all →
-            </Link>
+            />
+            <FeaturedProducts products={featured} storeSlug={params.store} />
           </div>
-          <FeaturedProducts products={featured} storeSlug={params.store} />
         </section>
       )}
     </div>

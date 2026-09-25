@@ -116,7 +116,10 @@ function darkFrom(r: Ramp): Palette {
   };
 }
 
-const INTER = "'Inter'";
+// The faces the root layout loads. A merchant's own `font` / `heading_font`
+// still overrides these — a preset only says what to fall back to.
+const INTER = 'var(--font-inter)';
+const SERIF = 'var(--font-playfair)';
 const SYSTEM = 'system-ui';
 
 export const THEME_PRESETS: ThemePreset[] = [
@@ -128,7 +131,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     dark: darkFrom(SLATE),
     radius: '0.5rem',
     fontSans: INTER,
-    fontDisplay: INTER,
+    fontDisplay: SERIF,
     cardStyle: 'bordered',
     heroStyle: 'banner',
     headingTracking: '0',
@@ -154,7 +157,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     dark: darkFrom(STONE),
     radius: '0.875rem',
     fontSans: INTER,
-    fontDisplay: "'Georgia', 'Times New Roman'",
+    fontDisplay: SERIF,
     cardStyle: 'elevated',
     heroStyle: 'split',
     headingTracking: '0',
@@ -201,7 +204,7 @@ export const THEME_PRESETS: ThemePreset[] = [
     dark: darkFrom(SLATE),
     radius: '1rem',
     fontSans: INTER,
-    fontDisplay: INTER,
+    fontDisplay: SERIF,
     cardStyle: 'elevated',
     heroStyle: 'split',
     headingTracking: '-0.01em',
