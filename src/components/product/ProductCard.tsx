@@ -9,6 +9,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
 import { trackAddToCart } from '@/lib/analytics';
+import { productIsSellable } from '@/lib/availability';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import type { OrderingProduct } from '@xeboki/sdk';
 
@@ -18,6 +19,10 @@ interface Props {
 }
 
 export function ProductCard({ product, storeSlug }: Props) {
+  // A card only ever quick-adds a product with no variations, so its own pool
+  // is the right question. "Sold Out" used to mean `isActive === false` alone,
+  // which said nothing about whether the shop had any.
+  const sellable = productIsSellable(product);
   const addItem = useCartStore((s) => s.addItem);
   const addToWishlist = useWishlistStore((s) => s.addItem);
   const removeFromWishlist = useWishlistStore((s) => s.removeItem);
@@ -82,7 +87,7 @@ export function ProductCard({ product, storeSlug }: Props) {
             </div>
           )}
 
-          {!product.isActive && (
+          {!sellable && (
             <div className="absolute inset-0 bg-surface/70 flex items-center justify-center">
               <span className="text-sm font-semibold text-fg-muted bg-surface px-3 py-1 rounded-full border">
                 Sold Out
@@ -115,7 +120,7 @@ export function ProductCard({ product, storeSlug }: Props) {
                 : formatCurrency(product.price ?? 0)}
             </span>
 
-            {product.isActive && !product.hasVariants && (
+            {sellable && !product.hasVariants && (
               <button
                 onClick={handleAddToCart}
                 className="p-1.5 rounded-brand bg-primary text-primary-foreground hover:opacity-90 transition-opacity"

@@ -8,6 +8,7 @@ import { clsx } from 'clsx';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { canBuy, variantIsSellable } from '@/lib/availability';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import { ProductReviews } from './ProductReviews';
@@ -23,7 +24,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
   const axes = product.variantOptions ?? [];
 
   // Stock only limits a product that tracks it; an untracked item never sells out.
-  const inStock = (v: ProductVariant) => !product.trackInventory || v.stock > 0;
+  const inStock = (v: ProductVariant) => variantIsSellable(product, v);
 
   // One chosen value per axis. A variation is a combination, so choosing "Navy"
   // after "M" has to keep M. Resolving each click to the first variation holding
@@ -52,8 +53,9 @@ export function ProductDetail({ product, storeSlug }: Props) {
     (product.hasVariants ? selectedVariant?.imageUrl ?? product.imageUrl : product.imageUrl) ??
     null;
 
-  const isAvailable =
-    product.isActive && (!product.hasVariants || (selectedVariant !== null && inStock(selectedVariant)));
+  // Was `isActive && (!hasVariants || ...)`, so a product with no variations
+  // never had its stock consulted at all.
+  const isAvailable = canBuy(product, selectedVariant);
 
   // Fire GA4/Meta view_item once per product view.
   useEffect(() => {
