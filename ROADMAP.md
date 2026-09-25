@@ -29,6 +29,19 @@ Assessment 2026-09-10. Status: done | needs-config (keys/dashboard) | decision (
 ## needs-config summary (set these to activate)
 RESEND_API_KEY, EMAIL_FROM · GA4/Meta ids · UPSTASH_REDIS_REST_URL/_TOKEN · STOREFRONT_STORES, CRON_SECRET, ABANDONED_CART_MINUTES · NEXT_PUBLIC_GOOGLE_PLACES_KEY · ERROR_WEBHOOK_URL · NEXT_PUBLIC_DEFAULT_LOCALE · Stripe dashboard: wallets + Apple Pay domain.
 
+## working locally when the gateway quota is spent
+The storefront key is free-tier: **100 requests/day, resetting at UTC midnight**. One CDP
+screen-walk of the catalog and a product page spends it, and then every page 404s — a cold
+`resilientRead` miss with upstream refusing, which looks like a break but is not.
+
+    cd ../API && python3 run_with_env.py storefront_dev_proxy.py   # :7091, or npm run dev:proxy
+    npm run dev:live                                               # storefront on :7090
+
+`storefront_dev_proxy.py` forwards to the REAL api.pos.xeboki.com (it is not a mock): it strips
+the `/v1/pos` prefix the gateway would strip, and swaps the store key for the live test staff JWT
+plus `X-Xeboki-User-Id`. It acts as that account on TEST_SUBSCRIBER_ID, so every write it carries
+is a real write — flip-prove-restore applies.
+
 ## remaining decisions for the team
 - Multi-currency charging (FX source + payment config) — the only true feature gap left.
 - Sentry account/DSN if the /api/log baseline isn't enough.

@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 7090",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "dev:live": "XEBOKI_API_BASE_URL=http://localhost:7091 next dev -p 7090",
+    "dev:proxy": "cd ../API && python3 run_with_env.py storefront_dev_proxy.py"
   },
   "dependencies": {
     "next": "14.2.3",
