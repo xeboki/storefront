@@ -5,6 +5,7 @@ import { PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
 import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import { clsx } from 'clsx';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function CheckoutForm({ storeSlug, orderId }: Props) {
+  const money = useMoney();
   const stripe = useStripe();
   const elements = useElements();
   const items = useCartStore((s) => s.items);
@@ -91,7 +93,7 @@ export function CheckoutForm({ storeSlug, orderId }: Props) {
               : 'bg-primary hover:opacity-90',
           )}
         >
-          {loading ? 'Processing…' : `Pay ${formatCurrency(subtotal)}`}
+          {loading ? 'Processing…' : `Pay ${money(subtotal)}`}
         </button>
       </form>
 
@@ -113,14 +115,14 @@ export function CheckoutForm({ storeSlug, orderId }: Props) {
                   <span className="text-fg-subtle"> × {item.quantity}</span>
                 </span>
                 <span className="font-medium text-fg whitespace-nowrap">
-                  {formatCurrency(item.price * item.quantity)}
+                  {money(item.price * item.quantity)}
                 </span>
               </li>
             ))}
           </ul>
           <div className="border-t border-line pt-3 flex justify-between font-bold text-fg">
             <span>Total</span>
-            <span>{formatCurrency(subtotal)}</span>
+            <span>{money(subtotal)}</span>
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 import { Users, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import type { OrderingClassSession } from '@xeboki/sdk';
 
 interface Props {
@@ -30,6 +31,7 @@ function formatWhen(session: OrderingClassSession): string {
  * assumes the site is broken, not that it is busy.
  */
 export function ClassList({ storeSlug }: Props) {
+  const money = useMoney();
   const router = useRouter();
   const customer = useAuthStore((s) => s.customer);
 
@@ -157,7 +159,7 @@ export function ClassList({ storeSlug }: Props) {
               <div className="text-right shrink-0">
                 {session.price > 0 && (
                   <p className="font-semibold text-fg mb-2">
-                    {formatCurrency(session.price)}
+                    {money(session.price)}
                   </p>
                 )}
 

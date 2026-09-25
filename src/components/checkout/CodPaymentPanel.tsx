@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 
 interface Props {
   storeSlug: string;
@@ -44,6 +45,7 @@ export function CodPaymentPanel({
   shippingAmount,
   loyaltyPointsRedeemed,
 }: Props) {
+  const money = useMoney();
   const clearCart = useCartStore((s) => s.clearCart);
   const [loading, setLoading] = useState(false);
 
@@ -101,7 +103,7 @@ export function CodPaymentPanel({
 
       <div className="flex justify-between text-sm font-semibold text-fg border-t border-line pt-4">
         <span>Amount due</span>
-        <span>{formatCurrency(total)}</span>
+        <span>{money(total)}</span>
       </div>
 
       <button

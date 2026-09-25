@@ -17,10 +17,20 @@ import { LOCATION_COOKIE } from './location-cookie';
 
 export { LOCATION_COOKIE, LOCATION_COOKIE_MAX_AGE } from './location-cookie';
 
-/** Branches a shopper can actually order from — one of delivery or pickup. */
+/**
+ * Branches a shopper can actually order from.
+ *
+ * Two separate questions, and only one of them used to be asked:
+ *   * `orderingEnabled` — is this branch on the webshop at all? The merchant's
+ *     own switch, on the location record.
+ *   * delivery/pickup — if it is, how would it fulfil?
+ *
+ * Filtering on the second alone put branches in the switcher that had never
+ * been enabled for online ordering — sub 34 offered Gulberg, which is off.
+ */
 export function onlineStores(config: StorefrontConfig | null): FulfillmentLocation[] {
   return (config?.fulfillmentLocations ?? []).filter(
-    (l) => l.deliveryEnabled || l.pickupEnabled,
+    (l) => l.orderingEnabled && (l.deliveryEnabled || l.pickupEnabled),
   );
 }
 
@@ -64,6 +74,37 @@ export function activeLocation(
     stores[0] ??
     null
   );
+}
+
+/**
+ * The store the shopper has actually CHOSEN, or null if nobody has yet.
+ *
+ * `activeLocation` falls back to the first branch so every page has something
+ * to render. That fallback is exactly what has to be distinguishable here: a
+ * shopper who has never picked must be asked, not silently given whichever
+ * branch the merchant happened to list first.
+ */
+export function chosenLocation(
+  config: StorefrontConfig | null,
+  explicitId?: string | null,
+): FulfillmentLocation | null {
+  if (!isLocationFirst(config)) return null;
+  const stores = onlineStores(config);
+  return (
+    byId(stores, explicitId) ??
+    byId(stores, headers().get('x-xeboki-loc')) ??
+    byId(stores, cookies().get(LOCATION_COOKIE)?.value)
+  );
+}
+
+/**
+ * True when the shop cannot sensibly render until a branch is picked: several
+ * stores, each with its own catalog, and no choice on record.
+ */
+export function needsStoreChoice(config: StorefrontConfig | null): boolean {
+  return isLocationFirst(config)
+    && onlineStores(config).length > 1
+    && chosenLocation(config) === null;
 }
 
 /** As above, for callers that only need the id to pass to the API. */

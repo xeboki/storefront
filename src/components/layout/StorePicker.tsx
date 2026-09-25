@@ -31,6 +31,19 @@ export function StorePicker({ stores, activeId, storeSlug, className = '' }: Pro
 
   const active = stores.find((s) => s.locationId === activeId) ?? stores[0];
 
+  // One store on the webshop: there is nothing to switch between, so say where
+  // they are shopping without offering a menu that opens onto a single choice.
+  if (stores.length === 1) {
+    return (
+      <span
+        className={`flex items-center gap-1.5 whitespace-nowrap px-2 py-1.5 text-sm text-fg-muted ${className}`}
+      >
+        <MapPin size={16} className="flex-shrink-0" aria-hidden />
+        <span className="max-w-[10rem] truncate font-medium">{label(active)}</span>
+      </span>
+    );
+  }
+
   function choose(s: FulfillmentLocation) {
     setOpen(false);
     if (s.locationId === active.locationId) return;

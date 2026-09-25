@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 import { ChevronLeft, ChevronRight, Calendar, Clock, User, CheckCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import type { OrderingProduct, OrderingStaff } from '@xeboki/sdk';
 
 // ── Time slot helpers ──────────────────────────────────────────────────────────
@@ -61,6 +62,7 @@ interface Props {
 // ── Component ──────────────────────────────────────────────────────────────────
 
 export function BookingWidget({ storeSlug, services, staff }: Props) {
+  const money = useMoney();
   const router = useRouter();
   const customer = useAuthStore((s) => s.customer);
 
@@ -198,7 +200,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
                     )}
                   </div>
                   <span className="font-bold text-primary ml-4 whitespace-nowrap">
-                    {formatCurrency(svc.price)}
+                    {money(svc.price)}
                   </span>
                 </button>
               </li>
@@ -434,7 +436,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
           </div>
           <div className="flex justify-between border-t border-line pt-3">
             <span className="text-fg-muted">Price</span>
-            <span className="font-bold text-primary">{formatCurrency(selectedService?.price ?? 0)}</span>
+            <span className="font-bold text-primary">{money(selectedService?.price ?? 0)}</span>
           </div>
         </div>
 

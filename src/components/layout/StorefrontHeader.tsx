@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ShoppingCart, User, Menu, X, Search, Heart, Calendar, Wrench, MapPin } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { StorePicker } from './StorePicker';
+import { useHydrated } from '@/lib/use-hydrated';
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -25,6 +26,9 @@ export function StorefrontHeader({
   storeConfig, storefrontConfig, storeSlug, stores, activeLocationId,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  // The cart lives in localStorage, so the server cannot know it. Showing the
+  // badge before hydration made React discard the header's markup.
+  const hydrated = useHydrated();
   const itemCount = useCartStore((s) => s.itemCount());
   const customer = useAuthStore((s) => s.customer);
   const businessType = useStoreConfigStore((s) => s.businessType);
@@ -145,7 +149,7 @@ export function StorefrontHeader({
               stores={stores}
               activeId={activeLocationId}
               storeSlug={storeSlug}
-              className="hidden md:block"
+              className="hidden md:flex"
             />
 
             <ColorSchemeToggle className="hidden md:inline-flex" />
@@ -156,7 +160,7 @@ export function StorefrontHeader({
               aria-label="Cart"
             >
               <ShoppingCart size={20} />
-              {itemCount > 0 && (
+              {hydrated && itemCount > 0 && (
                 <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold">
                   {itemCount > 9 ? '9+' : itemCount}
                 </span>

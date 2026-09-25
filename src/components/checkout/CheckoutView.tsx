@@ -9,6 +9,7 @@ import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, TABLE_TYPES } from '@/stores/storeConfigStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import {
   computeShippingForCity,
   resolveDeliveryLocation,
@@ -111,6 +112,7 @@ interface Props {
 export function CheckoutView({
   storeSlug, storefrontConfig, paymentMethods = [], loyalty, shoppingAtLocationId = null,
 }: Props) {
+  const money = useMoney();
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
   const customer = useAuthStore((s) => s.customer);
@@ -725,7 +727,7 @@ export function CheckoutView({
                   <div>
                     <span className="font-semibold text-emerald-800">{discountState.code}</span>
                     <span className="text-emerald-700 ml-2">
-                      −{formatCurrency(discountState.discountAmount ?? 0)}
+                      −{money(discountState.discountAmount ?? 0)}
                     </span>
                   </div>
                   <button onClick={removeDiscount} className="text-emerald-600 hover:text-rose-600 transition-colors text-xs font-medium">
@@ -774,7 +776,7 @@ export function CheckoutView({
                   <div>
                     <span className="font-semibold text-violet-800">{giftCardState.code}</span>
                     <span className="text-violet-700 ml-2">
-                      Balance: {formatCurrency(giftCardState.balance)} · Applying {formatCurrency(giftCardApplied)}
+                      Balance: {money(giftCardState.balance)} · Applying {money(giftCardApplied)}
                     </span>
                   </div>
                   <button onClick={removeGiftCard} className="text-violet-600 hover:text-rose-600 transition-colors text-xs font-medium">
@@ -819,8 +821,8 @@ export function CheckoutView({
                 <span className="block text-amber-700">
                   You have {loyalty.points} points
                   {redeemLoyalty && loyaltyPointsRedeemed > 0
-                    ? ` — redeeming ${loyaltyPointsRedeemed} for ${formatCurrency(loyaltyDiscount)} off`
-                    : ` (worth up to ${formatCurrency(Math.round(loyalty.points * loyaltyPerPoint * 100) / 100)})`}
+                    ? ` — redeeming ${loyaltyPointsRedeemed} for ${money(loyaltyDiscount)} off`
+                    : ` (worth up to ${money(Math.round(loyalty.points * loyaltyPerPoint * 100) / 100)})`}
                 </span>
               </span>
             </label>
@@ -913,6 +915,7 @@ interface OrderSummaryProps {
 }
 
 function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, taxRate = 0, taxInclusive = false, sticky }: OrderSummaryProps) {
+  const money = useMoney();
   return (
     <div className={clsx('rounded-brand border border-line p-5 space-y-4', sticky && 'sticky top-24')}>
       <h2 className="font-bold text-fg">Order Summary</h2>
@@ -925,7 +928,7 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
               <span className="text-fg-subtle"> × {item.quantity}</span>
             </span>
             <span className="font-medium text-fg whitespace-nowrap">
-              {formatCurrency(item.price * item.quantity)}
+              {money(item.price * item.quantity)}
             </span>
           </li>
         ))}
@@ -934,33 +937,33 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
       <div className="space-y-1.5 text-sm border-t border-line pt-3">
         <div className="flex justify-between text-fg-muted">
           <span>Subtotal</span>
-          <span>{formatCurrency(subtotal)}</span>
+          <span>{money(subtotal)}</span>
         </div>
         {discountAmount > 0 && (
           <div className="flex justify-between text-emerald-600">
             <span>Discount</span>
-            <span>−{formatCurrency(discountAmount)}</span>
+            <span>−{money(discountAmount)}</span>
           </div>
         )}
         <div className="flex justify-between text-fg-muted">
           <span>Shipping</span>
-          <span>{shipping > 0 ? formatCurrency(shipping) : 'Free'}</span>
+          <span>{shipping > 0 ? money(shipping) : 'Free'}</span>
         </div>
         {loyaltyDiscount > 0 && (
           <div className="flex justify-between text-amber-600">
             <span>Loyalty points</span>
-            <span>−{formatCurrency(loyaltyDiscount)}</span>
+            <span>−{money(loyaltyDiscount)}</span>
           </div>
         )}
         {giftCardApplied > 0 && (
           <div className="flex justify-between text-violet-600">
             <span>Gift card</span>
-            <span>−{formatCurrency(giftCardApplied)}</span>
+            <span>−{money(giftCardApplied)}</span>
           </div>
         )}
         <div className="flex justify-between font-bold text-fg text-base border-t border-line pt-2 mt-1">
           <span>Total</span>
-          <span>{formatCurrency(orderTotal)}</span>
+          <span>{money(orderTotal)}</span>
         </div>
         {taxRate > 0 && (
           <p className="text-xs text-fg-subtle pt-0.5">

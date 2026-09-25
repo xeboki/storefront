@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Package, RotateCw } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import { ReturnRequest } from './ReturnRequest';
 import { trackPurchase } from '@/lib/analytics';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
@@ -27,6 +28,7 @@ const STATUS_STEPS = [
 ];
 
 export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) {
+  const money = useMoney();
   const [order, setOrder] = useState<OrderingOrder>(initialOrder);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [refreshing, setRefreshing] = useState(false);
@@ -259,11 +261,11 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
                   <p className="text-xs text-fg-subtle">{item.modifierNames.join(', ')}</p>
                 )}
                 <p className="text-xs text-fg-subtle mt-0.5">
-                  {formatCurrency(item.unitPrice)} × {item.quantity}
+                  {money(item.unitPrice)} × {item.quantity}
                 </p>
               </div>
               <p className="text-sm font-bold text-fg whitespace-nowrap">
-                {formatCurrency(item.totalPrice)}
+                {money(item.totalPrice)}
               </p>
             </li>
           ))}
@@ -273,40 +275,40 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
         <div className="px-5 py-4 border-t border-line space-y-2 text-sm bg-surface-alt/60">
           <div className="flex justify-between text-fg-muted">
             <span>Subtotal</span>
-            <span>{formatCurrency(order.subtotal)}</span>
+            <span>{money(order.subtotal)}</span>
           </div>
           {order.tax > 0 && (
             <div className="flex justify-between text-fg-muted">
               <span>Tax</span>
-              <span>{formatCurrency(order.tax)}</span>
+              <span>{money(order.tax)}</span>
             </div>
           )}
           {order.discount > 0 && (
             <div className="flex justify-between text-emerald-700">
               <span>Discount</span>
-              <span>−{formatCurrency(order.discount)}</span>
+              <span>−{money(order.discount)}</span>
             </div>
           )}
           {order.shipping > 0 && (
             <div className="flex justify-between text-fg-muted">
               <span>Shipping</span>
-              <span>{formatCurrency(order.shipping)}</span>
+              <span>{money(order.shipping)}</span>
             </div>
           )}
           {order.loyaltyDiscount > 0 && (
             <div className="flex justify-between text-amber-600">
               <span>Loyalty points</span>
-              <span>−{formatCurrency(order.loyaltyDiscount)}</span>
+              <span>−{money(order.loyaltyDiscount)}</span>
             </div>
           )}
           <div className="flex justify-between font-bold text-fg text-base pt-3 border-t border-line">
             <span>Total</span>
-            <span>{formatCurrency(order.total)}</span>
+            <span>{money(order.total)}</span>
           </div>
           {order.paidTotal > 0 && order.paidTotal < order.total && (
             <div className="flex justify-between text-amber-700 text-xs">
               <span>Amount due</span>
-              <span>{formatCurrency(order.total - order.paidTotal)}</span>
+              <span>{money(order.total - order.paidTotal)}</span>
             </div>
           )}
         </div>

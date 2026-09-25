@@ -5,12 +5,14 @@ import Image from 'next/image';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 
 interface Props {
   storeSlug: string;
 }
 
 export function CartView({ storeSlug }: Props) {
+  const money = useMoney();
   const { items, updateQuantity, removeItem, subtotal } = useCartStore();
 
   if (items.length === 0) {
@@ -65,7 +67,7 @@ export function CartView({ storeSlug }: Props) {
                 </p>
               )}
               <p className="text-sm font-bold text-fg mt-1">
-                {formatCurrency(item.price)}
+                {money(item.price)}
               </p>
             </div>
 
@@ -96,7 +98,7 @@ export function CartView({ storeSlug }: Props) {
               </button>
 
               <p className="text-sm font-bold text-fg">
-                {formatCurrency(item.price * item.quantity)}
+                {money(item.price * item.quantity)}
               </p>
             </div>
           </li>
@@ -107,7 +109,7 @@ export function CartView({ storeSlug }: Props) {
       <div className="rounded-brand border border-line p-5 space-y-3">
         <div className="flex justify-between text-fg-muted">
           <span>Subtotal</span>
-          <span className="font-medium">{formatCurrency(subtotal())}</span>
+          <span className="font-medium">{money(subtotal())}</span>
         </div>
         <div className="flex justify-between text-fg-subtle text-sm">
           <span>Shipping & tax</span>
@@ -115,7 +117,7 @@ export function CartView({ storeSlug }: Props) {
         </div>
         <div className="border-t border-line pt-3 flex justify-between font-bold text-fg text-lg">
           <span>Total</span>
-          <span>{formatCurrency(subtotal())}</span>
+          <span>{money(subtotal())}</span>
         </div>
 
         <Link

@@ -8,6 +8,7 @@ import { clsx } from 'clsx';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import { canBuy, variantIsSellable } from '@/lib/availability';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export function ProductDetail({ product, storeSlug }: Props) {
+  const money = useMoney();
   const variants: ProductVariant[] = product.hasVariants ? product.variants ?? [] : [];
   const axes = product.variantOptions ?? [];
 
@@ -148,7 +150,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-fg">{product.name}</h1>
-          <p className="text-2xl font-bold text-primary mt-2">{formatCurrency(activePrice)}</p>
+          <p className="text-2xl font-bold text-primary mt-2">{money(activePrice)}</p>
         </div>
 
         {product.description && (
@@ -225,7 +227,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
                 >
                   <span>{option.name}</span>
                   {option.priceAdjustment > 0 && (
-                    <span className="text-xs text-fg-muted">+{formatCurrency(option.priceAdjustment)}</span>
+                    <span className="text-xs text-fg-muted">+{money(option.priceAdjustment)}</span>
                   )}
                 </button>
               ))}
@@ -330,7 +332,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
       <div className="flex items-center gap-3">
         <div className="min-w-0">
           <p className="truncate text-xs text-fg-muted">{product.name}</p>
-          <p className="font-semibold text-fg">{formatCurrency(activePrice)}</p>
+          <p className="font-semibold text-fg">{money(activePrice)}</p>
         </div>
         <button
           onClick={handleAddToCart}

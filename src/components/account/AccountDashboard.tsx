@@ -5,6 +5,7 @@ import { LogOut, Package, MapPin, User, Heart, Calendar, Edit } from 'lucide-rea
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, APPOINTMENT_TYPES } from '@/stores/storeConfigStore';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import type { SessionPayload } from '@/lib/auth/session';
 import type { OrderingOrder } from '@xeboki/sdk';
 
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
+  const money = useMoney();
   const logout = useAuthStore((s) => s.logout);
   const businessType = useStoreConfigStore((s) => s.businessType);
   const hasAppointments = APPOINTMENT_TYPES.has(businessType);
@@ -105,7 +107,7 @@ export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-fg text-sm">
-                      {formatCurrency(order.total)}
+                      {money(order.total)}
                     </p>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(order.status)}`}>
                       {order.status}

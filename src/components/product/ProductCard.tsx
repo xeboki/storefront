@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import { trackAddToCart } from '@/lib/analytics';
 import { productIsSellable } from '@/lib/availability';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export function ProductCard({ product, storeSlug }: Props) {
+  const money = useMoney();
   // A card only ever quick-adds a product with no variations, so its own pool
   // is the right question. "Sold Out" used to mean `isActive === false` alone,
   // which said nothing about whether the shop had any.
@@ -116,8 +118,8 @@ export function ProductCard({ product, storeSlug }: Props) {
           <div className="mt-2 flex items-center justify-between gap-2">
             <span className="font-bold text-fg">
               {product.hasVariants
-                ? `From ${formatCurrency(product.price ?? 0)}`
-                : formatCurrency(product.price ?? 0)}
+                ? `From ${money(product.price ?? 0)}`
+                : money(product.price ?? 0)}
             </span>
 
             {sellable && !product.hasVariants && (

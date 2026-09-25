@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Package } from 'lucide-react';
 import { clsx } from 'clsx';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 import type { OrderingOrder } from '@xeboki/sdk';
 
 interface Props {
@@ -26,6 +27,7 @@ const STATUS_FILTERS = [
 ];
 
 export function OrdersListClient({ initialOrders, total, storeSlug, initialStatus }: Props) {
+  const money = useMoney();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [orders] = useState<OrderingOrder[]>(initialOrders);
@@ -108,7 +110,7 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
                 {/* Right: total + status */}
                 <div className="text-right flex-shrink-0">
                   <p className="font-bold text-fg text-sm">
-                    {formatCurrency(order.total)}
+                    {money(order.total)}
                   </p>
                   <span className={`text-xs mt-1 inline-block px-2 py-0.5 rounded-full font-medium ${statusBadge(order.status)}`}>
                     {STATUS_LABEL[order.status] ?? order.status}

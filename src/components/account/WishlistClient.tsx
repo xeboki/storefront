@@ -7,12 +7,14 @@ import { toast } from 'react-hot-toast';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { useCartStore } from '@/stores/cartStore';
 import { formatCurrency } from '@/lib/utils';
+import { useMoney } from '@/lib/currency';
 
 interface Props {
   storeSlug: string;
 }
 
 export function WishlistClient({ storeSlug }: Props) {
+  const money = useMoney();
   const items = useWishlistStore((s) => s.items.filter((i) => i.storeSlug === storeSlug));
   const removeItem = useWishlistStore((s) => s.removeItem);
   const addToCart = useCartStore((s) => s.addItem);
@@ -83,7 +85,7 @@ export function WishlistClient({ storeSlug }: Props) {
               {item.variantId && (
                 <p className="text-xs text-fg-subtle mt-0.5">Variant saved</p>
               )}
-              <p className="font-bold text-primary text-sm mt-1">{formatCurrency(item.price)}</p>
+              <p className="font-bold text-primary text-sm mt-1">{money(item.price)}</p>
             </div>
 
             {/* Actions */}

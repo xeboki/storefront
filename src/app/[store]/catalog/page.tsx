@@ -91,36 +91,10 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         {search ? `Results for “${search}”` : categoryName}
       </h1>
 
-      {/* Location-first: pick a store; the catalog shows its own stock. */}
-      {locationFirst && (
-        <div className="mb-5 rounded-brand border border-line bg-surface-alt p-3">
-          <p className="text-xs font-medium text-fg-muted mb-2">Shopping at</p>
-          <div className="flex flex-wrap gap-2">
-            {stores.map((s) => {
-              const params2 = new URLSearchParams()
-              params2.set('loc', s.locationId)
-              if (searchParams.category) params2.set('category', searchParams.category)
-              const active = s.locationId === activeLoc
-              return (
-                <Link
-                  key={s.locationId}
-                  href={`${base}?${params2.toString()}`}
-                  className={
-                    'px-3 py-1.5 rounded-full text-sm border transition-colors ' +
-                    (active
-                      ? 'bg-primary text-primary-foreground border-primary'
-                      : 'bg-surface text-fg border-line hover:border-primary')
-                  }
-                >
-                  {s.locationName || s.city || 'Store'}
-                </Link>
-              )
-            })}
-          </div>
-        </div>
-      )}
+      {/* The store switcher lives in the header, on every page. It used to be
+          repeated here as a chip row, which said the same thing twice and cost
+          a phone most of its first screen. */}
 
-      {/* Phone: one sticky Filter/Sort bar. Desktop: the controls inline. */}
       <CatalogFilterSheet
         categories={categories}
         activeCategoryId={searchParams.category}

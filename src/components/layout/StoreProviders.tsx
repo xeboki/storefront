@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import type { StorefrontConfig, StoreConfig } from '@xeboki/sdk';
+import { CurrencyProvider } from '@/lib/currency';
 
 interface Props {
   slug: string;
@@ -52,9 +53,9 @@ export function StoreProviders({ children, initialCustomer, storeConfig }: Props
   }, [storeConfig, setStoreConfig]);
 
   return (
-    <>
+    <CurrencyProvider code={storeConfig.currencyCode}>
       {children}
       <Toaster position="bottom-center" />
-    </>
+    </CurrencyProvider>
   );
 }
