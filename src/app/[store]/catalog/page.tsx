@@ -3,7 +3,6 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store'
 import { activeLocation, isLocationFirst, onlineStores, storeLabel } from '@/lib/location'
-import { CategoryFilterBar } from '@/components/product/CategoryFilterBar'
 import { InStockFilter } from '@/components/product/InStockFilter'
 import { CatalogSort } from '@/components/product/CatalogSort'
 import { CatalogFilterSheet } from '@/components/product/CatalogFilterSheet'
@@ -104,12 +103,8 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         total={total}
       />
 
-      <CategoryFilterBar
-        categories={categories}
-        activeId={searchParams.category}
-        storeSlug={params.store}
-        className="hidden sm:block"
-      />
+      {/* Categories live in the header rail now, on every page. Rendering them
+          again here showed the same list twice on one screen. */}
       {/* Search is in the header on every page now; only availability and
           sort belong to the listing itself. */}
       <div className="mb-4 hidden items-center justify-between gap-3 sm:flex">

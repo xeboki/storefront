@@ -14,6 +14,7 @@
  */
 import Link from 'next/link';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
 import { ShoppingCart, User, X, Heart, Calendar, Wrench, MapPin } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
@@ -62,6 +63,23 @@ export function StorefrontHeader({
   const hasWorkOrders = WORK_ORDER_TYPES.has(businessType);
   const customNavLinks: NavLink[] = storefrontConfig?.navLinks ?? [];
   const rail = categories.filter((c) => c.id !== '_uncategorized');
+
+  // Carry the catalog's own state across a category change — the search term,
+  // the sort and the chosen store — so picking "Clothing" does not silently
+  // throw away what the shopper had narrowed to. Only these four: the header
+  // is on every page, and a stray param from an order page does not belong on
+  // a catalog link.
+  const params = useSearchParams();
+  const catalogHref = (categoryId: string | null) => {
+    const next = new URLSearchParams();
+    for (const key of ['q', 'sort', 'instock', 'loc']) {
+      const value = params.get(key);
+      if (value) next.set(key, value);
+    }
+    if (categoryId) next.set('category', categoryId);
+    const qs = next.toString();
+    return `/${storeSlug}/catalog${qs ? `?${qs}` : ''}`;
+  };
 
   const iconButton =
     'flex h-10 w-10 items-center justify-center rounded-full text-fg-muted transition-colors hover:bg-surface-alt hover:text-fg';
@@ -143,7 +161,7 @@ export function StorefrontHeader({
         {(rail.length > 0 || customNavLinks.length > 0) && (
           <nav
             aria-label="Categories"
-            className="hidden border-t border-line lg:block"
+            className="hidden border-t border-line sm:block"
           >
             <ScrollRail
               fade="from-surface"
@@ -151,7 +169,7 @@ export function StorefrontHeader({
               trackClassName="flex items-center gap-6 py-3 text-sm font-medium uppercase tracking-wide"
             >
               <Link
-                href={`/${storeSlug}/catalog`}
+                href={catalogHref(null)}
                 className="whitespace-nowrap text-fg transition-colors hover:text-primary"
               >
                 {t('nav.allProducts')}
@@ -159,7 +177,7 @@ export function StorefrontHeader({
               {rail.map((cat) => (
                 <Link
                   key={cat.id}
-                  href={`/${storeSlug}/catalog?category=${cat.id}`}
+                  href={catalogHref(cat.id)}
                   className="whitespace-nowrap text-fg-muted transition-colors hover:text-primary"
                 >
                   {cat.name}
@@ -217,7 +235,7 @@ export function StorefrontHeader({
               {rail.slice(0, 12).map((cat) => (
                 <Link
                   key={cat.id}
-                  href={`/${storeSlug}/catalog?category=${cat.id}`}
+                  href={catalogHref(cat.id)}
                   onClick={() => setMobileOpen(false)}
                   className="block rounded-brand px-3 py-3 text-sm font-medium text-fg hover:bg-surface-alt"
                 >
