@@ -31,6 +31,9 @@ export function resolveDeliveryLocation(
   if (!c) return null;
   const serving = config.fulfillmentLocations.filter(
     (l) =>
+      // `orderingEnabled` first: a branch that is not on the webshop must not
+      // be handed an order, however well it serves the buyer's city.
+      l.orderingEnabled &&
       l.deliveryEnabled &&
       (l.servedCities.some((sc) => _norm(sc) === c) || _norm(l.city) === c),
   );
@@ -38,9 +41,18 @@ export function resolveDeliveryLocation(
   return serving.reduce((a, b) => (b.deliveryFee < a.deliveryFee ? b : a));
 }
 
-/** Branches offering click & collect, for the pickup-location picker. */
+/**
+ * Branches offering click & collect, for the pickup-location picker.
+ *
+ * This is the list that decides which location an order is ATTRIBUTED to, so
+ * it has to respect the merchant's online switch. Filtering on `pickupEnabled`
+ * alone offered collection from a branch that does not sell online at all —
+ * sub 34 listed Gulberg, which is switched off.
+ */
 export function pickupLocations(config: StorefrontConfig | null): FulfillmentLocation[] {
-  return config?.fulfillmentLocations.filter((l) => l.pickupEnabled) ?? [];
+  return config?.fulfillmentLocations.filter(
+    (l) => l.orderingEnabled && l.pickupEnabled,
+  ) ?? [];
 }
 
 /**

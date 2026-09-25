@@ -186,6 +186,13 @@ export function CheckoutView({
   // fulfil it — a delivery city another branch serves, or a collection point
   // they changed — say so, rather than let the stock they saw quietly stop
   // applying.
+  // A branch's minimum order was shown on its page and enforced nowhere, so a
+  // merchant's rule was decorative: a €15 minimum did not stop a €3.10 basket.
+  // Measured against what the shopper pays for the goods, so a discount that
+  // takes them under the line is caught too.
+  const minOrder = deliveryType === 'delivery' ? (deliveryBranch?.minOrder ?? 0) : 0;
+  const belowMinimum = minOrder > 0 && goods < minOrder;
+
   const shoppedAt = (storefrontConfig?.fulfillmentLocations ?? [])
     .find((l) => l.locationId === shoppingAtLocationId) ?? null;
   const fulfilledElsewhere =
@@ -869,11 +876,19 @@ export function CheckoutView({
           </div>
         </section>
 
+        {belowMinimum && deliveryBranch && (
+          <p className="rounded-brand border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200">
+            {deliveryBranch.locationName || deliveryBranch.city} has a minimum
+            delivery order of {money(minOrder)}. Add {money(minOrder - goods)}{' '}
+            more to continue, or collect in store instead.
+          </p>
+        )}
+
         {error && <p className="text-sm text-rose-600">{error}</p>}
 
         <button
           onClick={handleContinue}
-          disabled={loading}
+          disabled={loading || belowMinimum}
           className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           {loading
