@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { ShoppingCart, Plus, Minus, Heart } from 'lucide-react';
@@ -10,6 +9,7 @@ import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
 import { useMoney } from '@/lib/currency';
 import { canBuy, variantIsSellable } from '@/lib/availability';
+import { ProductImage } from './ProductImage';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import { ProductReviews } from './ProductReviews';
@@ -130,20 +130,19 @@ export function ProductDetail({ product, storeSlug }: Props) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
       {/* Image */}
       <div className="relative aspect-square rounded-brand overflow-hidden bg-surface-alt">
-        {activeImage ? (
-          <Image
-            src={activeImage}
-            alt={product.name}
-            fill
-            className="object-cover"
-            priority
-            sizes="(max-width: 1024px) 100vw, 50vw"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
-            <ShoppingCart size={80} />
-          </div>
-        )}
+        <ProductImage
+          src={activeImage}
+          alt={product.name}
+          fill
+          className="object-cover"
+          priority
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          fallback={
+            <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
+              <ShoppingCart size={80} />
+            </div>
+          }
+        />
       </div>
 
       {/* Info */}

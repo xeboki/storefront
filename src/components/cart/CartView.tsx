@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { ProductImage } from '@/components/product/ProductImage';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { formatCurrency } from '@/lib/utils';
@@ -41,19 +41,18 @@ export function CartView({ storeSlug }: Props) {
           >
             {/* Thumbnail */}
             <div className="w-20 h-20 rounded-brand overflow-hidden bg-surface-alt flex-shrink-0">
-              {item.imageUrl ? (
-                <Image
-                  src={item.imageUrl}
-                  alt={item.name}
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-fg-subtle">
-                  <ShoppingBag size={28} />
-                </div>
-              )}
+              <ProductImage
+                src={item.imageUrl}
+                alt={item.name}
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                fallback={
+                  <div className="w-full h-full flex items-center justify-center text-fg-subtle">
+                    <ShoppingBag size={28} />
+                  </div>
+                }
+              />
             </div>
 
             <div className="flex-1 min-w-0">

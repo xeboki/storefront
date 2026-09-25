@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import { ProductImage } from './ProductImage';
 import { ShoppingCart, Heart } from 'lucide-react';
 import { clsx } from 'clsx';
 import { toast } from 'react-hot-toast';
@@ -75,19 +75,18 @@ export function ProductCard({ product, storeSlug }: Props) {
     <Link href={href} className="group block">
       <div className="rounded-brand overflow-hidden border border-line bg-surface hover:shadow-md transition-shadow">
         <div className="relative aspect-square bg-surface-alt">
-          {product.imageUrl ? (
-            <Image
-              src={product.imageUrl}
-              alt={product.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 50vw, 25vw"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
-              <ShoppingCart size={48} />
-            </div>
-          )}
+          <ProductImage
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            sizes="(max-width: 768px) 50vw, 25vw"
+            fallback={
+              <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
+                <ShoppingCart size={48} />
+              </div>
+            }
+          />
 
           {!sellable && (
             <div className="absolute inset-0 bg-surface/70 flex items-center justify-center">

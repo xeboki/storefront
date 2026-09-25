@@ -1,5 +1,5 @@
-import Image from 'next/image';
 import Link from 'next/link';
+import { ProductImage } from '@/components/product/ProductImage';
 import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 
 interface Props {
@@ -15,15 +15,16 @@ export function HeroSection({ storefrontConfig, storeConfig, storeSlug }: Props)
 
   return (
     <section className="relative overflow-hidden bg-primary">
-      {bgImage && (
-        <Image
-          src={bgImage}
-          alt="Hero"
-          fill
-          className="object-cover opacity-30"
-          priority
-        />
-      )}
+      {/* A hero image that fails leaves the primary-coloured band, which is a
+          perfectly good hero — not a torn-image icon across the top of the shop. */}
+      <ProductImage
+        src={bgImage}
+        alt=""
+        fill
+        className="object-cover opacity-30"
+        priority
+        fallback={null}
+      />
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
         <div className="max-w-2xl">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground leading-tight">

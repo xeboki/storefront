@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { ShoppingCart, User, Menu, X, Search, Heart, Calendar, Wrench, MapPin } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { StorePicker } from './StorePicker';
+import { ProductImage } from '@/components/product/ProductImage';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
@@ -45,17 +45,16 @@ export function StorefrontHeader({
 
           {/* Logo / brand */}
           <Link href={`/${storeSlug}`} className="flex items-center gap-2 font-bold text-lg flex-shrink-0">
-            {storefrontConfig?.logoUrl ? (
-              <Image
-                src={storefrontConfig.logoUrl}
-                alt={storeConfig.businessName}
-                width={120}
-                height={32}
-                className="h-8 w-auto object-contain"
-              />
-            ) : (
-              <span className="text-primary">{storeConfig.businessName}</span>
-            )}
+            {/* A logo that 404s falls back to the shop's name rather than a
+                broken-image box in the corner of every page. */}
+            <ProductImage
+              src={storefrontConfig?.logoUrl}
+              alt={storeConfig.businessName}
+              width={120}
+              height={32}
+              className="h-8 w-auto object-contain"
+              fallback={<span className="text-primary">{storeConfig.businessName}</span>}
+            />
           </Link>
 
           {/* Desktop nav */}

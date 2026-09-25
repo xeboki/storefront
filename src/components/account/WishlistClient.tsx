@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import { ProductImage } from '@/components/product/ProductImage';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useWishlistStore } from '@/stores/wishlistStore';
@@ -58,19 +58,18 @@ export function WishlistClient({ storeSlug }: Props) {
             {/* Image */}
             <Link href={`/${storeSlug}/product/${item.productId}`} className="flex-shrink-0">
               <div className="w-16 h-16 rounded-brand overflow-hidden bg-surface-alt">
-                {item.imageUrl ? (
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.name}
-                    width={64}
-                    height={64}
-                    className="object-cover w-full h-full"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-fg-subtle">
-                    <ShoppingCart size={20} />
-                  </div>
-                )}
+                <ProductImage
+                  src={item.imageUrl}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  className="object-cover w-full h-full"
+                  fallback={
+                    <div className="w-full h-full flex items-center justify-center text-fg-subtle">
+                      <ShoppingCart size={20} />
+                    </div>
+                  }
+                />
               </div>
             </Link>
 
