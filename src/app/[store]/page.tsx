@@ -6,6 +6,8 @@ import { FeaturedProducts } from '@/components/product/FeaturedProducts';
 import { CategoryGrid } from '@/components/product/CategoryGrid';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { TrustBar } from '@/components/layout/TrustBar';
+import { EditorialBand } from '@/components/layout/EditorialBand';
+import { onlineStores } from '@/lib/location';
 
 interface Props {
   params: { store: string };
@@ -84,7 +86,7 @@ export default async function StorePage({ params }: Props) {
       <TrustBar storefrontConfig={storefrontConfig} currency={storeConfig.currencyCode} />
 
       {categories.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
           <SectionHeader
             eyebrow="Browse"
             title={APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by category'}
@@ -101,8 +103,8 @@ export default async function StorePage({ params }: Props) {
       )}
 
       {featured.length > 0 && (
-        <section className="border-t border-line bg-surface-alt/40">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-24">
+        <section className="border-t border-line">
+          <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
             <SectionHeader
               eyebrow="Handpicked"
               title={APPOINTMENT_TYPES.has(bt) ? 'Featured services' : 'Featured products'}
@@ -113,6 +115,15 @@ export default async function StorePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* A different rhythm between the grids, so the page is not three lists
+          stacked on top of each other. */}
+      <EditorialBand
+        storeConfig={storeConfig}
+        storeSlug={params.store}
+        imageUrl={storefrontConfig?.heroImageUrl}
+        stores={onlineStores(storefrontConfig)}
+      />
     </div>
   );
 }

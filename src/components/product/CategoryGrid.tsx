@@ -1,49 +1,55 @@
 import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import type { OrderingCategory } from '@xeboki/sdk';
-import { CategoryIcon } from './CategoryIcon';
 
 interface Props {
   categories: OrderingCategory[];
   storeSlug: string;
 }
 
+/**
+ * The department index.
+ *
+ * This was six small squares each holding an icon — and where a category had
+ * no icon, its first letter. A grid of lettered boxes reads as a placeholder
+ * somebody forgot to finish, and most catalogues have no category artwork to
+ * rescue it with.
+ *
+ * So it is set as an index instead: a number, a name, a rule. Typography is
+ * the only material here, which means it looks deliberate with no imagery at
+ * all — and it is the treatment that survives a merchant who has ten
+ * departments rather than four.
+ */
 export function CategoryGrid({ categories, storeSlug }: Props) {
-  const visible = categories.filter((c) => c.id !== '_uncategorized').slice(0, 6);
-
+  const visible = categories.filter((c) => c.id !== '_uncategorized').slice(0, 8);
   if (visible.length === 0) return null;
 
   return (
-    // Tall tiles on a portrait ratio, the way a department is presented in a
-    // shop rather than a row of small square buttons.
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-      {visible.map((category) => (
-        <Link
-          key={category.id}
-          href={`/${storeSlug}/catalog?category=${category.id}`}
-          className="lift group relative flex aspect-[4/5] flex-col items-center justify-end overflow-hidden rounded-brand-lg border border-line bg-surface p-4 text-center"
-        >
-          {/* A wash of the brand colour that deepens on hover, so the tiles
-              read as a set rather than six empty boxes. */}
-          <span
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-primary/5 to-primary/20 motion-safe:transition-opacity motion-safe:duration-300 group-hover:opacity-0"
-          />
-          <span
-            aria-hidden
-            className="absolute inset-0 bg-gradient-to-b from-primary/20 to-primary/50 opacity-0 motion-safe:transition-opacity motion-safe:duration-300 group-hover:opacity-100"
-          />
-
-          <span className="relative flex flex-1 items-center justify-center">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface/80 text-primary shadow-sm backdrop-blur motion-safe:transition-transform motion-safe:duration-300 group-hover:scale-110">
-              <CategoryIcon icon={category.icon} name={category.name} className="h-6 w-6" />
+    <ul className="grid grid-cols-1 gap-x-12 sm:grid-cols-2">
+      {visible.map((category, index) => (
+        <li key={category.id}>
+          <Link
+            href={`/${storeSlug}/catalog?category=${category.id}`}
+            className="group flex items-baseline gap-5 border-b border-line py-5 transition-colors hover:border-primary"
+          >
+            <span className="price text-xs font-medium text-fg-subtle transition-colors group-hover:text-primary">
+              {String(index + 1).padStart(2, '0')}
             </span>
-          </span>
 
-          <span className="relative mt-3 text-sm font-semibold leading-snug text-fg line-clamp-2">
-            {category.name}
-          </span>
-        </Link>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-xl font-medium text-fg transition-colors group-hover:text-primary sm:text-2xl">
+                {category.name}
+              </span>
+            </span>
+
+            <ArrowUpRight
+              size={18}
+              aria-hidden
+              className="flex-shrink-0 text-fg-subtle motion-safe:transition-all motion-safe:duration-300 group-hover:text-primary motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+            />
+          </Link>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

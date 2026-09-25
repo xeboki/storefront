@@ -73,75 +73,80 @@ export function ProductCard({ product, storeSlug }: Props) {
 
   return (
     <Link href={href} className="group block">
-      <div className="lift flex h-full flex-col overflow-hidden rounded-brand-lg border border-line bg-surface hover:border-primary/40 hover:shadow-xl">
-        <div className="relative aspect-[4/5] overflow-hidden bg-surface-alt">
-          <ProductImage
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 768px) 50vw, 25vw"
-            fallback={
-              <div className="absolute inset-0 flex items-center justify-center text-fg-subtle">
-                <ShoppingCart size={48} />
-              </div>
-            }
-          />
+      {/* No card chrome. A bordered, shadowed box makes a grid read as a
+          dashboard; letting the image sit on the page and carrying the
+          hierarchy in the type is what makes a shop look considered. */}
+      <div className="relative aspect-[4/5] overflow-hidden rounded-brand bg-surface-alt">
+        <ProductImage
+          src={product.imageUrl}
+          alt={product.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover motion-safe:transition-transform motion-safe:duration-[600ms] motion-safe:ease-out motion-safe:group-hover:scale-[1.04]"
+          fallback={
+            <div className="absolute inset-0 flex items-center justify-center text-fg-subtle/40">
+              <ShoppingCart size={40} strokeWidth={1} />
+            </div>
+          }
+        />
 
-          {/* A corner badge and a faded image, rather than a scrim with a pill
-              floating in the middle of the picture — that read as an error
-              state and hid the product a shopper was trying to look at. */}
-          {!sellable && (
-            <>
-              <span aria-hidden className="absolute inset-0 bg-surface/55" />
-              <span className="absolute left-3 top-3 rounded-full bg-fg px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-bg">
-                Sold out
-              </span>
-            </>
-          )}
-
-          {/* Wishlist button */}
-          <button
-            onClick={handleToggleWishlist}
-            aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
-            className={clsx(
-              'absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full shadow-sm backdrop-blur transition-colors',
-              isWishlisted
-                ? 'bg-rose-50 text-rose-500'
-                : 'bg-surface/90 text-fg-subtle hover:text-rose-500',
-            )}
-          >
-            <Heart size={14} className={isWishlisted ? 'fill-rose-500' : ''} />
-          </button>
-        </div>
-
-        <div className="flex flex-1 flex-col p-4">
-          {product.categoryName && (
-            <p className="eyebrow mb-1.5 text-[10px]">{product.categoryName}</p>
-          )}
-          <h3 className="line-clamp-2 text-sm font-medium leading-snug text-fg">
-            {product.name}
-          </h3>
-
-          <div className="mt-auto flex items-end justify-between gap-2 pt-3">
-            <span className="price text-base font-semibold text-fg">
-              {product.hasVariants && (
-                <span className="mr-1 text-xs font-normal text-fg-muted">From</span>
-              )}
-              {money(product.price ?? 0)}
+        {!sellable && (
+          <>
+            <span aria-hidden className="absolute inset-0 bg-bg/50" />
+            <span className="absolute left-3 top-3 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
+              Sold out
             </span>
+          </>
+        )}
 
-            {sellable && !product.hasVariants && (
-              <button
-                onClick={handleAddToCart}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
-                aria-label="Add to cart"
-              >
-                <ShoppingCart size={16} />
-              </button>
-            )}
-          </div>
-        </div>
+        <button
+          onClick={handleToggleWishlist}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+          className={clsx(
+            'absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur transition',
+            isWishlisted
+              ? 'bg-rose-500/90 text-white'
+              : 'bg-bg/50 text-fg opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+          )}
+        >
+          <Heart size={14} className={isWishlisted ? 'fill-white' : ''} />
+        </button>
+
+        {/* The buy action rises out of the image on hover, so the grid stays
+            quiet until someone is actually interested in one of them. */}
+        {sellable && !product.hasVariants && (
+          <button
+            onClick={handleAddToCart}
+            className="absolute inset-x-2 bottom-2 hidden h-10 items-center justify-center gap-2 rounded-brand bg-fg text-xs font-semibold uppercase tracking-[0.12em] text-bg opacity-0 motion-safe:transition-all motion-safe:duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus-visible:opacity-100 sm:flex motion-safe:translate-y-2"
+          >
+            <ShoppingCart size={14} />
+            Add to cart
+          </button>
+        )}
+      </div>
+
+      <div className="pt-4">
+        {product.categoryName && (
+          <p className="eyebrow text-[10px] tracking-[0.16em]">{product.categoryName}</p>
+        )}
+        <h3 className="mt-1.5 line-clamp-1 text-sm font-medium text-fg transition-colors group-hover:text-primary">
+          {product.name}
+        </h3>
+        <p className="price mt-1 text-sm text-fg-muted">
+          {product.hasVariants && <span className="mr-1 text-xs">From</span>}
+          {money(product.price ?? 0)}
+        </p>
+
+        {/* Phones never get a hover, so variants and small screens get a plain
+            line of text instead of an action they cannot reach. */}
+        {sellable && !product.hasVariants && (
+          <button
+            onClick={handleAddToCart}
+            className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-primary sm:hidden"
+          >
+            Add to cart
+          </button>
+        )}
       </div>
     </Link>
   );
