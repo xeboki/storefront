@@ -1,8 +1,8 @@
 import {
-  Baby, Bike, Book, Car, Coffee, Cookie, Dumbbell, Gamepad2, Gem, Gift,
-  Hammer, Headphones, Heart, Home, Laptop, Leaf, type LucideIcon, Monitor,
-  PawPrint, Pill, Scissors, Shirt, ShoppingBasket, Smartphone, Sparkles, Tag,
-  Utensils, Watch, Wrench,
+  Baby, BatteryCharging, Bike, Book, Car, Coffee, Cookie, Dumbbell, Gamepad2,
+  Gem, Gift, Hammer, Headphones, Heart, Home, Laptop, Leaf, type LucideIcon,
+  Monitor, PawPrint, Pill, Scissors, Shirt, ShoppingBasket, Smartphone,
+  Sparkles, Store, Tag, Utensils, Watch, Wine, Wrench,
 } from 'lucide-react';
 
 /**
@@ -23,9 +23,12 @@ const MATERIAL_TO_LUCIDE: Record<string, LucideIcon> = {
   card_giftcard: Gift, redeem: Gift, favorite: Heart, auto_awesome: Sparkles,
   content_cut: Scissors, build: Wrench, handyman: Hammer, construction: Hammer,
   local_grocery_store: ShoppingBasket, shopping_basket: ShoppingBasket,
-  shopping_cart: ShoppingBasket, storefront: ShoppingBasket,
+  shopping_cart: ShoppingBasket, storefront: Store, store: Store,
   restaurant: Utensils, restaurant_menu: Utensils, fastfood: Cookie,
   local_cafe: Coffee, coffee: Coffee, cake: Cookie, bakery_dining: Cookie,
+  wine_bar: Wine, liquor: Wine, local_bar: Wine, nightlife: Wine,
+  battery_full: BatteryCharging, battery_charging_full: BatteryCharging,
+  battery_std: BatteryCharging, power: BatteryCharging,
   local_pharmacy: Pill, medication: Pill, spa: Leaf, eco: Leaf, yard: Leaf,
   fitness_center: Dumbbell, sports: Dumbbell, directions_bike: Bike,
   directions_car: Car, car_repair: Car, pets: PawPrint,
