@@ -21,6 +21,7 @@ import { StorePicker } from './StorePicker';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { HeaderSearch } from './HeaderSearch';
 import { MobileTabBar } from './MobileTabBar';
+import { ScrollRail } from './ScrollRail';
 import { ProductImage } from '@/components/product/ProductImage';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useCartStore } from '@/stores/cartStore';
@@ -144,7 +145,11 @@ export function StorefrontHeader({
             aria-label="Categories"
             className="hidden border-t border-line lg:block"
           >
-            <div className="mx-auto flex max-w-7xl items-center gap-6 overflow-x-auto px-4 py-3 text-sm font-medium uppercase tracking-wide scrollbar-hide sm:px-6 lg:px-8">
+            <ScrollRail
+              fade="from-surface"
+              className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+              trackClassName="flex items-center gap-6 py-3 text-sm font-medium uppercase tracking-wide"
+            >
               <Link
                 href={`/${storeSlug}/catalog`}
                 className="whitespace-nowrap text-fg transition-colors hover:text-primary"
@@ -179,7 +184,7 @@ export function StorefrontHeader({
                   {link.label}
                 </a>
               ))}
-            </div>
+            </ScrollRail>
           </nav>
         )}
       </header>

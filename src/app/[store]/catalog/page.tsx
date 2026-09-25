@@ -108,7 +108,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         categories={categories}
         activeId={searchParams.category}
         storeSlug={params.store}
-        className="hidden sm:flex"
+        className="hidden sm:block"
       />
       {/* Search is in the header on every page now; only availability and
           sort belong to the listing itself. */}

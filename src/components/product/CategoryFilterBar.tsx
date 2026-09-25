@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
+import { ScrollRail } from '@/components/layout/ScrollRail';
 import type { OrderingCategory } from '@xeboki/sdk';
 
 interface Props {
@@ -43,7 +44,8 @@ export function CategoryFilterBar({ categories, activeId, storeSlug, className }
     );
 
   return (
-    <div className={clsx('flex gap-2 overflow-x-auto pb-2 mb-6 scrollbar-hide', className)}>
+    // Sits on the page background, so the fade has to match that, not a card.
+    <ScrollRail fade="from-bg" className={clsx('mb-6', className)} trackClassName="flex gap-2 pb-2">
       <Link href={hrefFor(null)} className={chip(!activeId)}>
         All
       </Link>
@@ -52,6 +54,6 @@ export function CategoryFilterBar({ categories, activeId, storeSlug, className }
           {cat.name}
         </Link>
       ))}
-    </div>
+    </ScrollRail>
   );
 }
