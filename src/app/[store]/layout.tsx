@@ -9,6 +9,7 @@ import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
 import { resolveLocale } from '@/lib/i18n';
 import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
+import { activeLocation, onlineStores } from '@/lib/location';
 
 interface Props {
   params: { store: string };
@@ -58,6 +59,11 @@ export default async function StoreLayout({ params, children }: Props) {
   const { storeConfig, storefrontConfig, slug } = resolved;
   const locale = resolveLocale(null);
 
+  // Resolved once per request and handed down, so the header, the catalog, the
+  // product page and checkout cannot disagree about which store this is.
+  const stores = onlineStores(storefrontConfig);
+  const activeStore = activeLocation(storefrontConfig);
+
   const orgJsonLd = storefrontConfig?.structuredDataEnabled
     ? generateOrganization(slug, storeConfig, storefrontConfig)
     : null;
@@ -85,6 +91,8 @@ export default async function StoreLayout({ params, children }: Props) {
             storeConfig={storeConfig}
             storefrontConfig={storefrontConfig}
             storeSlug={slug}
+            stores={activeStore ? stores : []}
+            activeLocationId={activeStore?.locationId ?? null}
           />
           <main className="flex-1">{children}</main>
           <StorefrontFooter storeConfig={storeConfig} storefrontConfig={storefrontConfig} storeSlug={slug} />

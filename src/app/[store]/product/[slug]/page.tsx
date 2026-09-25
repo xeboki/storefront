@@ -8,9 +8,11 @@ import { loadStore, loadProduct, loadUpsells } from '@/lib/sdk/store';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { generateProduct, generateBreadcrumbs } from '@/lib/seo/structured-data';
+import { activeLocation, activeLocationId, isLocationFirst, storeLabel } from '@/lib/location';
 
 interface Props {
   params: { store: string; slug: string };
+  searchParams: { loc?: string };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -38,11 +40,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const resolved = await loadStore(params.store);
   if (!resolved) notFound();
 
-  const product = await loadProduct(resolved.apiKey, params.slug);
+  // The page used to ask for the product with no location at all, so it showed
+  // the whole business's stock while the listing beside it showed the branch's
+  // — the same product read 157 here and 147 there.
+  const store = activeLocation(resolved.storefrontConfig, searchParams.loc);
+  const product = await loadProduct(
+    resolved.apiKey,
+    params.slug,
+    activeLocationId(resolved.storefrontConfig, searchParams.loc),
+  );
   if (!product) notFound();
 
   const upsells = (await loadUpsells(resolved.apiKey, product.id)).filter((p) => p.id !== product.id);

@@ -4,20 +4,26 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ShoppingCart, User, Menu, X, Search, Heart, Calendar, Wrench } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
+import { StorePicker } from './StorePicker';
 import { useState } from 'react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore, APPOINTMENT_TYPES, WORK_ORDER_TYPES } from '@/stores/storeConfigStore';
 import { useT } from '@/lib/i18n/client';
-import type { StoreConfig, StorefrontConfig, NavLink } from '@xeboki/sdk';
+import type { StoreConfig, StorefrontConfig, NavLink, FulfillmentLocation } from '@xeboki/sdk';
 
 interface Props {
   storeConfig: StoreConfig;
   storefrontConfig: StorefrontConfig | null;
   storeSlug: string;
+  /** Branches to choose between. Empty unless the shop browses store-first. */
+  stores: FulfillmentLocation[];
+  activeLocationId: string | null;
 }
 
-export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: Props) {
+export function StorefrontHeader({
+  storeConfig, storefrontConfig, storeSlug, stores, activeLocationId,
+}: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const itemCount = useCartStore((s) => s.itemCount());
   const customer = useAuthStore((s) => s.customer);
@@ -130,6 +136,12 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
               </Link>
             )}
 
+            <StorePicker
+              stores={stores}
+              activeId={activeLocationId}
+              className="hidden md:block"
+            />
+
             <ColorSchemeToggle className="hidden md:inline-flex" />
 
             <Link
@@ -185,6 +197,13 @@ export function StorefrontHeader({ storeConfig, storefrontConfig, storeSlug }: P
             <Link href={`/${storeSlug}/login`} className="flex items-center gap-2 py-2.5 text-fg font-medium" onClick={() => setMobileOpen(false)}>
               <User size={16} className="text-fg-subtle" /> Sign in
             </Link>
+          )}
+
+          {stores.length > 0 && (
+            <div className="flex items-center justify-between border-t border-line pt-3 mt-1">
+              <span className="text-sm text-fg-muted">Shopping at</span>
+              <StorePicker stores={stores} activeId={activeLocationId} />
+            </div>
           )}
 
           <div className="flex items-center justify-between border-t border-line pt-3 mt-1">

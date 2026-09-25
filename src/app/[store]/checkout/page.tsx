@@ -8,6 +8,7 @@ import { loadStore } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
 import { getSession } from '@/lib/auth/session';
 import { CheckoutView } from '@/components/checkout/CheckoutView';
+import { activeLocationId } from '@/lib/location';
 
 interface Props {
   params: { store: string };
@@ -44,6 +45,7 @@ export default async function CheckoutPage({ params }: Props) {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-2xl font-bold text-fg mb-6">Checkout</h1>
       <CheckoutView
+        shoppingAtLocationId={activeLocationId(resolved.storefrontConfig) ?? null}
         storeSlug={params.store}
         storefrontConfig={resolved.storefrontConfig}
         paymentMethods={resolved.storeConfig.paymentMethods}

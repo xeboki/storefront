@@ -100,9 +100,17 @@ interface Props {
   storeSlug: string;
   storefrontConfig: StorefrontConfig | null;
   loyalty: LoyaltyOffer | null;
+  /**
+   * The store the shopper has been browsing. Checkout used to pick whichever
+   * pickup branch came first, so a basket filled at one branch could be
+   * collected from another without a word.
+   */
+  shoppingAtLocationId?: string | null;
 }
 
-export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [], loyalty }: Props) {
+export function CheckoutView({
+  storeSlug, storefrontConfig, paymentMethods = [], loyalty, shoppingAtLocationId = null,
+}: Props) {
   const items = useCartStore((s) => s.items);
   const subtotal = useCartStore((s) => s.subtotal());
   const customer = useAuthStore((s) => s.customer);
@@ -122,7 +130,10 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
   const [deliveryCity, setDeliveryCity] = useState('');
   const _pickupBranches = pickupLocations(storefrontConfig);
   const [pickupLocationId, setPickupLocationId] = useState<string>(
-    _pickupBranches[0]?.locationId ?? '',
+    // Collect from the store they shopped at, if it takes collections.
+    _pickupBranches.find((b) => b.locationId === shoppingAtLocationId)?.locationId
+      ?? _pickupBranches[0]?.locationId
+      ?? '',
   );
 
   // Discount
@@ -168,6 +179,17 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
   const pickupBranch = _pickupBranches.find((b) => b.locationId === pickupLocationId) ?? null;
   const fulfilBranch = deliveryType === 'delivery' ? deliveryBranch : pickupBranch;
   const fulfilLocationId = fulfilBranch?.locationId ?? '';
+
+  // The basket was filled from one store's shelves. If a different store will
+  // fulfil it — a delivery city another branch serves, or a collection point
+  // they changed — say so, rather than let the stock they saw quietly stop
+  // applying.
+  const shoppedAt = (storefrontConfig?.fulfillmentLocations ?? [])
+    .find((l) => l.locationId === shoppingAtLocationId) ?? null;
+  const fulfilledElsewhere =
+    shoppedAt !== null &&
+    fulfilBranch !== null &&
+    fulfilBranch.locationId !== shoppedAt.locationId;
   // Tax rate is display-only — the charged total's tax comes from the POS.
   const taxRate = taxRateFor(fulfilBranch, storefrontConfig);
   const taxInclusive = storefrontConfig?.taxInclusive ?? false;
@@ -643,6 +665,16 @@ export function CheckoutView({ storeSlug, storefrontConfig, paymentMethods = [],
                 <p className="text-xs text-fg-subtle mt-0.5">{pickupBranch.pickupInstructions}</p>
               )}
             </div>
+          )}
+
+          {fulfilledElsewhere && (
+            <p className="mt-3 rounded-brand border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200">
+              You were shopping at{' '}
+              <strong>{shoppedAt!.locationName || shoppedAt!.city}</strong>, but this
+              order will be fulfilled by{' '}
+              <strong>{fulfilBranch!.locationName || fulfilBranch!.city}</strong>.
+              Availability and prices may differ.
+            </p>
           )}
 
           {/* Table number for dine-in */}

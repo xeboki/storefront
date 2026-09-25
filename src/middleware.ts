@@ -8,6 +8,7 @@
  *   3. x-store-slug header injection (consumed by server components)
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { LOCATION_COOKIE, LOCATION_COOKIE_MAX_AGE } from '@/lib/location-cookie'
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store'
 const DEV_STORE_SLUG = process.env.NEXT_PUBLIC_DEV_STORE_SLUG
@@ -173,6 +174,14 @@ export async function middleware(request: NextRequest) {
   // a request header. Visual only, never persisted — safe to leave public.
   const themePreview = searchParams.get('theme')
 
+  // ── Chosen store ───────────────────────────────────────────────────────────
+  // `?loc=` used to be read by the catalog page alone, so the store a shopper
+  // picked was forgotten the moment they opened a product. Remember it here and
+  // every server render — catalog, product, cart, checkout — reads the same one.
+  // The value is validated against the store's own branches before it is
+  // trusted; see lib/location.ts.
+  const chosenLocation = searchParams.get('loc')
+
   // ── Subdomain routing ──────────────────────────────────────────────────────
   let slug: string | null = null
 
@@ -190,9 +199,24 @@ export async function middleware(request: NextRequest) {
   // back to the browser, so every reader fell through to its 'demo' default.
   const requestHeaders = new Headers(request.headers)
   if (themePreview) requestHeaders.set('x-xeboki-theme', themePreview)
+  // Also on the REQUEST, because a cookie set on the response is not visible to
+  // `cookies()` in the render it was set during — the first page after a switch
+  // would still show the old store.
+  if (chosenLocation) requestHeaders.set('x-xeboki-loc', chosenLocation)
   if (slug) requestHeaders.set('x-store-slug', slug)
 
-  const passthrough = () => NextResponse.next({ request: { headers: requestHeaders } })
+  const remember = (res: NextResponse) => {
+    if (chosenLocation) {
+      res.cookies.set(LOCATION_COOKIE, chosenLocation, {
+        path: '/',
+        maxAge: LOCATION_COOKIE_MAX_AGE,
+        sameSite: 'lax',
+      })
+    }
+    return res
+  }
+
+  const passthrough = () => remember(NextResponse.next({ request: { headers: requestHeaders } }))
 
   if (!slug) return passthrough()
   if (pathname.startsWith(`/${slug}`)) return passthrough()
@@ -200,7 +224,7 @@ export async function middleware(request: NextRequest) {
   const rewriteUrl = request.nextUrl.clone()
   rewriteUrl.pathname = `/${slug}${pathname}`
 
-  return NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } })
+  return remember(NextResponse.rewrite(rewriteUrl, { request: { headers: requestHeaders } }))
 }
 
 export const config = {

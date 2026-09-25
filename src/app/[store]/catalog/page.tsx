@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store'
+import { activeLocation, isLocationFirst, onlineStores, storeLabel } from '@/lib/location'
 import { CategoryFilterBar } from '@/components/product/CategoryFilterBar'
 import { CatalogSearch } from '@/components/product/CatalogSearch'
 import { CatalogSort } from '@/components/product/CatalogSort'
@@ -37,15 +38,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   const search = searchParams.q?.trim() || undefined
   const sort = (searchParams.sort as 'name_asc'|'name_desc'|'price_asc'|'price_desc'|'newest'|undefined) || undefined
 
-  // Catalog browsing model (merchant-configured). In 'location_first', the buyer
-  // browses one store's catalog — scope stock + availability to that location.
-  const catalogMode = store.storefrontConfig?.catalogMode ?? 'unified'
-  const onlineStores = (store.storefrontConfig?.fulfillmentLocations ?? [])
-    .filter((l) => l.deliveryEnabled || l.pickupEnabled)
-  const locationFirst = catalogMode === 'location_first' && onlineStores.length > 0
-  const activeStore = locationFirst
-    ? (onlineStores.find((s) => s.locationId === searchParams.loc) ?? onlineStores[0])
-    : undefined
+  // Which store the shopper is shopping at — one answer, shared with the
+  // product page, the cart and checkout. `?loc=` is remembered by the
+  // middleware, so it survives past this page.
+  const locationFirst = isLocationFirst(store.storefrontConfig)
+  const stores = onlineStores(store.storefrontConfig)
+  const activeStore = activeLocation(store.storefrontConfig, searchParams.loc)
   const activeLoc = activeStore?.locationId
 
   // 'location_first' means a shopper picks a store and sees what that store can
@@ -97,7 +95,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         <div className="mb-5 rounded-brand border border-line bg-surface-alt p-3">
           <p className="text-xs font-medium text-fg-muted mb-2">Shopping at</p>
           <div className="flex flex-wrap gap-2">
-            {onlineStores.map((s) => {
+            {stores.map((s) => {
               const params2 = new URLSearchParams()
               params2.set('loc', s.locationId)
               if (searchParams.category) params2.set('category', searchParams.category)
@@ -140,8 +138,8 @@ export default async function CatalogPage({ params, searchParams }: Props) {
 
       {products.length === 0 && locationFirst && !search && !searchParams.category ? (
         <EmptyStoreNotice
-          storeName={activeStore?.locationName || activeStore?.city || 'this store'}
-          others={onlineStores.filter((s) => s.locationId !== activeLoc)}
+          storeName={storeLabel(activeStore)}
+          others={stores.filter((s) => s.locationId !== activeLoc)}
           base={base}
         />
       ) : (

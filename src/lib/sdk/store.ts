@@ -143,10 +143,17 @@ export const loadUpsells = unstable_cache(
 );
 
 export const loadProduct = unstable_cache(
-  async (apiKey: string, slug: string) => {
+  // [locationId] scopes stock to the store the shopper picked. It is part of
+  // the cache key as well as the request — without that, whichever branch
+  // rendered first would serve its stock figures to the others.
+  async (apiKey: string, slug: string, locationId?: string) => {
     const { getXebokiClient } = await import('./client');
     const client = getXebokiClient(apiKey);
-    return resilientRead(`product:${apiKey.slice(-8)}:${slug}`, () => client.ordering.getProductBySlug(slug), { fallback: 'null' });
+    return resilientRead(
+      `product:${apiKey.slice(-8)}:${slug}:${locationId ?? ''}`,
+      () => client.ordering.getProductBySlug(slug, locationId),
+      { fallback: 'null' },
+    );
   },
   ['product-by-slug'],
   { revalidate: 60, tags: ['catalog'] },
