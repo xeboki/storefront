@@ -68,7 +68,9 @@ export default async function ProductPage({ params, searchParams }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* pb-28 on phones clears the sticky buy bar, which is fixed to the
+          bottom and would otherwise sit over the end of the page. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 sm:pb-8">
         <ProductDetail product={product} storeSlug={params.store} />
         {upsells.length > 0 && (
           <section className="mt-16">

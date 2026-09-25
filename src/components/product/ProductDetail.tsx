@@ -231,8 +231,9 @@ export function ProductDetail({ product, storeSlug }: Props) {
           </div>
         ))}
 
-        {/* Quantity + CTA */}
-        <div className="flex items-center gap-4 pt-2">
+        {/* Quantity + CTA. Hidden on a phone — the sticky bar below owns it
+            there, because this one scrolls out of reach past the fold. */}
+        <div className="hidden sm:flex items-center gap-4 pt-2">
           <div className="flex items-center border border-line rounded-brand overflow-hidden">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -279,9 +280,69 @@ export function ProductDetail({ product, storeSlug }: Props) {
           </button>
         </div>
 
+        {/* Phone: quantity stays in the flow, buying lives in the sticky bar. */}
+        <div className="flex sm:hidden items-center gap-4 pt-2">
+          <div className="flex items-center border border-line rounded-brand overflow-hidden">
+            <button
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              aria-label="Decrease quantity"
+              className="px-4 py-3 text-fg-muted hover:bg-surface-alt transition-colors"
+            >
+              <Minus size={16} />
+            </button>
+            <span className="px-4 py-3 text-fg font-medium min-w-[3ch] text-center">
+              {quantity}
+            </span>
+            <button
+              onClick={() => setQuantity(quantity + 1)}
+              aria-label="Increase quantity"
+              className="px-4 py-3 text-fg-muted hover:bg-surface-alt transition-colors"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+          <button
+            onClick={handleToggleWishlist}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            className={clsx(
+              'p-3 rounded-brand border transition-colors',
+              isWishlisted
+                ? 'border-rose-300 bg-rose-50 text-rose-500'
+                : 'border-line text-fg-subtle hover:border-rose-300 hover:text-rose-500',
+            )}
+          >
+            <Heart size={20} className={isWishlisted ? 'fill-rose-500' : ''} />
+          </button>
+        </div>
+
         {product.hasVariants && selectedVariant?.sku && (
           <p className="text-xs text-fg-subtle">SKU: {selectedVariant.sku}</p>
         )}
+      </div>
+    </div>
+
+    {/* Sticky buy bar — phones only. It carries the price so a shopper deep in
+        the description still knows what they are about to pay, and it sits
+        above the home indicator via safe-area padding. */}
+    <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-xs text-fg-muted">{product.name}</p>
+          <p className="font-semibold text-fg">{formatCurrency(activePrice)}</p>
+        </div>
+        <button
+          onClick={handleAddToCart}
+          disabled={!isAvailable}
+          className={clsx(
+            'ml-auto flex h-12 flex-1 items-center justify-center gap-2 rounded-brand px-6 font-semibold transition-opacity',
+            isAvailable
+              ? 'bg-primary text-primary-foreground hover:opacity-90'
+              : 'bg-surface-alt text-fg-subtle cursor-not-allowed',
+          )}
+        >
+          <ShoppingCart size={18} />
+          {isAvailable ? 'Add to Cart' : 'Sold Out'}
+        </button>
       </div>
     </div>
 

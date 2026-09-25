@@ -77,7 +77,7 @@ export function CatalogSearch({ initialQuery, initialInStock, lockInStock = fals
         )}
       </div>
       {!lockInStock && (
-      <label className="flex items-center gap-2 text-sm text-fg-muted whitespace-nowrap px-1">
+      <label className="hidden sm:flex items-center gap-2 text-sm text-fg-muted whitespace-nowrap px-1">
         <input
           type="checkbox"
           checked={inStock}
