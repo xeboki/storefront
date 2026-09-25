@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { ColorSchemeToggle } from './ColorSchemeToggle';
 import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 
 interface Props {
@@ -113,7 +114,12 @@ export function StorefrontFooter({ storeConfig, storefrontConfig, storeSlug }: P
 
         <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-fg-subtle">
           <p>© {year} {storeConfig.businessName}. All rights reserved.</p>
-          <p>Powered by <span className="font-semibold text-fg-muted">Xeboki</span></p>
+          <div className="flex items-center gap-4">
+            {/* Appearance belongs with the other housekeeping, not in the
+                header taking room from search and the cart. */}
+            <ColorSchemeToggle compact />
+            <p>Powered by <span className="font-semibold text-fg-muted">Xeboki</span></p>
+          </div>
         </div>
       </div>
     </footer>

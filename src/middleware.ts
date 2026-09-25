@@ -9,6 +9,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { LOCATION_COOKIE, LOCATION_COOKIE_MAX_AGE } from '@/lib/location-cookie'
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE } from '@/lib/i18n/locale-cookie'
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store'
 const DEV_STORE_SLUG = process.env.NEXT_PUBLIC_DEV_STORE_SLUG
@@ -189,6 +190,11 @@ export async function middleware(request: NextRequest) {
   // trusted; see lib/location.ts.
   const chosenLocation = searchParams.get('loc')
 
+  // ── Chosen language ────────────────────────────────────────────────────────
+  // `?lang=`, remembered the same way. The dictionaries have always existed;
+  // nothing let a shopper pick one.
+  const chosenLocale = searchParams.get('lang')
+
   // ── Subdomain routing ──────────────────────────────────────────────────────
   let slug: string | null = null
 
@@ -210,6 +216,7 @@ export async function middleware(request: NextRequest) {
   // `cookies()` in the render it was set during — the first page after a switch
   // would still show the old store.
   if (chosenLocation) requestHeaders.set('x-xeboki-loc', chosenLocation)
+  if (chosenLocale) requestHeaders.set('x-xeboki-lang', chosenLocale)
   if (slug) requestHeaders.set('x-store-slug', slug)
 
   const remember = (res: NextResponse) => {
@@ -217,6 +224,13 @@ export async function middleware(request: NextRequest) {
       res.cookies.set(LOCATION_COOKIE, chosenLocation, {
         path: '/',
         maxAge: LOCATION_COOKIE_MAX_AGE,
+        sameSite: 'lax',
+      })
+    }
+    if (chosenLocale) {
+      res.cookies.set(LOCALE_COOKIE, chosenLocale, {
+        path: '/',
+        maxAge: LOCALE_COOKIE_MAX_AGE,
         sameSite: 'lax',
       })
     }

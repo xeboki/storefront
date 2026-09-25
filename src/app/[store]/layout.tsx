@@ -1,13 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { loadStore } from '@/lib/sdk/store';
+import { loadStore, loadCategories } from '@/lib/sdk/store';
 
 import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
-import { resolveLocale } from '@/lib/i18n';
+import { activeLocale, availableLocales } from '@/lib/i18n/server';
 import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
 import { activeLocation, needsStoreChoice, onlineStores } from '@/lib/location';
 import { StoreGate } from '@/components/location/StoreGate';
@@ -58,7 +58,14 @@ export default async function StoreLayout({ params, children }: Props) {
   if (!resolved) notFound();
 
   const { storeConfig, storefrontConfig, slug } = resolved;
-  const locale = resolveLocale(null);
+  // Resolved from the shopper's choice, not just the deployment default —
+  // the dictionaries have always been here, the switch has not.
+  const locale = activeLocale();
+  const locales = availableLocales();
+
+  // The category rail is part of the header now, so the layout loads it once
+  // instead of every page that wants to show categories.
+  const categories = (await loadCategories(resolved.apiKey).catch(() => ({ data: [] }))).data ?? [];
 
   // Resolved once per request and handed down, so the header, the catalog, the
   // product page and checkout cannot disagree about which store this is.
@@ -97,6 +104,9 @@ export default async function StoreLayout({ params, children }: Props) {
             storeSlug={slug}
             stores={activeStore ? stores : []}
             activeLocationId={activeStore?.locationId ?? null}
+            categories={categories}
+            locales={locales}
+            locale={locale}
           />
           <main className="flex-1">{children}</main>
           {mustChooseStore && (

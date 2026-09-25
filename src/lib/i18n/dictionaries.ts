@@ -24,6 +24,12 @@ export const MESSAGES = {
     'checkout.continue': 'Continue to Payment',
     'common.shopNow': 'Shop Now',
     'common.total': 'Total',
+    'search.placeholder': 'Search products…',
+    'nav.stores': 'Stores',
+    'nav.wishlist': 'Saved',
+    'nav.home': 'Home',
+    'nav.menu': 'Menu',
+    'nav.cart': 'Cart',
   },
   es: {
     'nav.shop': 'Tienda',
@@ -45,6 +51,12 @@ export const MESSAGES = {
     'checkout.continue': 'Continuar al pago',
     'common.shopNow': 'Comprar ahora',
     'common.total': 'Total',
+    'search.placeholder': 'Buscar productos…',
+    'nav.stores': 'Tiendas',
+    'nav.wishlist': 'Guardados',
+    'nav.home': 'Inicio',
+    'nav.menu': 'Menú',
+    'nav.cart': 'Carrito',
   },
 } as const;
 

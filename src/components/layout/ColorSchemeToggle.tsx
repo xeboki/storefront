@@ -10,12 +10,43 @@ const OPTIONS: { value: ColorScheme; label: string; Icon: typeof Sun }[] = [
 ];
 
 /**
- * Three-way segmented control. `system` is an option rather than an implicit
- * default, because a shopper who has never touched it should be able to see
- * that the shop is following their phone and not guessing.
+ * Appearance control, in two sizes.
+ *
+ * `compact` is one button that cycles light → dark → system, for places where
+ * three side-by-side buttons are more furniture than the setting deserves —
+ * the header, mainly, where it was crowding out the things people came to use.
+ * The icon shows the current mode and the label names the next one, so the
+ * cycle is discoverable without three permanent buttons.
+ *
+ * `system` stays an option either way: a shopper who has never touched it
+ * should be able to see the shop is following their phone, not guessing.
  */
-export function ColorSchemeToggle({ className = '' }: { className?: string }) {
+export function ColorSchemeToggle({
+  className = '',
+  compact = false,
+}: {
+  className?: string;
+  compact?: boolean;
+}) {
   const { scheme, setScheme } = useColorScheme();
+
+  if (compact) {
+    const index = OPTIONS.findIndex((o) => o.value === scheme);
+    const current = OPTIONS[index === -1 ? 2 : index];
+    const next = OPTIONS[(index === -1 ? 2 : index + 1) % OPTIONS.length];
+    const { Icon } = current;
+    return (
+      <button
+        type="button"
+        onClick={() => setScheme(next.value)}
+        aria-label={`Appearance: ${current.label}. Switch to ${next.label}.`}
+        title={`Appearance: ${current.label}`}
+        className={`flex h-9 w-9 items-center justify-center rounded-brand border border-line text-fg-muted transition-colors hover:text-fg ${className}`}
+      >
+        <Icon className="h-4 w-4" />
+      </button>
+    );
+  }
 
   return (
     <div

@@ -4,7 +4,7 @@ import Script from 'next/script';
 import './globals.css';
 import { loadStore } from '@/lib/sdk/store';
 import { buildThemeVars } from '@/lib/theme';
-import { resolveLocale } from '@/lib/i18n';
+import { activeLocale } from '@/lib/i18n/server';
 import { ColorSchemeProvider, colorSchemeScript } from '@/components/layout/color-scheme';
 
 export const metadata: Metadata = {
@@ -33,7 +33,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const themeVars = buildThemeVars(
     preview && config ? { ...config, theme: preview } : config,
   );
-  const locale = resolveLocale(null);
+  // The shopper's choice, not the deployment default — <html lang> is what a
+  // screen reader and a translation tool read, so it has to agree with the
+  // language the page is actually written in.
+  const locale = activeLocale();
 
   return (
     <html

@@ -4,7 +4,7 @@ import type { Metadata } from 'next'
 import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store'
 import { activeLocation, isLocationFirst, onlineStores, storeLabel } from '@/lib/location'
 import { CategoryFilterBar } from '@/components/product/CategoryFilterBar'
-import { CatalogSearch } from '@/components/product/CatalogSearch'
+import { InStockFilter } from '@/components/product/InStockFilter'
 import { CatalogSort } from '@/components/product/CatalogSort'
 import { CatalogFilterSheet } from '@/components/product/CatalogFilterSheet'
 import { ProductGrid } from '@/components/product/ProductGrid'
@@ -110,15 +110,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
         storeSlug={params.store}
         className="hidden sm:flex"
       />
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div className="flex-1">
-          <CatalogSearch
-            initialQuery={search ?? ''}
-            initialInStock={scopedToStock}
-            lockInStock={locationFirst}
-          />
-        </div>
-        <CatalogSort current={sort ?? ''} className="hidden sm:flex" />
+      {/* Search is in the header on every page now; only availability and
+          sort belong to the listing itself. */}
+      <div className="mb-4 hidden items-center justify-between gap-3 sm:flex">
+        <InStockFilter checked={scopedToStock} locked={locationFirst} />
+        <CatalogSort current={sort ?? ''} />
       </div>
 
       <p className="text-sm text-fg-muted mb-4">
