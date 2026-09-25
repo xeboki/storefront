@@ -7,10 +7,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { Mail, MapPin, Navigation, Phone, Store, Truck } from 'lucide-react';
-import { loadStore } from '@/lib/sdk/store';
+import { Clock, Mail, MapPin, Navigation, Phone, Store, Truck } from 'lucide-react';
+import { loadStore, loadLocations } from '@/lib/sdk/store';
 import { activeLocation, locationBySlug, serviceArea, storeLabel } from '@/lib/location';
 import { generateBreadcrumbs, generateLocalBranch } from '@/lib/seo/structured-data';
+import { OpeningHoursTable } from '@/components/location/OpeningHours';
 import { formatCurrency } from '@/lib/utils';
 
 interface Props {
@@ -47,7 +48,21 @@ export default async function LocationPage({ params }: Props) {
   if (!branch) notFound();
 
   const name = storeLabel(branch);
-  const address = branch.pickupAddress || branch.city || '';
+
+  // The ordering terms live on the storefront config; the branch's own address,
+  // phone and trading hours live on the location record. Join them by id rather
+  // than keep a second copy of the address in the CMS.
+  const record = (await loadLocations(resolved.apiKey).catch(() => []))
+    .find((l) => l.id === branch.locationId) ?? null;
+
+  const address =
+    branch.pickupAddress ||
+    (typeof record?.address === 'string' ? record.address : '') ||
+    branch.city ||
+    '';
+  const phone = record?.phone || storeConfig.supportPhone || '';
+  const email = record?.email || storeConfig.supportEmail || '';
+  const hours = record?.hours ?? null;
 
   // Someone can land here from a search result while their basket and the
   // header both belong to another branch. Say which is which rather than let
@@ -64,6 +79,8 @@ export default async function LocationPage({ params }: Props) {
     city: branch.city ?? '',
     address: branch.pickupAddress ?? '',
     serviceArea: areas,
+    phone,
+    hours,
   });
   const breadcrumbJsonLd = generateBreadcrumbs(params.store, storefrontConfig, [
     { name: 'Our stores', path: '/locations' },
@@ -107,17 +124,17 @@ export default async function LocationPage({ params }: Props) {
           </a>
         )}
         {/* tel: and mailto: are the mobile-contact path — one tap, no form. */}
-        {storeConfig.supportPhone && (
+        {phone && (
           <a
-            href={`tel:${storeConfig.supportPhone.replace(/\s+/g, '')}`}
+            href={`tel:${phone.replace(/\s+/g, '')}`}
             className="flex items-center gap-1.5 rounded-brand border border-line px-4 py-2.5 text-sm font-medium text-fg transition-colors hover:border-primary hover:text-primary"
           >
             <Phone size={15} aria-hidden /> Call
           </a>
         )}
-        {storeConfig.supportEmail && (
+        {email && (
           <a
-            href={`mailto:${storeConfig.supportEmail}`}
+            href={`mailto:${email}`}
             className="flex items-center gap-1.5 rounded-brand border border-line px-4 py-2.5 text-sm font-medium text-fg transition-colors hover:border-primary hover:text-primary"
           >
             <Mail size={15} aria-hidden /> Email
@@ -186,6 +203,15 @@ export default async function LocationPage({ params }: Props) {
           )}
         </section>
       </div>
+
+      {hours && (
+        <section className="mt-4 rounded-brand border border-line bg-surface p-5">
+          <h2 className="flex items-center gap-2 font-semibold text-fg">
+            <Clock size={16} aria-hidden /> Opening hours
+          </h2>
+          <OpeningHoursTable hours={hours} />
+        </section>
+      )}
 
       {/* The coverage zone, spelled out. A shopper should not have to reach
           checkout to discover whether this store reaches them. */}

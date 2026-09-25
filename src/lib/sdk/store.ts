@@ -218,6 +218,27 @@ export const loadCustomPage = unstable_cache(
 // so plainly instead of surfacing a raw 400.
 // ---------------------------------------------------------------------------
 
+/**
+ * The merchant's real location records — address, phone, trading hours.
+ *
+ * Distinct from `storefrontConfig.fulfillmentLocations`, which holds only the
+ * ORDERING terms (fees, radius, served cities) plus a denormalised name. The
+ * facts a branch page needs live on the location itself, so a branch page joins
+ * the two by id rather than the CMS keeping a second copy of the address.
+ */
+export const loadLocations = unstable_cache(
+  async (apiKey: string) => {
+    const { getXebokiClient } = await import('./client');
+    const client = getXebokiClient(apiKey);
+    const res = await resilientRead(`locations:${apiKey.slice(-8)}`, () =>
+      client.ordering.listLocations(),
+    );
+    return res?.data ?? [];
+  },
+  ['ordering-locations'],
+  { revalidate: 300, tags: ['store-config'] },
+);
+
 export const resolveOrderingLocationId = unstable_cache(
   async (apiKey: string): Promise<string | null> => {
     const { getXebokiClient } = await import('./client');

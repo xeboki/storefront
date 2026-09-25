@@ -5,7 +5,7 @@
  * All generators return a plain object suitable for:
  *   <script type="application/ld+json">{JSON.stringify(generateOrganization(...))}</script>
  */
-import type { StoreConfig, StorefrontConfig, OrderingProduct, BlogPost } from '@xeboki/sdk';
+import type { StoreConfig, StorefrontConfig, OrderingProduct, BlogPost, WeeklyHours } from '@xeboki/sdk';
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store';
 
@@ -63,8 +63,23 @@ export function generateLocalBranch(
     city: string;
     address: string;
     serviceArea: string[];
+    phone?: string | null;
+    hours?: WeeklyHours | null;
   },
 ) {
+  // schema.org wants the three-letter day form, and only the days we know.
+  const DAY_CODE: Record<string, string> = {
+    monday: 'Mo', tuesday: 'Tu', wednesday: 'We', thursday: 'Th',
+    friday: 'Fr', saturday: 'Sa', sunday: 'Su',
+  };
+  const openingHours = Object.entries(branch.hours ?? {})
+    .filter(([, slot]) => slot && !slot.closed && slot.opens && slot.closes)
+    .map(([day, slot]) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: DAY_CODE[day],
+      opens: slot!.opens,
+      closes: slot!.closes,
+    }));
   const base = storeUrl(storeSlug, storefrontConfig);
   return {
     '@context': 'https://schema.org',
@@ -74,8 +89,12 @@ export function generateLocalBranch(
     url: `${base}/l/${branch.slug}`,
     branchOf: { '@type': 'Organization', name: storeConfig.businessName, url: base },
     ...(storefrontConfig?.logoUrl && { logo: storefrontConfig.logoUrl }),
-    ...(storeConfig.supportPhone && { telephone: storeConfig.supportPhone }),
+    // The branch's own number when it has one; the shop's only as a fallback.
+    ...((branch.phone || storeConfig.supportPhone) && {
+      telephone: branch.phone || storeConfig.supportPhone,
+    }),
     ...(storeConfig.supportEmail && { email: storeConfig.supportEmail }),
+    ...(openingHours.length > 0 && { openingHoursSpecification: openingHours }),
     ...((branch.address || branch.city) && {
       address: {
         '@type': 'PostalAddress',
