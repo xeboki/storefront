@@ -28,8 +28,15 @@ function key(businessType: string | null | undefined): string {
 
 const APPOINTMENTS = new Set(['salon', 'gym', 'service', 'petstore', 'optical', 'mobilerepair']);
 const WORK_ORDERS = new Set(['mobilerepair', 'laundry', 'service', 'optical']);
-/** `liquor` is the id Manager stores; `liquorstore` is the older spelling. */
-const AGE_GATE = new Set(['liquor', 'liquorstore']);
+/**
+ * Who has to say something about age.
+ *
+ * `liquor` is the id Manager stores. A bar is here too: a pub shipping bottles
+ * is selling alcohol to someone it cannot see, which is the whole reason the
+ * notice exists. `liquorStore`, which this set used to hold on its own, is not
+ * an id Manager has ever written — see the guard in the API's tests.
+ */
+const AGE_GATE = new Set(['liquor', 'bar']);
 const TABLES = new Set(['restaurant', 'bar']);
 const FOOD = new Set(['restaurant', 'bar', 'coffeeshop', 'qsr', 'bakery', 'foodtruck']);
 
