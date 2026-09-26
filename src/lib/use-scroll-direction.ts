@@ -9,6 +9,21 @@ export interface ScrollState {
   scrolled: boolean;
 }
 
+/** How far the page has to travel one way before the bar believes it. */
+const COMMIT = 24;
+/**
+ * How long to stop listening after a flip.
+ *
+ * The rail's collapse is a 300ms transition, and it changes the height of a
+ * sticky header — which is content above everything else on the page. The
+ * browser moves the page to compensate, frame by frame, for as long as that
+ * animation runs. Those are scrolls this hook caused; reading them as the
+ * reader's intent is what made the bar flicker on the way back up: the rail
+ * opened, the page shifted down, that read as "scrolling down", the rail shut,
+ * the page shifted back, and round it went for as long as a finger moved.
+ */
+const SETTLE_MS = 380;
+
 /**
  * Which way the page is moving, for chrome that should get out of the way.
  *
@@ -16,36 +31,75 @@ export interface ScrollState {
  * often than the screen refreshes, and doing layout work in it is how a scroll
  * starts to stutter on a phone.
  *
- * [threshold] keeps the bar still through the small movements a finger makes
- * while reading — collapsing on a 3px jitter feels broken, not responsive.
+ * Direction is committed from an anchor rather than compared frame to frame.
+ * A per-frame comparison answers "which way did the last 16ms go", and near the
+ * top of a page — where a finger wobbles, momentum settles and the browser is
+ * still correcting for the header's own animation — that question has no stable
+ * answer. The anchor asks the one that does: has the page travelled [COMMIT]
+ * pixels one way since it last changed its mind?
+ *
+ * [threshold] keeps the bar open near the top of the page. It sits well clear
+ * of the rail's own height on purpose: if the two were close, collapsing the
+ * rail could carry the page back across the line that forces it open again,
+ * and the pair would sit there switching.
  */
-export function useScrollDirection(threshold = 64): ScrollState {
+export function useScrollDirection(threshold = 140): ScrollState {
   const [state, setState] = useState<ScrollState>({ hidden: false, scrolled: false });
-  const last = useRef(0);
+  /** What was last published — read in the rAF, which is outside React. */
+  const current = useRef<ScrollState>({ hidden: false, scrolled: false });
+  /** Where the page last changed direction — what COMMIT is measured from. */
+  const anchor = useRef(0);
+  const lastY = useRef(0);
+  const goingDown = useRef(false);
+  /** Ignore everything until this moment; a flip is still settling. */
+  const deaf = useRef(0);
   const ticking = useRef(false);
 
   useEffect(() => {
-    last.current = window.scrollY;
+    anchor.current = window.scrollY;
+    lastY.current = window.scrollY;
 
     function read() {
-      const y = Math.max(0, window.scrollY);
-      const previous = last.current;
-      // `last` always tracks the latest position. Deciding direction against a
-      // stale anchor was the bug: a browser emits several scroll events as a
-      // jump settles, and the ones with a tiny delta were left to decide.
-      last.current = y;
-
-      setState((prev) => {
-        let hidden = prev.hidden;
-        if (y <= threshold) hidden = false;          // near the top, always show
-        else if (y > previous + 4) hidden = true;    // heading down
-        else if (y < previous - 4) hidden = false;   // heading back up
-        const scrolled = y > 8;
-        return hidden === prev.hidden && scrolled === prev.scrolled
-          ? prev                                     // no re-render for nothing
-          : { hidden, scrolled };
-      });
       ticking.current = false;
+      const y = Math.max(0, window.scrollY);
+      const previous = lastY.current;
+      lastY.current = y;
+
+      if (performance.now() < deaf.current) {
+        // Still settling. Keep the anchor under the page so the next real
+        // movement is measured from where it actually ended up.
+        anchor.current = y;
+        return;
+      }
+
+      // A turn resets what the commit is measured from, so a reversal needs
+      // its own COMMIT pixels rather than inheriting the run before it.
+      const down = y > previous;
+      if (previous !== y && down !== goingDown.current) {
+        goingDown.current = down;
+        anchor.current = previous;
+      }
+
+      // Worked out here rather than inside the updater: an updater has to be
+      // pure, and React is free to run it twice.
+      const prev = current.current;
+      let hidden = prev.hidden;
+      if (y <= threshold) {
+        hidden = false;
+      } else if (y - anchor.current > COMMIT) {
+        hidden = true;
+      } else if (anchor.current - y > COMMIT) {
+        hidden = false;
+      }
+      const scrolled = y > 8;
+
+      if (hidden === prev.hidden && scrolled === prev.scrolled) return;
+      if (hidden !== prev.hidden) {
+        deaf.current = performance.now() + SETTLE_MS;
+        anchor.current = y;
+      }
+      current.current = { hidden, scrolled };
+      setState(current.current);
     }
 
     function onScroll() {
