@@ -159,7 +159,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                         done
-                          ? 'bg-primary text-primary-foreground'
+                          ? 'bg-primary-solid text-primary-foreground'
                           : 'bg-surface-alt text-fg-subtle'
                       } ${active ? 'ring-4 ring-primary/20' : ''}`}
                     >
@@ -178,7 +178,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
                     <div className="flex-1 h-0.5 mx-2 transition-colors">
                       <div
                         className={`h-full transition-all duration-500 ${
-                          i < stepIndex ? 'bg-primary' : 'bg-surface-alt'
+                          i < stepIndex ? 'bg-primary-solid' : 'bg-surface-alt'
                         }`}
                       />
                     </div>

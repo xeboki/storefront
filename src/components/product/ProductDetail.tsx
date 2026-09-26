@@ -284,7 +284,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
             className={clsx(
               'flex h-12 flex-1 items-center justify-center gap-2 rounded-brand text-xs font-semibold uppercase tracking-[0.14em] transition-opacity',
               isAvailable
-                ? 'bg-primary text-primary-foreground hover:opacity-90'
+                ? 'bg-primary-solid text-primary-foreground hover:opacity-90'
                 : 'cursor-not-allowed bg-surface-alt text-fg-subtle',
             )}
           >
@@ -385,7 +385,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
           className={clsx(
             'ml-auto flex h-12 flex-1 items-center justify-center gap-2 rounded-brand px-6 font-semibold transition-opacity',
             isAvailable
-              ? 'bg-primary text-primary-foreground hover:opacity-90'
+              ? 'bg-primary-solid text-primary-foreground hover:opacity-90'
               : 'bg-surface-alt text-fg-subtle cursor-not-allowed',
           )}
         >

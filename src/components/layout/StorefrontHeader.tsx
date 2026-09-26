@@ -194,7 +194,7 @@ export function StorefrontHeader({
               <Link
                 href={`/${storeSlug}/cart`}
                 aria-label={t('nav.cart')}
-                className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+                className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-solid text-primary-foreground transition-opacity hover:opacity-90"
               >
                 <ShoppingCart size={18} />
                 {hydrated && itemCount > 0 && (

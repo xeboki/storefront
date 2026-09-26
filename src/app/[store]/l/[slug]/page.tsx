@@ -110,7 +110,7 @@ export default async function LocationPage({ params }: Props) {
       <div className="mt-6 flex flex-wrap gap-2">
         <Link
           href={`/${params.store}/catalog?loc=${branch.locationId}`}
-          className="rounded-brand bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+          className="rounded-brand bg-primary-solid px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
           Shop this store
         </Link>

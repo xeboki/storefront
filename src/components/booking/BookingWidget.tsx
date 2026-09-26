@@ -316,7 +316,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
                   className={clsx(
                     'flex flex-col items-center py-2 rounded-brand text-xs font-medium transition-colors',
                     isSelected
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'bg-primary-solid text-primary-foreground'
                       : isPast || isUnavailable
                       ? 'text-fg-subtle cursor-not-allowed'
                       : 'text-fg hover:bg-primary/10 hover:text-primary border border-line',
@@ -374,7 +374,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
                         !slot.available
                           ? 'bg-surface-alt text-fg-subtle border-line line-through cursor-not-allowed'
                           : isSelected
-                          ? 'bg-primary text-primary-foreground border-primary'
+                          ? 'bg-primary-solid text-primary-foreground border-primary'
                           : 'bg-surface text-fg border-line hover:border-primary',
                       )}
                     >
@@ -390,7 +390,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
         {selectedDate && selectedSlot && (
           <button
             onClick={() => setStep('confirm')}
-            className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity"
+            className="w-full py-3 bg-primary-solid text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity"
           >
             Continue
           </button>
@@ -467,7 +467,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
         <button
           onClick={handleBook}
           disabled={loading || !customer}
-          className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
+          className="w-full py-3 bg-primary-solid text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
         >
           {loading ? 'Booking…' : 'Confirm Appointment'}
         </button>
@@ -493,7 +493,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
         </a>
         <a
           href={`/${storeSlug}`}
-          className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 transition-opacity"
+          className="px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 transition-opacity"
         >
           Back to Store
         </a>

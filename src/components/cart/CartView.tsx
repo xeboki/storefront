@@ -124,7 +124,7 @@ export function CartView({ storeSlug }: Props) {
 
           <Link
             href={`/${storeSlug}/checkout`}
-            className="mt-6 flex h-12 w-full items-center justify-center rounded-brand bg-primary text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90"
+            className="mt-6 flex h-12 w-full items-center justify-center rounded-brand bg-primary-solid text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90"
           >
             Proceed to Checkout
           </Link>

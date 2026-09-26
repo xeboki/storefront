@@ -78,7 +78,7 @@ export function HeroSection({
   const column = variant === 'split' ? 'mx-auto max-w-2xl text-center' : 'max-w-xl';
 
   return (
-    <section className="relative isolate overflow-hidden bg-primary">
+    <section className="relative isolate overflow-hidden bg-primary-solid">
       {/* Photography, when there is any. Darkened so type stays readable over
           whatever the merchant uploads — we cannot know if it is a pale
           studio shot or a night scene. */}

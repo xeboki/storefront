@@ -92,7 +92,7 @@ export function CatalogFilterSheet({
           <SlidersHorizontal size={16} aria-hidden />
           Filter
           {activeCount > 0 && (
-            <span className="ml-0.5 rounded-full bg-primary px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
+            <span className="ml-0.5 rounded-full bg-primary-solid px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
               {activeCount}
             </span>
           )}
@@ -220,7 +220,7 @@ export function CatalogFilterSheet({
               <button
                 type="button"
                 onClick={() => setPanel(null)}
-                className="w-full rounded-brand bg-primary py-3 text-sm font-semibold text-primary-foreground"
+                className="w-full rounded-brand bg-primary-solid py-3 text-sm font-semibold text-primary-foreground"
               >
                 Show {total} {total === 1 ? 'product' : 'products'}
               </button>

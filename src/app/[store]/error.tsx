@@ -14,7 +14,7 @@ export default function StoreError({ error, reset }: { error: Error & { digest?:
       <p className="text-fg-muted mb-6">This page hit an error. Please try again.</p>
       <button
         onClick={() => reset()}
-        className="px-5 py-2.5 rounded-brand bg-primary text-primary-foreground font-semibold hover:opacity-90"
+        className="px-5 py-2.5 rounded-brand bg-primary-solid text-primary-foreground font-semibold hover:opacity-90"
       >
         Try again
       </button>

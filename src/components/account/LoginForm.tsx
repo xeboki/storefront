@@ -80,7 +80,7 @@ export function LoginForm({ storeSlug }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity disabled:opacity-50"
+        className="w-full py-2.5 bg-primary-solid text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {loading ? 'Signing in…' : 'Sign In'}
       </button>

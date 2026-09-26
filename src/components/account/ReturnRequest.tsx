@@ -110,7 +110,7 @@ export function ReturnRequest({ orderId, storeSlug, eligible }: Props) {
             <button
               onClick={submit}
               disabled={submitting}
-              className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50"
+              className="px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50"
             >
               {submitting ? 'Submitting…' : 'Submit return'}
             </button>

@@ -51,7 +51,7 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
             className={clsx(
               'flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium border transition-colors',
               initialStatus === f.key || (!initialStatus && !f.key)
-                ? 'bg-primary text-primary-foreground border-primary'
+                ? 'bg-primary-solid text-primary-foreground border-primary'
                 : 'bg-surface text-fg-muted border-line hover:border-primary hover:text-primary',
             )}
           >

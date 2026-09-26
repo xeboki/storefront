@@ -43,7 +43,7 @@ export function StoreLogo({ logoUrl, name, className = '', size = 'sm' }: Props)
           <span
             aria-hidden
             className={`relative grid flex-shrink-0 place-items-center overflow-hidden
-              rounded-[35%] bg-primary text-primary-foreground shadow-sm
+              rounded-[35%] bg-primary-solid text-primary-foreground shadow-sm
               ring-1 ring-inset ring-white/20 ${tile}`}
           >
             {/* Light falling across it from the top left. Flat colour is what

@@ -90,7 +90,7 @@ export function CheckoutForm({ storeSlug, orderId }: Props) {
             'w-full py-3 px-6 rounded-brand font-semibold text-primary-foreground transition-opacity',
             loading || !stripe
               ? 'bg-fg-subtle cursor-not-allowed'
-              : 'bg-primary hover:opacity-90',
+              : 'bg-primary-solid hover:opacity-90',
           )}
         >
           {loading ? 'Processing…' : `Pay ${money(subtotal)}`}

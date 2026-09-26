@@ -21,6 +21,8 @@ const config: Config = {
       colors: {
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
+          // The one to fill a shape with when words go on top of it.
+          solid: 'rgb(var(--color-primary-solid) / <alpha-value>)',
           foreground: 'rgb(var(--color-primary-fg) / <alpha-value>)',
         },
         secondary: {

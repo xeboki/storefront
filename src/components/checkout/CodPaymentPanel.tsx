@@ -109,7 +109,7 @@ export function CodPaymentPanel({
       <button
         onClick={placeOrder}
         disabled={loading}
-        className="w-full py-3 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
+        className="w-full py-3 bg-primary-solid text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
       >
         {loading ? 'Placing order…' : 'Place Order'}
       </button>

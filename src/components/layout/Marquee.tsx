@@ -23,7 +23,7 @@ export function Marquee({ text }: { text?: string | null }) {
   ));
 
   return (
-    <div className="marquee relative overflow-hidden border-b border-line bg-primary text-primary-foreground">
+    <div className="marquee relative overflow-hidden border-b border-line bg-primary-solid text-primary-foreground">
       {/* Read once by assistive tech; the repeats are decoration. */}
       <span className="sr-only">{message}</span>
       <div className="marquee-track py-2.5" aria-hidden>

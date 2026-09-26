@@ -43,7 +43,7 @@ export default async function AccountAppointmentsPage({ params }: Props) {
       <div className="mb-4">
         <Link
           href={`/${params.store}/book`}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 transition-opacity"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 transition-opacity"
         >
           + Book New Appointment
         </Link>

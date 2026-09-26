@@ -177,7 +177,7 @@ export function ClassList({ storeSlug }: Props) {
                       'rounded-brand px-4 py-2 text-sm font-medium transition',
                       soldOut || busy
                         ? 'bg-surface-alt text-fg-subtle cursor-not-allowed'
-                        : 'bg-primary text-primary-foreground hover:opacity-90',
+                        : 'bg-primary-solid text-primary-foreground hover:opacity-90',
                     )}
                   >
                     {busy ? 'Booking…' : soldOut ? 'Full' : 'Book'}

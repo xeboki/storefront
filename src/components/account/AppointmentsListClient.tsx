@@ -83,7 +83,7 @@ export function AppointmentsListClient({ initialAppointments, storeSlug }: Props
             className={clsx(
               'flex-shrink-0 text-xs px-3 py-1.5 rounded-full font-medium border transition-colors',
               filter === f.key || (!filter && !f.key)
-                ? 'bg-primary text-primary-foreground border-primary'
+                ? 'bg-primary-solid text-primary-foreground border-primary'
                 : 'bg-surface text-fg-muted border-line hover:border-primary hover:text-primary',
             )}
           >

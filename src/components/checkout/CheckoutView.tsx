@@ -612,7 +612,7 @@ export function CheckoutView({
                 className={clsx(
                   'py-2.5 px-4 rounded-brand border text-sm font-medium transition-colors',
                   deliveryType === key
-                    ? 'bg-primary text-primary-foreground border-primary'
+                    ? 'bg-primary-solid text-primary-foreground border-primary'
                     : 'bg-surface text-fg border-line hover:border-primary',
                 )}
               >
@@ -755,7 +755,7 @@ export function CheckoutView({
                   <button
                     onClick={applyDiscount}
                     disabled={discountLoading || !discountCode.trim()}
-                    className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    className="px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
                   >
                     {discountLoading ? '…' : 'Apply'}
                   </button>
@@ -804,7 +804,7 @@ export function CheckoutView({
                   <button
                     onClick={applyGiftCard}
                     disabled={giftCardLoading || !giftCardCode.trim()}
-                    className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    className="px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
                   >
                     {giftCardLoading ? '…' : 'Apply'}
                   </button>
@@ -858,7 +858,7 @@ export function CheckoutView({
                   'w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center',
                   paymentMethod === m.id ? 'border-primary' : 'border-line',
                 )}>
-                  {paymentMethod === m.id && <span className="w-2 h-2 rounded-full bg-primary block" />}
+                  {paymentMethod === m.id && <span className="w-2 h-2 rounded-full bg-primary-solid block" />}
                 </span>
 
                 <span className="text-lg">{m.icon}</span>
@@ -890,7 +890,7 @@ export function CheckoutView({
         <button
           onClick={handleContinue}
           disabled={loading || belowMinimum}
-          className="flex h-12 w-full items-center justify-center rounded-brand bg-primary text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="flex h-12 w-full items-center justify-center rounded-brand bg-primary-solid text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading
             ? 'Preparing…'

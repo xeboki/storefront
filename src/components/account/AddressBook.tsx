@@ -205,7 +205,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
             <button
               type="submit"
               disabled={saving}
-              className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50"
+              className="px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50"
             >
               {saving ? 'Saving…' : 'Save Address'}
             </button>

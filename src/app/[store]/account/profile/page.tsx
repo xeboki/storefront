@@ -110,7 +110,7 @@ export default function AccountProfilePage({ params }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity text-sm"
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary-solid text-primary-foreground font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity text-sm"
         >
           <Save size={16} />
           {loading ? 'Saving…' : 'Save Changes'}

@@ -127,7 +127,7 @@ export default async function StorePage({ params }: Props) {
             </div>
             <Link
               href={`/${params.store}/book`}
-              className="flex-shrink-0 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity text-sm"
+              className="flex-shrink-0 px-6 py-2.5 bg-primary-solid text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity text-sm"
             >
               {bookingWords.linkLabel}
             </Link>

@@ -18,6 +18,7 @@ import type { StorefrontConfig } from '@xeboki/sdk';
 import {
   ensureContrast,
   liftForDark,
+  solidFill,
   luminance,
   mix,
   parseHex,
@@ -97,6 +98,11 @@ function fontStack(family: string | null | undefined, fallback: string): string 
  * id="_goober">` lands first and breaks hydration.
  */
 function paletteVars(prefix: string, p: Palette, accent: Rgb, accent2: Rgb): ThemeVars {
+  // The brand colour, and the brand colour you can put words on. They are the
+  // same thing for most palettes and differ by a shade for a mid-tone one —
+  // see solidFill. Keeping them apart is what lets a tint, a border and a link
+  // stay exactly the colour the merchant picked.
+  const solid = solidFill(accent);
   return {
     [`--${prefix}-bg`]: triplet(p.bg),
     [`--${prefix}-surface`]: triplet(p.surface),
@@ -106,7 +112,8 @@ function paletteVars(prefix: string, p: Palette, accent: Rgb, accent2: Rgb): The
     [`--${prefix}-fg-muted`]: triplet(p.fgMuted),
     [`--${prefix}-fg-subtle`]: triplet(p.fgSubtle),
     [`--${prefix}-primary`]: triplet(accent),
-    [`--${prefix}-primary-fg`]: triplet(readableOn(accent)),
+    [`--${prefix}-primary-solid`]: triplet(solid.fill),
+    [`--${prefix}-primary-fg`]: triplet(solid.text),
     [`--${prefix}-secondary`]: triplet(accent2),
     [`--${prefix}-secondary-fg`]: triplet(readableOn(accent2)),
   };

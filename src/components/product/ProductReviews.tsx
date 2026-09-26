@@ -181,7 +181,7 @@ export function ProductReviews({ storeSlug, productId }: Props) {
             <button
               type="submit"
               disabled={submitting}
-              className="px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
+              className="px-4 py-2 bg-primary-solid text-primary-foreground text-sm font-semibold rounded-brand hover:opacity-90 disabled:opacity-50 transition-opacity"
             >
               {submitting ? 'Submitting…' : 'Submit Review'}
             </button>

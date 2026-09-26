@@ -291,7 +291,7 @@ export function RepairEstimateApproval({
           type="button"
           disabled={saving || chosen.length === 0}
           onClick={() => void submit(false)}
-          className="flex-1 bg-primary text-primary-foreground px-6 py-3 rounded-brand font-medium hover:opacity-90 disabled:opacity-50"
+          className="flex-1 bg-primary-solid text-primary-foreground px-6 py-3 rounded-brand font-medium hover:opacity-90 disabled:opacity-50"
         >
           {saving ? 'Sending…' : `Approve ${money(total)}`}
         </button>

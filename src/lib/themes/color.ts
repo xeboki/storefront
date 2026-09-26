@@ -67,6 +67,43 @@ export function mix(a: Rgb, b: Rgb, t: number): Rgb {
   return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
 }
 
+/** WCAG AA for normal text. A button label is normal text. */
+const AA = 4.5;
+
+/**
+ * The brand colour as a colour you can put white words on.
+ *
+ * `readableOn` answers "which of black or white reads better here", and for a
+ * mid-tone brand — emerald, teal, most blues — the honest answer is black:
+ * white clears only about 3:1, black nearly 6. So a filled button got dark
+ * slate on emerald, which passes and looks like unstyled text on a coloured
+ * rectangle. Nobody's brand button looks like that.
+ *
+ * The fix is not to put white on it anyway. It is to darken the fill until
+ * white genuinely reads, which keeps the shape a person expects AND the
+ * contrast they need. The merchant's colour is untouched everywhere it is
+ * shown AS a colour — tints, borders, links — and shaded only where words sit
+ * on top of it.
+ *
+ * A brand too light to carry white at all — a yellow, a pale pink — would have
+ * to be darkened past recognition, so that one keeps dark text on the colour
+ * as chosen. Legibility wins either way; only the route differs.
+ */
+export function solidFill(brand: Rgb): { fill: Rgb; text: Rgb } {
+  if (contrastRatio(brand, WHITE) >= AA) return { fill: brand, text: WHITE };
+
+  // Capped at a quarter. Beyond that it stops being a shade of the merchant's
+  // colour and starts being a different one — a gold darkened until white
+  // reads on it is a brown, and a shop that chose gold did not choose brown.
+  for (let step = 1; step <= 4; step++) {
+    const darker = mix(brand, [0, 0, 0], step * 0.06);
+    if (contrastRatio(darker, WHITE) >= AA) return { fill: darker, text: WHITE };
+  }
+  // Too light to carry white and still be itself. Dark words on the colour as
+  // chosen: less conventional, but it is their colour and it is legible.
+  return { fill: brand, text: readableOn(brand) };
+}
+
 /**
  * Moves an accent until it reads against whatever page it sits on.
  *

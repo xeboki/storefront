@@ -164,7 +164,7 @@ export function RepairLookup({
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-brand font-medium hover:opacity-90 disabled:opacity-50"
+          className="w-full bg-primary-solid text-primary-foreground px-6 py-3 rounded-brand font-medium hover:opacity-90 disabled:opacity-50"
         >
           {loading ? 'Checking…' : 'Check status'}
         </button>
