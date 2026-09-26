@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { storeName } from '@/lib/store-name';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
+import { StoreLogo } from './StoreLogo';
 import { MapPin } from 'lucide-react';
 import { sectionWords } from '@/lib/section-copy';
 import { showSection } from '@/lib/sections';
@@ -87,7 +88,15 @@ export function StorefrontFooter({
 
           {/* Brand column — always shown */}
           <div className="md:col-span-1">
-            <h3 className="font-bold text-fg mb-3">{storeName(storeConfig)}</h3>
+            {/* The same mark the header carries. A footer that opened on the
+                name as plain text made the page end somewhere different from
+                where it started. */}
+            <StoreLogo
+              logoUrl={storefrontConfig?.logoUrl}
+              name={storeName(storeConfig)}
+              size="md"
+              className="mb-4"
+            />
             {tagline && (
               <p className="mb-3 max-w-xs text-sm leading-relaxed text-fg-muted">{tagline}</p>
             )}

@@ -32,6 +32,11 @@ export async function generateMetadata({ params }: { params: { store: string } }
 
   const titleTemplate = storefrontConfig?.seoTitleTemplate ?? `%s | ${storeName(storeConfig)}`;
 
+  // The merchant's favicon if they uploaded one — it has been in the config
+  // since the CMS shipped and nothing read it — and otherwise the shop's
+  // monogram, so the tab carries the same mark as the header.
+  const icon = storefrontConfig?.faviconUrl || `/${params.store}/brandmark`;
+
   return {
     title: {
       default: storefrontConfig?.seoTitle || storeName(storeConfig),
@@ -50,6 +55,7 @@ export async function generateMetadata({ params }: { params: { store: string } }
     ...(storefrontConfig?.googleVerificationCode && {
       verification: { google: storefrontConfig.googleVerificationCode },
     }),
+    icons: { icon, shortcut: icon, apple: icon },
     robots: storefrontConfig?.isPublished
       ? { index: true, follow: true }
       : { index: false, follow: false },
