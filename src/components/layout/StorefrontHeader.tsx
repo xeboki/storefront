@@ -17,7 +17,7 @@ import { storeName } from '@/lib/store-name';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
-import { ShoppingCart, User, X, Heart, Calendar, Wrench, MapPin } from 'lucide-react';
+import { ShoppingCart, User, X, Heart, Calendar, Wrench, MapPin, Search } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { StorePicker } from './StorePicker';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -54,6 +54,7 @@ export function StorefrontHeader({
   categories, locales, locale,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   // The cart lives in localStorage, so the server cannot know it. Showing the
   // badge before hydration made React discard the header's markup.
   const hydrated = useHydrated();
@@ -69,7 +70,27 @@ export function StorefrontHeader({
   const showBooking = hasAppointments(businessType);
   const showTracking = hasWorkOrders(businessType);
   const customNavLinks: NavLink[] = storefrontConfig?.navLinks ?? [];
-  const rail = categories.filter((c) => c.id !== '_uncategorized');
+
+  // How this shop wants its header. The API fills every field and falls back
+  // on anything it does not recognise, so nothing here has to be defended
+  // against a half-written setting.
+  const header = storefrontConfig?.headerSettings;
+  const searchStyle = header?.search ?? 'full';
+  const railStyle = header?.categoryRail ?? 'all';
+  const hiddenCategories = new Set(header?.hiddenCategoryIds ?? []);
+  const featuredIds = storefrontConfig?.featuredCategoryIds ?? [];
+
+  const rail = categories
+    .filter((c) => c.id !== '_uncategorized')
+    .filter((c) => !hiddenCategories.has(c.id))
+    // 'featured' shows the merchant's chosen set, in the order they arranged
+    // it — but only once they have chosen one. A shop that picked nothing
+    // would otherwise get an empty bar where its departments were.
+    .filter((c) => railStyle !== 'featured' || featuredIds.length === 0 || featuredIds.includes(c.id))
+    .sort((a, b) =>
+      railStyle === 'featured' && featuredIds.length
+        ? featuredIds.indexOf(a.id) - featuredIds.indexOf(b.id)
+        : 0);
 
   // Carry the catalog's own state across a category change — the search term,
   // the sort and the chosen store — so picking "Clothing" does not silently
@@ -95,7 +116,8 @@ export function StorefrontHeader({
     <>
       <header
         className={clsx(
-          'sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur',
+          header?.sticky === false ? 'relative' : 'sticky top-0',
+          'z-40 border-b border-line bg-surface/95 backdrop-blur',
           'transition-shadow duration-300',
           scrolled && 'shadow-sm',
         )}
@@ -110,20 +132,59 @@ export function StorefrontHeader({
           </Link>
 
           {/* The search field gets the middle of the bar, as the thing most
-              shoppers are actually trying to do. */}
-          <HeaderSearch storeSlug={storeSlug} className="hidden flex-1 md:block" />
+              shoppers are actually trying to do — unless this shop says
+              otherwise. `compact` gives it a fixed measure instead of the
+              whole bar, for a shop whose name and departments matter more. */}
+          {searchStyle !== 'off' && searchStyle !== 'icon' && (
+            <HeaderSearch
+              storeSlug={storeSlug}
+              className={
+                searchStyle === 'compact'
+                  ? 'hidden w-64 md:block lg:w-80'
+                  : 'hidden flex-1 md:block'
+              }
+            />
+          )}
 
           <div className="ml-auto flex items-center gap-0.5 md:gap-1">
-            <StorePicker
-              stores={stores}
-              activeId={activeLocationId}
-              storeSlug={storeSlug}
-              className="hidden lg:flex"
-            />
+            {/* `icon` keeps search in the header without giving it room: it
+                opens the same field in the row below, which is where a phone
+                has always had it. */}
+            {searchStyle === 'icon' && (
+              <button
+                type="button"
+                onClick={() => setSearchOpen((v) => !v)}
+                aria-expanded={searchOpen}
+                aria-label={t('search.placeholder')}
+                className={clsx(iconButton, 'hidden md:flex')}
+              >
+                <Search size={20} />
+              </button>
+            )}
 
-            <LanguageSwitcher locales={locales} active={locale} className="hidden sm:block" />
+            {header?.showCurrency !== false && header?.showCurrency && (
+              // The store's currency, stated. NOT a switcher: there is no
+              // exchange rate behind this shop, and a price relabelled into
+              // another currency would be a lie about what gets charged.
+              <span className="hidden px-2 text-sm font-medium text-fg-muted sm:inline">
+                {storeConfig.currencyCode}
+              </span>
+            )}
 
-            {customer ? (
+            {header?.showLocation !== false && (
+              <StorePicker
+                stores={stores}
+                activeId={activeLocationId}
+                storeSlug={storeSlug}
+                className="hidden lg:flex"
+              />
+            )}
+
+            {header?.showLanguage !== false && (
+              <LanguageSwitcher locales={locales} active={locale} className="hidden sm:block" />
+            )}
+
+            {header?.showAccount === false ? null : customer ? (
               <Link href={`/${storeSlug}/account`} className={iconButton} aria-label={t('nav.account')}>
                 <User size={20} />
               </Link>
@@ -133,38 +194,52 @@ export function StorefrontHeader({
               </Link>
             )}
 
-            <Link
-              href={`/${storeSlug}/account/wishlist`}
-              className={clsx(iconButton, 'hidden sm:flex')}
-              aria-label={t('nav.wishlist')}
-            >
-              <Heart size={20} />
-            </Link>
+            {header?.showWishlist !== false && (
+              <Link
+                href={`/${storeSlug}/account/wishlist`}
+                className={clsx(iconButton, 'hidden sm:flex')}
+                aria-label={t('nav.wishlist')}
+              >
+                <Heart size={20} />
+              </Link>
+            )}
 
             {/* The cart is the one action worth an accent — it is where the
                 shopper is heading. */}
-            <Link
-              href={`/${storeSlug}/cart`}
-              aria-label={t('nav.cart')}
-              className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              <ShoppingCart size={18} />
-              {hydrated && itemCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-bold text-bg">
-                  {itemCount > 9 ? '9+' : itemCount}
-                </span>
-              )}
-            </Link>
+            {/* A shop that does not sell online — a showroom, a repair shop
+                taking bookings only — has nowhere for a cart to go. */}
+            {header?.showCart !== false && (
+              <Link
+                href={`/${storeSlug}/cart`}
+                aria-label={t('nav.cart')}
+                className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                <ShoppingCart size={18} />
+                {hydrated && itemCount > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-bold text-bg">
+                    {itemCount > 9 ? '9+' : itemCount}
+                  </span>
+                )}
+              </Link>
+            )}
           </div>
         </div>
 
-        {/* Row 1b — search on a phone, where it cannot share the top row */}
-        <div className="border-t border-line px-4 py-2 md:hidden">
-          <HeaderSearch storeSlug={storeSlug} />
-        </div>
+        {/* Row 1b — search on a phone, where it cannot share the top row, and
+            on any screen when this shop keeps it behind the icon. */}
+        {searchStyle !== 'off' && (
+          <div
+            className={clsx(
+              'border-t border-line px-4 py-2',
+              searchStyle === 'icon' ? (searchOpen ? 'block' : 'hidden md:hidden') : 'md:hidden',
+            )}
+          >
+            <HeaderSearch storeSlug={storeSlug} />
+          </div>
+        )}
 
         {/* Row 2 — the category rail */}
-        {(rail.length > 0 || customNavLinks.length > 0) && (
+        {railStyle !== 'off' && (rail.length > 0 || customNavLinks.length > 0) && (
           <nav
             aria-label="Categories"
             // grid-rows trick: animating to `auto` is not possible, and a fixed
