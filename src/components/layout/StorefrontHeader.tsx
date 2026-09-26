@@ -29,7 +29,8 @@ import { useHydrated } from '@/lib/use-hydrated';
 import { useScrollDirection } from '@/lib/use-scroll-direction';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useStoreConfigStore, APPOINTMENT_TYPES, WORK_ORDER_TYPES } from '@/stores/storeConfigStore';
+import { useStoreConfigStore } from '@/stores/storeConfigStore';
+import { hasAppointments, hasWorkOrders } from '@/lib/business-type';
 import { useT } from '@/lib/i18n/client';
 import type {
   StoreConfig, StorefrontConfig, NavLink, FulfillmentLocation, OrderingCategory,
@@ -65,8 +66,8 @@ export function StorefrontHeader({
   // way down and comes back the moment they head up.
   const { hidden: railHidden, scrolled } = useScrollDirection();
 
-  const hasAppointments = APPOINTMENT_TYPES.has(businessType);
-  const hasWorkOrders = WORK_ORDER_TYPES.has(businessType);
+  const showBooking = hasAppointments(businessType);
+  const showTracking = hasWorkOrders(businessType);
   const customNavLinks: NavLink[] = storefrontConfig?.navLinks ?? [];
   const rail = categories.filter((c) => c.id !== '_uncategorized');
 
@@ -195,12 +196,12 @@ export function StorefrontHeader({
                   {cat.name}
                 </Link>
               ))}
-              {hasAppointments && (
+              {showBooking && (
                 <Link href={`/${storeSlug}/book`} className="whitespace-nowrap text-fg-muted hover:text-primary">
                   Book
                 </Link>
               )}
-              {hasWorkOrders && (
+              {showTracking && (
                 <Link href={`/${storeSlug}/repairs`} className="whitespace-nowrap text-fg-muted hover:text-primary">
                   Track Order
                 </Link>
@@ -256,12 +257,12 @@ export function StorefrontHeader({
                 </Link>
               ))}
 
-              {hasAppointments && (
+              {showBooking && (
                 <Link href={`/${storeSlug}/book`} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-brand px-3 py-3 text-sm font-medium text-fg hover:bg-surface-alt">
                   <Calendar size={16} className="text-fg-subtle" /> Book
                 </Link>
               )}
-              {hasWorkOrders && (
+              {showTracking && (
                 <Link href={`/${storeSlug}/repairs`} onClick={() => setMobileOpen(false)} className="flex items-center gap-2 rounded-brand px-3 py-3 text-sm font-medium text-fg hover:bg-surface-alt">
                   <Wrench size={16} className="text-fg-subtle" /> Track Order
                 </Link>

@@ -10,6 +10,10 @@ export type SectionKey =
   | 'editorial'
   /** The closing band above the footer. */
   | 'footerCta'
+  /** Bands a business type turns on: booking, order tracking, the age gate. */
+  | 'appointmentsCta'
+  | 'workOrderCta'
+  | 'ageGate'
   /** Not a band: the hero's second button, switched the same way. */
   | 'heroSecondaryCta';
 

@@ -7,7 +7,8 @@ import { clsx } from 'clsx';
 import { Tag, Gift, ChevronDown, ChevronUp, Utensils } from 'lucide-react';
 import { useCartStore } from '@/stores/cartStore';
 import { useAuthStore } from '@/stores/authStore';
-import { useStoreConfigStore, TABLE_TYPES } from '@/stores/storeConfigStore';
+import { useStoreConfigStore } from '@/stores/storeConfigStore';
+import { hasTables } from '@/lib/business-type';
 import { formatCurrency } from '@/lib/utils';
 import { useMoney } from '@/lib/currency';
 import {
@@ -118,7 +119,7 @@ export function CheckoutView({
   const customer = useAuthStore((s) => s.customer);
   const businessType = useStoreConfigStore((s) => s.businessType);
 
-  const isTableBusiness = TABLE_TYPES.has(businessType);
+  const isTableBusiness = hasTables(businessType);
 
   // Guest contact
   const [guestName, setGuestName] = useState('');

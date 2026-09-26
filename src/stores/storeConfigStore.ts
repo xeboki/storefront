@@ -6,26 +6,10 @@
  */
 import { create } from 'zustand';
 
-// Business types that support appointment booking
-export const APPOINTMENT_TYPES = new Set([
-  'salon', 'gym', 'service', 'petStore', 'optical', 'mobileRepair',
-]);
-
-// Business types that support table selection at checkout
-export const TABLE_TYPES = new Set(['restaurant', 'bar']);
-
-// Business types that require an age gate
-export const AGE_GATE_TYPES = new Set(['liquorStore']);
-
-// Food businesses that show KDS-aware order types
-export const FOOD_TYPES = new Set([
-  'restaurant', 'bar', 'coffeeShop', 'qsr', 'bakery', 'foodTruck',
-]);
-
-// Work-order businesses (repair tracking, drop-off jobs)
-export const WORK_ORDER_TYPES = new Set([
-  'mobileRepair', 'laundry', 'service', 'optical',
-]);
+// The business-type lists that used to live here are in lib/business-type.ts,
+// spelled once and compared on a normalised form. Four copies of them, all in
+// camelCase against an API that serves snake_case, is what kept every gate on
+// a multi-word type permanently shut.
 
 interface StoreConfigState {
   businessType: string;

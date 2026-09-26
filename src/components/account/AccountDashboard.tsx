@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { LogOut, Package, MapPin, User, Heart, Calendar, Edit } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { useStoreConfigStore, APPOINTMENT_TYPES } from '@/stores/storeConfigStore';
+import { useStoreConfigStore } from '@/stores/storeConfigStore';
+import { hasAppointments } from '@/lib/business-type';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { useMoney } from '@/lib/currency';
 import type { SessionPayload } from '@/lib/auth/session';
@@ -19,7 +20,7 @@ export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
   const money = useMoney();
   const logout = useAuthStore((s) => s.logout);
   const businessType = useStoreConfigStore((s) => s.businessType);
-  const hasAppointments = APPOINTMENT_TYPES.has(businessType);
+  const showAppointments = hasAppointments(businessType);
 
   return (
     <div className="space-y-8">
@@ -66,7 +67,7 @@ export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
           <Heart size={20} className="text-primary" />
           <span className="font-medium text-fg">Wishlist</span>
         </Link>
-        {hasAppointments && (
+        {showAppointments && (
           <Link
             href={`/${storeSlug}/account/appointments`}
             className="flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors"

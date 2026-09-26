@@ -12,16 +12,12 @@ import { onlineStores } from '@/lib/location';
 import { showSection } from '@/lib/sections';
 import { sectionWords } from '@/lib/section-copy';
 import { buildTheme } from '@/lib/theme';
+import { hasAppointments, hasWorkOrders, needsAgeGate } from '@/lib/business-type';
 
 interface Props {
   params: { store: string };
 }
 
-const APPOINTMENT_TYPES = new Set([
-  'salon', 'gym', 'service', 'petStore', 'optical', 'mobileRepair',
-]);
-const WORK_ORDER_TYPES = new Set(['mobileRepair', 'laundry', 'service', 'optical']);
-const AGE_GATE_TYPES = new Set(['liquorStore']);
 
 export default async function StorePage({ params }: Props) {
   const resolved = await loadStore(params.store);
@@ -53,6 +49,25 @@ export default async function StorePage({ params }: Props) {
     ? chosen
     : presetHero) as 'banner' | 'split' | 'minimal';
 
+  // The three bands a business type turns on. Their words were fixed English
+  // written for a category rather than a shop, and one of them — the drinking
+  // age — was fixed at 21, which is right in the United States and wrong
+  // across most of the world. All three take the merchant's wording now, and
+  // all three can be switched off like any other band.
+  const bookingWords = sectionWords(storefrontConfig, 'appointmentsCta', {
+    title: 'Book an Appointment',
+    lede: 'Choose your service, staff, and time — online in seconds.',
+    linkLabel: 'Book Now',
+  });
+  const trackWords = sectionWords(storefrontConfig, 'workOrderCta', {
+    title: 'Track Your Order',
+    lede: 'Enter your ticket number to see the status of your repair or job.',
+    linkLabel: 'Track Order',
+  });
+  const ageWords = sectionWords(storefrontConfig, 'ageGate', {
+    title: 'By shopping here you confirm you are old enough to buy alcohol where you live.',
+  });
+
   const chosenIds = (storefrontConfig?.featuredProductIds ?? []).slice(0, 8);
   const curated = chosenIds.length
     ? (await Promise.all(chosenIds.map((id) => loadProduct(apiKey, id).catch(() => null))))
@@ -82,10 +97,12 @@ export default async function StorePage({ params }: Props) {
 
   return (
     <div>
-      {/* Age gate warning banner */}
-      {AGE_GATE_TYPES.has(bt) && (
+      {/* Age gate warning banner. The wording is the merchant's because the
+          age is: 21 in the United States, 18 across most of Europe, and a
+          shop that states the wrong one is making a claim about the law. */}
+      {needsAgeGate(bt) && showSection(storefrontConfig, 'ageGate') && (
         <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-sm text-amber-800">
-          You must be 21+ to purchase alcohol. By shopping here you confirm you are of legal drinking age.
+          {ageWords.title}
         </div>
       )}
 
@@ -99,35 +116,40 @@ export default async function StorePage({ params }: Props) {
       />
 
       {/* Business-type CTAs */}
-      {APPOINTMENT_TYPES.has(bt) && (
+      {hasAppointments(bt) && showSection(storefrontConfig, 'appointmentsCta') && (
         <section className="bg-primary/5 border-b border-primary/10 py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-fg">Book an Appointment</h2>
-              <p className="text-sm text-fg-muted mt-0.5">Choose your service, staff, and time — online in seconds.</p>
+              <h2 className="text-lg font-bold text-fg">{bookingWords.title}</h2>
+              {bookingWords.lede && (
+                <p className="text-sm text-fg-muted mt-0.5">{bookingWords.lede}</p>
+              )}
             </div>
             <Link
               href={`/${params.store}/book`}
               className="flex-shrink-0 px-6 py-2.5 bg-primary text-primary-foreground font-semibold rounded-brand hover:opacity-90 transition-opacity text-sm"
             >
-              Book Now
+              {bookingWords.linkLabel}
             </Link>
           </div>
         </section>
       )}
 
-      {WORK_ORDER_TYPES.has(bt) && !APPOINTMENT_TYPES.has(bt) && (
+      {hasWorkOrders(bt) && !hasAppointments(bt)
+        && showSection(storefrontConfig, 'workOrderCta') && (
         <section className="bg-surface-alt border-b border-line py-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-fg">Track Your Order</h2>
-              <p className="text-sm text-fg-muted mt-0.5">Enter your ticket number to see the status of your repair or job.</p>
+              <h2 className="text-lg font-bold text-fg">{trackWords.title}</h2>
+              {trackWords.lede && (
+                <p className="text-sm text-fg-muted mt-0.5">{trackWords.lede}</p>
+              )}
             </div>
             <Link
               href={`/${params.store}/repairs`}
               className="flex-shrink-0 px-6 py-2.5 border border-primary text-primary font-semibold rounded-brand hover:bg-primary/5 transition-colors text-sm"
             >
-              Track Order
+              {trackWords.linkLabel}
             </Link>
           </div>
         </section>
@@ -144,8 +166,8 @@ export default async function StorePage({ params }: Props) {
           <SectionHeader
             {...sectionWords(storefrontConfig, 'categories', {
               eyebrow: 'Browse',
-              title: APPOINTMENT_TYPES.has(bt) ? 'Our Services' : 'Shop by category',
-              lede: APPOINTMENT_TYPES.has(bt)
+              title: hasAppointments(bt) ? 'Our Services' : 'Shop by category',
+              lede: hasAppointments(bt)
                 ? 'Book any of the services this store offers.'
                 : 'Every department in the store, in one place.',
               linkLabel: 'All products',
@@ -162,7 +184,7 @@ export default async function StorePage({ params }: Props) {
             <SectionHeader
               {...sectionWords(storefrontConfig, 'featured', {
                 eyebrow: 'Handpicked',
-                title: APPOINTMENT_TYPES.has(bt) ? 'Featured services' : 'Featured products',
+                title: hasAppointments(bt) ? 'Featured services' : 'Featured products',
                 lede: 'Chosen by the store this week.',
                 linkLabel: 'View all',
               })}

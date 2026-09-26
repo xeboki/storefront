@@ -3,6 +3,7 @@ import { loadStore } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
 import { BookingWidget } from '@/components/booking/BookingWidget';
 import type { Metadata } from 'next';
+import { hasAppointments } from '@/lib/business-type';
 
 interface Props {
   params: { store: string };
@@ -10,9 +11,6 @@ interface Props {
 
 export const metadata: Metadata = { title: 'Book an Appointment' };
 
-const APPOINTMENT_TYPES = new Set([
-  'salon', 'gym', 'service', 'petStore', 'optical', 'mobileRepair',
-]);
 
 export default async function BookPage({ params }: Props) {
   const resolved = await loadStore(params.store);
@@ -20,7 +18,7 @@ export default async function BookPage({ params }: Props) {
 
   const { apiKey, storeConfig } = resolved;
 
-  if (!APPOINTMENT_TYPES.has(storeConfig.businessType)) notFound();
+  if (!hasAppointments(storeConfig.businessType)) notFound();
 
   const client = getXebokiClient(apiKey);
 
