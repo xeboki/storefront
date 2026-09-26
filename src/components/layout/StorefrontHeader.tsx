@@ -17,11 +17,12 @@ import { storeName } from '@/lib/store-name';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { clsx } from 'clsx';
-import { ShoppingCart, User, X, Heart, Calendar, Wrench, MapPin, Search } from 'lucide-react';
+import { ShoppingCart, User, X, Heart, Calendar, Wrench, MapPin } from 'lucide-react';
 import { ColorSchemeToggle } from './ColorSchemeToggle';
 import { StorePicker } from './StorePicker';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { HeaderSearch } from './HeaderSearch';
+import { HeaderSearchSlot } from './HeaderSearchSlot';
 import { MobileTabBar } from './MobileTabBar';
 import { ScrollRail } from './ScrollRail';
 import { StoreLogo } from './StoreLogo';
@@ -54,7 +55,6 @@ export function StorefrontHeader({
   categories, locales, locale,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   // The cart lives in localStorage, so the server cannot know it. Showing the
   // badge before hydration made React discard the header's markup.
   const hydrated = useHydrated();
@@ -75,7 +75,7 @@ export function StorefrontHeader({
   // on anything it does not recognise, so nothing here has to be defended
   // against a half-written setting.
   const header = storefrontConfig?.headerSettings;
-  const searchStyle = header?.search ?? 'full';
+  const searchOn = (header?.search ?? 'on') !== 'off';
   const railStyle = header?.categoryRail ?? 'all';
   const hiddenCategories = new Set(header?.hiddenCategoryIds ?? []);
   const featuredIds = storefrontConfig?.featuredCategoryIds ?? [];
@@ -131,37 +131,19 @@ export function StorefrontHeader({
             <StoreLogo logoUrl={storefrontConfig?.logoUrl} name={storeName(storeConfig)} />
           </Link>
 
-          {/* The search field gets the middle of the bar, as the thing most
-              shoppers are actually trying to do — unless this shop says
-              otherwise. `compact` gives it a fixed measure instead of the
-              whole bar, for a shop whose name and departments matter more. */}
-          {searchStyle !== 'off' && searchStyle !== 'icon' && (
-            <HeaderSearch
+          {/* Where it sits, how wide it is and whether it is a field or an
+              icon are three separate choices this shop has made. */}
+          {searchOn && (
+            <HeaderSearchSlot
               storeSlug={storeSlug}
-              className={
-                searchStyle === 'compact'
-                  ? 'hidden w-64 md:block lg:w-80'
-                  : 'hidden flex-1 md:block'
-              }
+              placement={header?.searchPlacement ?? 'centre'}
+              width={header?.searchWidth ?? 'fill'}
+              behaviour={header?.searchBehaviour ?? 'open'}
+              iconClassName={iconButton}
             />
           )}
 
           <div className="ml-auto flex items-center gap-0.5 md:gap-1">
-            {/* `icon` keeps search in the header without giving it room: it
-                opens the same field in the row below, which is where a phone
-                has always had it. */}
-            {searchStyle === 'icon' && (
-              <button
-                type="button"
-                onClick={() => setSearchOpen((v) => !v)}
-                aria-expanded={searchOpen}
-                aria-label={t('search.placeholder')}
-                className={clsx(iconButton, 'hidden md:flex')}
-              >
-                <Search size={20} />
-              </button>
-            )}
-
             {header?.showCurrency !== false && header?.showCurrency && (
               // The store's currency, stated. NOT a switcher: there is no
               // exchange rate behind this shop, and a price relabelled into
@@ -225,15 +207,11 @@ export function StorefrontHeader({
           </div>
         </div>
 
-        {/* Row 1b — search on a phone, where it cannot share the top row, and
-            on any screen when this shop keeps it behind the icon. */}
-        {searchStyle !== 'off' && (
-          <div
-            className={clsx(
-              'border-t border-line px-4 py-2',
-              searchStyle === 'icon' ? (searchOpen ? 'block' : 'hidden md:hidden') : 'md:hidden',
-            )}
-          >
+        {/* Row 1b — search on a phone, where it cannot share the top row.
+            A phone has no room for an icon that opens sideways, so it gets the
+            field whatever the shop chose for a wide screen. */}
+        {searchOn && (
+          <div className="border-t border-line px-4 py-2 md:hidden">
             <HeaderSearch storeSlug={storeSlug} />
           </div>
         )}
