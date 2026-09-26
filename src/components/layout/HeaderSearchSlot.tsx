@@ -39,12 +39,33 @@ export function HeaderSearchSlot({
 }: Props) {
   const t = useT();
   const [open, setOpen] = useState(false);
+  /**
+   * Open AND finished opening.
+   *
+   * The field grows by max-width, which only works if what is inside it is
+   * clipped — and the suggestion panel hangs below the header, so it was
+   * clipped too: typing found products and the list was cut off at the
+   * header's edge. Nothing looked broken, the box just sat there spinning.
+   *
+   * So the clipping lasts exactly as long as the animation does.
+   */
+  const [settled, setSettled] = useState(false);
   const fieldRef = useRef<HTMLDivElement>(null);
 
   // Opening it and leaving the cursor somewhere else is a button that looks
   // like it did nothing.
   useEffect(() => {
-    if (open) fieldRef.current?.querySelector('input')?.focus();
+    if (!open) {
+      setSettled(false);
+      return;
+    }
+    fieldRef.current?.querySelector('input')?.focus();
+    // Matches the transition below. A timer rather than `transitionend`
+    // because a reduced-motion browser fires no such event at all, and the
+    // panel would then be clipped forever for the people most likely to need
+    // it not to be.
+    const done = setTimeout(() => setSettled(true), 320);
+    return () => clearTimeout(done);
   }, [open]);
 
   const fills = width === 'fill';
@@ -56,28 +77,42 @@ export function HeaderSearchSlot({
         {/* The spacer decides which side it opens from: an icon on the right
             has to grow leftward into the bar, not push the cart off it. */}
         {placement !== 'left' && <span className="flex-1" aria-hidden />}
-        <div
-          className={clsx(
-            'hidden items-center justify-end md:flex',
-            // Animating to `auto` is not possible, so the field grows by
-            // max-width. Closed it is zero and cannot be tabbed into.
-            'motion-safe:transition-[max-width] motion-safe:duration-300 motion-safe:ease-out',
-            open ? (fills ? 'w-full max-w-2xl' : `${measure} max-w-full`) : 'max-w-0',
-          )}
-        >
-          <div ref={fieldRef} className={clsx('w-full overflow-hidden', !open && 'invisible')}>
-            <HeaderSearch storeSlug={storeSlug} />
+        {/* The field and its close button are one control, so they sit in
+            their own row. As separate children of the header they inherited
+            its gap — which is spaced for icons standing apart, and left the
+            cross floating a thumb's width from the box it closes. */}
+        <div className="flex items-center">
+          <div
+            className={clsx(
+              'hidden items-center justify-end md:flex',
+            settled ? 'overflow-visible' : 'overflow-hidden',
+              // Animating to `auto` is not possible, so the field grows by
+              // max-width. Closed it is zero and cannot be tabbed into.
+              'motion-safe:transition-[max-width] motion-safe:duration-300 motion-safe:ease-out',
+              open ? (fills ? 'w-full max-w-2xl' : `${measure} max-w-full`) : 'max-w-0',
+            )}
+          >
+            <div
+              ref={fieldRef}
+              className={clsx(
+                'w-full',
+                settled ? 'overflow-visible' : 'overflow-hidden',
+                !open && 'invisible',
+              )}
+            >
+              <HeaderSearch storeSlug={storeSlug} />
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-label={t('search.placeholder')}
+            className={clsx(iconClassName, 'hidden md:flex', open && 'ml-0.5')}
+          >
+            {open ? <X size={20} /> : <Search size={20} />}
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-label={t('search.placeholder')}
-          className={clsx(iconClassName, 'hidden md:flex')}
-        >
-          {open ? <X size={20} /> : <Search size={20} />}
-        </button>
         {placement === 'left' && <span className="flex-1" aria-hidden />}
       </>
     );

@@ -283,7 +283,11 @@ export function HeaderSearch({
             </Link>
           ))}
 
-          {rows.length > 0 && (
+          {/* Only when there is a page of products to go to. A department can
+              match a word no product carries — "cloth" finds Clothing and
+              nothing else — and offering "See all 0 results" as the way out of
+              that is a link to an empty grid. */}
+          {total > 0 && (
             <button
               type="button"
               onClick={() => go(`/${storeSlug}/catalog?q=${encodeURIComponent(term)}`)}
