@@ -1,0 +1,26 @@
+/* The styles that put every banner in the same place and change which one you
+   can see. The one on show is IN FLOW and carries the height; the rest float
+   over it.
+   Stacking all of them needs a definite height, and the "copy under the
+   picture" layout deliberately has none on a phone — its height is the picture
+   plus the words. With every banner absolute the band collapsed to zero. */
+.stage {
+  position: relative;
+  display: flex;
+}
+
+.panel {
+  display: flex;
+  width: 100%;
+}
+
+.current {
+  position: relative;
+  z-index: 10;
+}
+
+.resting {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}

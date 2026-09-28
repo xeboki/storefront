@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProductImage } from '@/components/product/ProductImage';
 import type { ResolvedSlide } from '@/lib/hero-slides';
+import { imageMotionClass } from '@/components/banners/motion';
 
 interface Props {
   slide: ResolvedSlide;
@@ -188,12 +189,10 @@ export function HeroSlideView({
               fill
               priority={priority}
               sizes="100vw"
-              className={`object-cover ${
-                // Shopify's "ambient movement": a slow drift that makes a
-                // still photograph feel alive. motion-safe only — this is
-                // exactly the kind of thing prefers-reduced-motion is for.
-                imageMotion === 'ambient' ? 'motion-safe:animate-hero-drift' : ''
-              }`}
+              // What the picture does while this banner is up — its own
+              // module, and its own question from how the shop reaches the
+              // next banner, so the two combine freely.
+              className={`object-cover ${imageMotionClass(imageMotion)}`}
               fallback={null}
             />
             {overlay && <div aria-hidden className={`absolute inset-0 ${overlay}`} />}

@@ -1,0 +1,33 @@
+/*
+ * What the picture does WHILE its banner is up.
+ *
+ * A different question from how the shop gets to the next banner, so these
+ * combine with any style. Every one is motion-safe: under
+ * prefers-reduced-motion the picture simply sits still, which is the whole
+ * point of the setting.
+ */
+
+@keyframes drift {
+  0%, 100% { transform: scale(1.06) translate3d(0, 0, 0); }
+  50%      { transform: scale(1.12) translate3d(-1.5%, -1%, 0); }
+}
+
+/* Slowly closes in, and does not spring back — a loop that returns reads as a
+   glitch at this speed. `alternate` makes it breathe instead. */
+@keyframes push {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.16); }
+}
+
+@keyframes pan {
+  from { transform: scale(1.14) translate3d(-4%, 0, 0); }
+  to   { transform: scale(1.14) translate3d(4%, 0, 0); }
+}
+
+.ambient { animation: drift 22s ease-in-out infinite; }
+.push    { animation: push 18s ease-out infinite alternate; }
+.pan     { animation: pan 26s ease-in-out infinite alternate; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient, .push, .pan { animation: none; }
+}

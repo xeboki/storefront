@@ -6,6 +6,7 @@ import type { HeroSlideshow as Settings } from '@xeboki/sdk';
 import type { ResolvedSlide } from '@/lib/hero-slides';
 import { INTERVAL_MS } from '@/lib/hero-slides';
 import { HeroSlideView } from './HeroSlideView';
+import { bannerStyle } from '@/components/banners/registry';
 
 interface Props {
   slides: ResolvedSlide[];
@@ -132,9 +133,12 @@ export function HeroSlideshow({ slides, settings }: Props) {
     );
   }
 
-  const fade = settings.transition === 'fade';
-  const peek = settings.transition === 'carousel';
-  const motion = reducedMotion ? '' : 'transition-transform duration-700 ease-out';
+  // Which style draws the band. Each is its own module with its own
+  // stylesheet, in its own chunk — a shop on a plain cross-fade never sends
+  // its visitors the carousel's CSS or the deck's transforms. Everything
+  // around it is the same whatever the animation, which is why the timer, the
+  // swipe, the arrows and the indicator live here and not in six copies.
+  const Stage = bannerStyle(settings.transition);
 
   return (
     <section
@@ -154,65 +158,21 @@ export function HeroSlideshow({ slides, settings }: Props) {
       onBlurCapture={() => setPaused(false)}
       className={`relative isolate overflow-hidden bg-primary-solid ${height}`}
     >
-      {fade ? (
-        <div className={`relative flex ${height}`}>
-          {slides.map((slide, i) => (
-            <div
-              key={slide.id}
-              aria-hidden={i !== index}
-              // The slide on show is IN FLOW and the rest are stacked over it.
-              //
-              // Stacking all of them needs a definite height, and the `below`
-              // layout deliberately has none on a phone — its height is the
-              // picture plus the words. With every slide absolute the section
-              // collapsed to nothing. This way the band is always exactly as
-              // tall as what is in it, and the cross-fade still works because
-              // the outgoing slide is the one that floats.
-              //
-              // The others stay in the tree so their images are already
-              // decoded and a shopper never watches one load in.
-              className={`flex w-full ${
-                i === index ? 'relative z-10 opacity-100' : 'pointer-events-none absolute inset-0 opacity-0'
-              } ${reducedMotion ? '' : 'transition-opacity duration-700 ease-out'}`}
-            >
-              <HeroSlideView
-                slide={slide}
-                layout={settings.layout}
-                mobileText={settings.mobileText}
-                imageMotion={settings.imageMotion}
-                priority={i === 0}
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div
-          className={`flex ${motion}`}
-          style={{
-            transform: peek
-              ? `translateX(calc(-${index} * 88% + 6%))`
-              : `translateX(-${index * 100}%)`,
-          }}
-        >
-          {slides.map((slide, i) => (
-            <div
-              key={slide.id}
-              aria-hidden={i !== index}
-              className={`flex ${peek ? 'w-[88%] shrink-0 px-1.5' : 'w-full shrink-0'} ${height}`}
-            >
-              <div className={`flex w-full ${peek ? 'overflow-hidden rounded-2xl' : ''}`}>
-                <HeroSlideView
-                  slide={slide}
-                  layout={settings.layout}
-                  mobileText={settings.mobileText}
-                  imageMotion={settings.imageMotion}
-                  priority={i === 0}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <Stage
+        slides={slides}
+        index={index}
+        reducedMotion={reducedMotion}
+        heightClass={height}
+        renderSlide={(slide, i) => (
+          <HeroSlideView
+            slide={slide}
+            layout={settings.layout}
+            mobileText={settings.mobileText}
+            imageMotion={settings.imageMotion}
+            priority={i === 0}
+          />
+        )}
+      />
 
       {settings.arrows && (
         <>

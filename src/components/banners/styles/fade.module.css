@@ -1,0 +1,7 @@
+.panel { transition: opacity 700ms ease-out; }
+.current { opacity: 1; }
+.resting { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+}

@@ -1,0 +1,35 @@
+.viewport { overflow: hidden; }
+
+.track {
+  display: flex;
+  will-change: transform;
+}
+
+.animated {
+  transition: transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Narrower than the viewport, so the next banner's edge shows. */
+.panel {
+  display: flex;
+  width: 88%;
+  flex-shrink: 0;
+  padding: 0 0.375rem;
+}
+
+.card {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+/* The banners either side are present but recede, so the current one reads as
+   the one being offered rather than one of three. */
+.panel > .card { transition: opacity 500ms ease-out; }
+.resting > .card { opacity: 0.45; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animated { transition: none; }
+  .panel > .card { transition: none; }
+}
