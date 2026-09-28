@@ -137,3 +137,19 @@
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: none; }
 }
+
+
+.upper {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Only the trigger goes white — the panel has its own background and stays
+   on the shop's own colours whatever the bar is sitting on. */
+[data-dark] .trigger {
+  color: rgb(255 255 255);
+}
+
+[data-dark] .trigger:hover {
+  background: rgb(255 255 255 / 0.14);
+}

@@ -37,6 +37,15 @@ export interface MenuStyleProps {
   collapsed: boolean;
   /** The word on a trigger, in the shopper's language. */
   menuLabel: string;
+  /**
+   * Whether the department names shout.
+   *
+   * A setting rather than a look, because it was hardcoded in two places and
+   * disagreed with itself: the rail shouted and the inline menu did not.
+   */
+  linkCase: 'normal' | 'upper';
+  /** White type, because the bar is dark or sitting on a picture. */
+  onDark: boolean;
 }
 
 /**

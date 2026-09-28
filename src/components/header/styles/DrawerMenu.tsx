@@ -15,11 +15,14 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { clsx } from 'clsx';
 import { useDismiss } from '../chrome';
 import type { MenuStyleProps } from '../types';
 import styles from './drawer.module.css';
 
-export default function DrawerMenu({ entries, allHref, allLabel, links, menuLabel }: MenuStyleProps) {
+export default function DrawerMenu({
+  entries, allHref, allLabel, links, menuLabel, linkCase, onDark,
+}: MenuStyleProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   const ref = useDismiss(open, close);
@@ -38,12 +41,12 @@ export default function DrawerMenu({ entries, allHref, allLabel, links, menuLabe
   if (entries.length === 0 && links.length === 0) return null;
 
   return (
-    <div className="hidden lg:block">
+    <div className="hidden lg:block" data-dark={onDark || undefined}>
       <button
         type="button"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className={styles.trigger}
+        className={clsx(styles.trigger, linkCase === 'normal' && styles.normal)}
       >
         <Menu size={18} />
         {menuLabel}

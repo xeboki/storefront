@@ -15,14 +15,27 @@ import type { MenuPlacement, MenuStyleProps } from './types';
 
 interface Style {
   placement: MenuPlacement;
+  /**
+   * Whether the menu grows to take whatever room the bar has.
+   *
+   * Only `inline` does, and it is the whole reason this flag exists: a search
+   * box set to "fills the bar" is also elastic, so the two share the row and
+   * each starves the other — the departments come out as two names and a
+   * "More", and the search box comes out too narrow to read a word in. Two
+   * things cannot both have the rest of the space.
+   *
+   * A trigger is not elastic. `mega` and `drawer` are one word wide whatever
+   * the catalogue holds, so a filling search box beside them is fine.
+   */
+  elastic: boolean;
   Component: ComponentType<MenuStyleProps>;
 }
 
 export const MENU_STYLES: Record<string, Style> = {
-  rail:   { placement: 'below', Component: dynamic(() => import('./styles/RailMenu')) },
-  inline: { placement: 'bar',   Component: dynamic(() => import('./styles/InlineMenu')) },
-  mega:   { placement: 'bar',   Component: dynamic(() => import('./styles/MegaMenu')) },
-  drawer: { placement: 'bar',   Component: dynamic(() => import('./styles/DrawerMenu')) },
+  rail:   { placement: 'below', elastic: false, Component: dynamic(() => import('./styles/RailMenu')) },
+  inline: { placement: 'bar',   elastic: true,  Component: dynamic(() => import('./styles/InlineMenu')) },
+  mega:   { placement: 'bar',   elastic: false, Component: dynamic(() => import('./styles/MegaMenu')) },
+  drawer: { placement: 'bar',   elastic: false, Component: dynamic(() => import('./styles/DrawerMenu')) },
 };
 
 /** What the API falls back to, and so must this. */

@@ -19,19 +19,31 @@ import { ScrollRail } from '../../layout/ScrollRail';
 import type { MenuStyleProps } from '../types';
 import styles from './rail.module.css';
 
-export default function RailMenu({ entries, allHref, allLabel, links, collapsed }: MenuStyleProps) {
+export default function RailMenu({
+  entries, allHref, allLabel, links, collapsed, linkCase, onDark,
+}: MenuStyleProps) {
   if (entries.length === 0 && links.length === 0) return null;
 
   return (
     <nav
       aria-label={allLabel}
-      className={clsx(styles.rail, collapsed && styles.folded, 'hidden border-t border-line sm:grid')}
+      className={clsx(
+        styles.rail,
+        collapsed && styles.folded,
+        'hidden sm:grid',
+        onDark ? 'border-t border-white/15' : 'border-t border-line',
+      )}
     >
       <div className="overflow-hidden">
         <ScrollRail
-          fade="from-surface"
+          fade={onDark ? 'from-transparent' : 'from-surface'}
           className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
-          trackClassName="flex items-center gap-6 py-3 text-sm font-medium uppercase tracking-wide"
+          trackClassName={clsx(
+            'flex items-center gap-6 py-3 text-sm font-medium',
+            // Was always uppercase. Shouting is now the shop's call, not a
+            // decision baked into one of the four menus.
+            linkCase === 'upper' && 'uppercase tracking-wide',
+          )}
         >
           <Link href={allHref} className="whitespace-nowrap text-fg transition-colors hover:text-primary">
             {allLabel}
@@ -40,18 +52,21 @@ export default function RailMenu({ entries, allHref, allLabel, links, collapsed 
             <Link
               key={entry.id}
               href={entry.href}
-              className="whitespace-nowrap text-fg-muted transition-colors hover:text-primary"
+              className={clsx(
+                'whitespace-nowrap transition-colors',
+                onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary',
+              )}
             >
               {entry.label}
             </Link>
           ))}
           {links.map((link) =>
             link.external ? (
-              <a key={link.url} href={link.url} className="whitespace-nowrap text-fg-muted transition-colors hover:text-primary">
+              <a key={link.url} href={link.url} className={clsx('whitespace-nowrap transition-colors', onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary')}>
                 {link.label}
               </a>
             ) : (
-              <Link key={link.url} href={link.url} className="whitespace-nowrap text-fg-muted transition-colors hover:text-primary">
+              <Link key={link.url} href={link.url} className={clsx('whitespace-nowrap transition-colors', onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary')}>
                 {link.label}
               </Link>
             ),

@@ -18,6 +18,21 @@
 
 .trigger:hover { background: rgb(var(--color-surface-alt)); }
 
+/* The drawer's trigger shouts by default, so this is the opt-out rather than
+   the opt-in the other two carry. */
+.normal {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-dark] .trigger {
+  color: rgb(255 255 255);
+}
+
+[data-dark] .trigger:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
 .overlay {
   position: fixed;
   inset: 0;

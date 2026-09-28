@@ -9,10 +9,25 @@
 import { useEffect, useRef, useState } from 'react';
 
 export const SCROLLS = ['condense', 'fixed', 'hide', 'static'] as const;
-export const SURFACES = ['solid', 'transparent', 'floating'] as const;
+export const SURFACES = ['solid', 'transparent', 'gradient', 'inverse', 'floating'] as const;
+
+/**
+ * Where the shop's mark sits, and what the menu does around it.
+ *
+ * Dawn calls this `logo_position` and every platform has some version of it;
+ * it is the setting that makes a header look like a different shop. `split`
+ * is the centred mark with departments either side that Squarespace dropped
+ * in 7.1 and people are still writing CSS to get back.
+ */
+export const LOGO_POSITIONS = ['left', 'centred', 'stacked', 'split'] as const;
+
+/** Sentence case or SHOUTING. Was hardcoded, and differently per menu. */
+export const LINK_CASES = ['normal', 'upper'] as const;
 
 export type Scroll = (typeof SCROLLS)[number];
 export type Surface = (typeof SURFACES)[number];
+export type LogoPosition = (typeof LOGO_POSITIONS)[number];
+export type LinkCase = (typeof LINK_CASES)[number];
 
 export function asScroll(value: string | null | undefined): Scroll {
   return (SCROLLS as readonly string[]).includes(value ?? '') ? (value as Scroll) : 'condense';
@@ -21,6 +36,19 @@ export function asScroll(value: string | null | undefined): Scroll {
 export function asSurface(value: string | null | undefined): Surface {
   return (SURFACES as readonly string[]).includes(value ?? '') ? (value as Surface) : 'solid';
 }
+
+export function asLogoPosition(value: string | null | undefined): LogoPosition {
+  return (LOGO_POSITIONS as readonly string[]).includes(value ?? '')
+    ? (value as LogoPosition)
+    : 'left';
+}
+
+export function asLinkCase(value: string | null | undefined): LinkCase {
+  return (LINK_CASES as readonly string[]).includes(value ?? '') ? (value as LinkCase) : 'upper';
+}
+
+/** The two surfaces that only mean anything over a picture. */
+export const OVER_BANNER_SURFACES: readonly Surface[] = ['transparent', 'gradient'];
 
 /**
  * Close on Escape, and on a click that lands outside.

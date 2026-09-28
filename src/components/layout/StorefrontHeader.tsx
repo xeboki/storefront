@@ -32,8 +32,11 @@ import { MobileTabBar } from './MobileTabBar';
 import { StoreLogo } from './StoreLogo';
 import { menuStyle } from '../header/registry';
 import { MobileNav, asMobileMenu } from '../header/MobileNav';
-import { asScroll, asSurface, useOverBanner } from '../header/chrome';
-import type { Scroll } from '../header/chrome';
+import {
+  asLinkCase, asLogoPosition, asScroll, asSurface, useOverBanner,
+  OVER_BANNER_SURFACES,
+} from '../header/chrome';
+import type { LogoPosition, Scroll } from '../header/chrome';
 import type { MenuEntry, MenuLink } from '../header/types';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useScrollDirection } from '@/lib/use-scroll-direction';
@@ -59,6 +62,25 @@ const SCROLL_POSITION: Record<Scroll, string> = {
   'condense': 'sticky top-0',
   'hide':     'sticky top-0',
   'static':   'relative',
+};
+
+/**
+ * Which row the menu is drawn in, once the mark has had its say.
+ *
+ * A style declares where it wants to be, but a centred or stacked mark takes
+ * the bar for itself — there is no room beside a mark in the middle of the
+ * row, and putting one there is what "centred" means the shop does not want.
+ * `'style'` means the style's own choice stands.
+ *
+ * Every position named, including the two that share an answer: `stacked`
+ * used to be drawn by not being one of the others, which is correct and
+ * unreadable, and is the same shape as the `fixed` scroll value below.
+ */
+const MENU_ROW: Record<LogoPosition, 'style' | 'below' | 'split'> = {
+  'left':    'style',
+  'stacked': 'below',
+  'centred': 'below',
+  'split':   'split',
 };
 
 interface Props {
@@ -102,7 +124,8 @@ export function StorefrontHeader({
   const railStyle = header?.categoryRail ?? 'all';
   const scroll = asScroll(header?.scroll);
   const surface = asSurface(header?.surface);
-  const { placement, Component: Menu } = menuStyle(header?.menu);
+  const linkCase = asLinkCase(header?.linkCase);
+  const { placement, elastic, Component: Menu } = menuStyle(header?.menu);
 
   const params = useSearchParams();
   const pathname = usePathname();
@@ -167,37 +190,106 @@ export function StorefrontHeader({
     return out;
   }, [showBooking, showTracking, customNavLinks, storeSlug]);
 
-  // `transparent` only means anything over a picture, and the only page with
-  // one is the shop's front. Everywhere else it starts solid, so a header
-  // never sits on the page background with nothing behind its type.
+  // `transparent` and `gradient` only mean anything over a picture, and the
+  // only page with one is the shop's front. Everywhere else they start solid,
+  // so a header never sits on the page background with nothing behind its
+  // type. `inverse` is not tied to a banner — it is the same dark bar on
+  // every page, which is the point of it.
   const canBeTransparent =
-    surface === 'transparent' &&
+    OVER_BANNER_SURFACES.includes(surface) &&
     pathname === `/${storeSlug}` &&
     (storefrontConfig?.heroSlides?.length ?? 0) > 0;
   const overBanner = useOverBanner(canBeTransparent);
+  /** White type: the bar is dark, or it is sitting on a photograph. */
+  const onDark = overBanner || surface === 'inverse';
+
+  /**
+   * Where the mark sits, and what the menu does around it.
+   *
+   * `split` puts the departments either side of a centred mark, so it needs a
+   * menu that lists them. A mega or drawer menu is one trigger and there is
+   * nothing to split, so it falls back to a centred mark with the trigger
+   * under it — the nearest arrangement that exists, rather than a header with
+   * a gap where half a menu should be. The back office says so beside the
+   * name, so a merchant is not left to discover it.
+   */
+  const listsDepartments = placement === 'below' || elastic;
+  const asked = asLogoPosition(header?.logoPosition);
+  const logoAt = asked === 'split' && !listsDepartments ? 'centred' : asked;
+  const markCentred = logoAt === 'centred' || logoAt === 'split';
 
   const menuHasNothingToShow = railStyle === 'off' || (entries.length === 0 && links.length === 0);
+
+  /**
+   * Which row the menu is drawn in, once the mark has had its say.
+   *
+   * A style declares where it wants to be, but a centred or stacked mark
+   * takes the bar for itself — there is no room beside a mark in the middle
+   * of the row, and putting one there is what "centred" means the shop does
+   * not want.
+   */
+  const row = MENU_ROW[logoAt];
+  const menuRow: 'bar' | 'below' | 'split' = row === 'style' ? placement : row;
+
+  /**
+   * "Fills the bar" needs a bar to fill.
+   *
+   * Beside a menu that also grows to take the room, both end up with half of
+   * it: a search box too narrow to read a word in, next to two departments
+   * and a "More". So the search takes a named width instead of an elastic
+   * one — the same call already made for the search's placement, which `fill`
+   * makes moot for the same reason.
+   *
+   * The small one, not the large one. A shop that chose this menu wants its
+   * departments in the bar, and 512px of search box leaves room for one of
+   * them. The search box is still there and still a field; it is the
+   * departments that would otherwise have nowhere to go.
+   */
+  const crowded = elastic && !menuHasNothingToShow && menuRow !== 'below';
+  const wantsFill = (header?.searchWidth ?? 'fill') === 'fill';
+  const searchWidth = crowded && wantsFill ? 'small' : header?.searchWidth ?? 'fill';
   // `condense` is the only behaviour that asks a below-bar menu to fold, and
   // the only one that tightens the bar.
   const condensed = scroll === 'condense' && goingDown;
 
   const iconButton = clsx(
     'flex h-10 w-10 items-center justify-center rounded-full transition-colors',
-    overBanner
+    onDark
       ? 'text-white/90 hover:bg-white/15 hover:text-white'
       : 'text-fg-muted hover:bg-surface-alt hover:text-fg',
   );
 
-  const menuNode = menuHasNothingToShow ? null : (
+  /** One menu, or one half of a split one. */
+  const drawMenu = (slice: MenuEntry[], links_: MenuLink[]) => (
     <Menu
-      entries={entries}
+      entries={slice}
       allHref={catalogHref(null)}
       allLabel={t('nav.allProducts')}
-      links={links}
+      links={links_}
       collapsed={condensed}
       menuLabel={t('nav.menu')}
+      linkCase={linkCase}
+      onDark={onDark}
     />
   );
+
+  const menuNode = menuHasNothingToShow ? null : drawMenu(entries, links);
+
+  /* Where it sits, how wide it is and whether it is a field or an icon are
+     three separate choices this shop has made. */
+  const searchSlot = searchOn ? (
+    <HeaderSearchSlot
+      storeSlug={storeSlug}
+      placement={header?.searchPlacement ?? 'centre'}
+      width={searchWidth}
+      behaviour={header?.searchBehaviour ?? 'open'}
+      spacers={!crowded}
+      iconClassName={iconButton}
+    />
+  ) : null;
+  // The departments, cut down the middle. The shop's own links go with the
+  // second half, where the eye finishes.
+  const half = Math.ceil(entries.length / 2);
 
   return (
     <>
@@ -211,51 +303,71 @@ export function StorefrontHeader({
           // `hide` gives the whole screen back while a shopper reads.
           scroll === 'hide' && goingDown && '-translate-y-full',
           surface === 'floating' && 'bg-transparent px-3 pt-3',
-          surface !== 'floating' &&
-            (overBanner
-              ? 'border-b border-white/15 bg-transparent'
-              : 'border-b border-line bg-surface/95 backdrop-blur'),
-          surface !== 'floating' && scrolled && !overBanner && 'shadow-sm',
+          surface === 'inverse' && 'bg-neutral-950',
+          // Over a picture: nothing behind it, or a fade that keeps white
+          // type legible over a photograph whose top is too pale for it.
+          overBanner && surface === 'transparent' && 'bg-transparent',
+          overBanner && surface === 'gradient' &&
+            'bg-gradient-to-b from-black/65 via-black/25 to-transparent',
+          // Solid is the fallback for every surface once the page has moved,
+          // and for every page that has no picture to sit on.
+          surface !== 'floating' && surface !== 'inverse' && !overBanner &&
+            'bg-surface/95 backdrop-blur',
+          // The hairline. A header on a white page without one is a real
+          // look, and there was no way to ask for it.
+          surface !== 'floating' && header?.showBorder !== false &&
+            (onDark ? 'border-b border-white/15' : 'border-b border-line'),
+          surface !== 'floating' && scrolled && !onDark && 'shadow-sm',
         )}
       >
         <div
           className={clsx(
             surface === 'floating' &&
-              'mx-auto max-w-7xl overflow-hidden rounded-brand-lg border border-line bg-surface/95 shadow-lg backdrop-blur',
+              'mx-auto max-w-7xl overflow-hidden rounded-brand-lg bg-surface/95 shadow-lg backdrop-blur',
+            surface === 'floating' && header?.showBorder !== false && 'border border-line',
           )}
         >
           {/* Row 1 — brand · menu · search · utilities */}
           <div
             className={clsx(
-              'mx-auto flex max-w-7xl items-center gap-3 px-4 transition-[height] duration-300 sm:px-6 lg:gap-4 lg:px-8',
+              'mx-auto max-w-7xl px-4 transition-[height] duration-300 sm:px-6 lg:px-8',
               condensed ? 'h-14' : 'h-16',
+              // A centred mark needs equal side columns, or it is centred on
+              // the space left over rather than on the page — which is what
+              // `justify-between` gives and why it always looks slightly off.
+              markCentred
+                ? 'grid grid-cols-[1fr_auto_1fr] items-center gap-3 lg:gap-4'
+                : 'flex items-center gap-3 lg:gap-4',
             )}
           >
+            {markCentred && (
+              <div className="flex min-w-0 items-center gap-3">
+                {menuRow === 'split' ? drawMenu(entries.slice(0, half), []) : searchSlot}
+              </div>
+            )}
+
             <Link
               href={`/${storeSlug}`}
               className={clsx(
                 'flex flex-shrink-0 items-center gap-2 text-lg font-bold',
-                overBanner && 'text-white',
+                onDark && 'text-white',
               )}
             >
               <StoreLogo logoUrl={storefrontConfig?.logoUrl} name={storeName(storeConfig)} />
             </Link>
 
-            {placement === 'bar' && menuNode}
+            {!markCentred && menuRow === 'bar' && menuNode}
+            {!markCentred && searchSlot}
 
-            {/* Where it sits, how wide it is and whether it is a field or an
-                icon are three separate choices this shop has made. */}
-            {searchOn && (
-              <HeaderSearchSlot
-                storeSlug={storeSlug}
-                placement={header?.searchPlacement ?? 'centre'}
-                width={header?.searchWidth ?? 'fill'}
-                behaviour={header?.searchBehaviour ?? 'open'}
-                iconClassName={iconButton}
-              />
-            )}
+            <div
+              className={clsx(
+                'flex items-center gap-0.5 md:gap-1',
+                markCentred ? 'min-w-0 justify-end' : 'ml-auto',
+              )}
+            >
+              {menuRow === 'split' && drawMenu(entries.slice(half), links)}
+              {markCentred && menuRow === 'split' && searchSlot}
 
-            <div className="ml-auto flex items-center gap-0.5 md:gap-1">
               {header?.showCurrency === true && (
                 // The store's currency, stated. NOT a switcher: there is no
                 // exchange rate behind this shop, and a price relabelled into
@@ -263,7 +375,7 @@ export function StorefrontHeader({
                 <span
                   className={clsx(
                     'hidden px-2 text-sm font-medium sm:inline',
-                    overBanner ? 'text-white/90' : 'text-fg-muted',
+                    onDark ? 'text-white/90' : 'text-fg-muted',
                   )}
                 >
                   {storeConfig.currencyCode}
@@ -333,7 +445,9 @@ export function StorefrontHeader({
             </div>
           )}
 
-          {placement === 'below' && menuNode}
+          {menuRow === 'below' && (
+            <div className={clsx(logoAt === 'centred' && 'text-center')}>{menuNode}</div>
+          )}
         </div>
       </header>
 

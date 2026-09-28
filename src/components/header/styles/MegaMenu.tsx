@@ -36,7 +36,9 @@ function columnise<T>(items: T[]): T[][] {
   return Array.from({ length: count }, (_, i) => items.slice(i * size, (i + 1) * size));
 }
 
-export default function MegaMenu({ entries, allHref, allLabel, links, menuLabel }: MenuStyleProps) {
+export default function MegaMenu({
+  entries, allHref, allLabel, links, menuLabel, linkCase, onDark,
+}: MenuStyleProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
   const ref = useDismiss(open, close);
@@ -48,14 +50,14 @@ export default function MegaMenu({ entries, allHref, allLabel, links, menuLabel 
   const columns = columnise(shown);
 
   return (
-    <div className="hidden lg:block" ref={ref}>
+    <div className="hidden lg:block" ref={ref} data-dark={onDark || undefined}>
       <button
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
         onClick={() => setOpen((v) => !v)}
         onMouseEnter={() => setOpen(true)}
-        className={styles.trigger}
+        className={clsx(styles.trigger, linkCase === 'upper' && styles.upper)}
       >
         {menuLabel}
         <ChevronDown size={15} className={clsx(styles.chevron, open && styles.chevronOpen)} />

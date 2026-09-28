@@ -25,6 +25,18 @@ interface Props {
   width: string;
   /** open | tap */
   behaviour: string;
+  /**
+   * Whether the box may push itself around with elastic spacers.
+   *
+   * False when something else in the bar already grows to fill it — an inline
+   * menu. The spacers are `flex-1`, so they compete with that menu for the
+   * same free space and win two thirds of it: the departments come out clipped
+   * to a few letters beside a search box floating in the middle of nothing.
+   *
+   * With no spacers the box sits after whatever grows, which puts it beside
+   * the icons — so placement is moot here, the same way `fill` makes it moot.
+   */
+  spacers?: boolean;
   iconClassName: string;
 }
 
@@ -35,7 +47,7 @@ const WIDTHS: Record<string, string> = {
 };
 
 export function HeaderSearchSlot({
-  storeSlug, placement, width, behaviour, iconClassName,
+  storeSlug, placement, width, behaviour, spacers = true, iconClassName,
 }: Props) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -70,13 +82,15 @@ export function HeaderSearchSlot({
 
   const fills = width === 'fill';
   const measure = fills ? 'flex-1' : WIDTHS[width] ?? WIDTHS.small;
+  /** `fill` leaves nothing to space, and neither does an elastic neighbour. */
+  const pad = spacers && !fills;
 
   if (behaviour === 'tap') {
     return (
       <>
         {/* The spacer decides which side it opens from: an icon on the right
             has to grow leftward into the bar, not push the cart off it. */}
-        {placement !== 'left' && <span className="flex-1" aria-hidden />}
+        {pad && placement !== 'left' && <span className="flex-1" aria-hidden />}
         {/* The field and its close button are one control, so they sit in
             their own row. As separate children of the header they inherited
             its gap — which is spaced for icons standing apart, and left the
@@ -113,7 +127,7 @@ export function HeaderSearchSlot({
             {open ? <X size={20} /> : <Search size={20} />}
           </button>
         </div>
-        {placement === 'left' && <span className="flex-1" aria-hidden />}
+        {pad && placement === 'left' && <span className="flex-1" aria-hidden />}
       </>
     );
   }
@@ -121,9 +135,9 @@ export function HeaderSearchSlot({
   return (
     <>
       {/* `fill` eats the row, so there is nothing for placement to decide. */}
-      {!fills && placement !== 'left' && <span className="flex-1" aria-hidden />}
+      {pad && placement !== 'left' && <span className="flex-1" aria-hidden />}
       <HeaderSearch storeSlug={storeSlug} className={clsx('hidden md:block', measure)} />
-      {!fills && placement !== 'right' && <span className="flex-1" aria-hidden />}
+      {pad && placement !== 'right' && <span className="flex-1" aria-hidden />}
     </>
   );
 }

@@ -1,3 +1,60 @@
+/* Takes its share of the bar and no more. `min-width: 0` is what lets flex
+   shrink the box at all; without it the row keeps its natural width and the
+   items paint over the search field beside them.
+   Deliberately NOT `overflow: hidden`: the overflow panel hangs out of this
+   box, and clipping it would cut the menu off at the bar. Nothing needs
+   clipping anyway — the count starts at the floor and only grows once it has
+   been measured, so there is no frame where too much is drawn. */
+/* `flex-basis: 0`, NOT `auto`.
+   With `auto` the box asks for its content's width, so the space flex gives
+   it depends on how many departments are in it — and the measurement below
+   then reads back its own output. It settles at a fixed point well under the
+   room actually free: three names, clipped mid-word, with the overflow
+   trigger pushed off the end. Basis zero makes the box take whatever is left
+   after the fixed-width siblings, whatever is inside it, so `clientWidth` is
+   the question the measurement means to ask. */
+.nav {
+  position: relative;
+  flex: 1 1 0%;
+  min-width: 0;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  flex: 1 1 0%;
+  align-items: center;
+  gap: 0.125rem;
+  min-width: 0;
+  /* The backstop. The measurement decides what goes in here, and when it is
+     right nothing is cut — but a name that grows after it was measured (a
+     font arriving late, a longer translation) must be cut off rather than
+     drawn across the search box beside it. */
+  overflow: hidden;
+}
+
+/* Laid out at natural width, never shown and never read by a screen reader.
+   `visibility: hidden` rather than `display: none`, which has no layout and
+   so no widths to measure. */
+.measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* The trigger needs a positioned ancestor for its panel, and it must be the
+   trigger itself — the nav clips, so a panel hung off the nav would be cut. */
+.slot {
+  position: relative;
+  flex: none;
+}
+
 /* Colours are `rgb(var(--color-*))`: every token in this storefront holds a
    space-separated triplet, not a colour, so dropping the bare variable into a
    property gives an invisible element rather than a red one. */
@@ -72,4 +129,23 @@
 @keyframes drop {
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: none; }
+}
+
+
+/* SHOUTING, when the shop asks for it. On the nav rather than each item so
+   the hidden measurement row is transformed too — measuring sentence case
+   and drawing capitals is measuring the wrong string. */
+.upper .item {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* White type, for a bar that is dark or sitting on a picture. */
+.nav[data-dark] .item {
+  color: rgb(255 255 255 / 0.82);
+}
+
+.nav[data-dark] .item:hover {
+  color: rgb(255 255 255);
+  background: rgb(255 255 255 / 0.14);
 }
