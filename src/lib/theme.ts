@@ -16,6 +16,7 @@
  */
 import type { StorefrontConfig } from '@xeboki/sdk';
 import { roleVars } from './themes/roles';
+import { typographyVars } from './themes/typography';
 import {
   ensureContrast,
   liftForDark,
@@ -190,7 +191,10 @@ export function buildTheme(config: StorefrontConfig | null): Theme {
       ...roleVars('l', config?.stateColors),
       ...roleVars('d', config?.stateColors),
       '--radius': preset.radius,
+      // The preset's tracking is the floor; a merchant's own choice replaces
+      // it below, which is why this comes first.
       '--heading-tracking': preset.headingTracking,
+      ...typographyVars(config),
       '--font-sans': fontStack(config?.font, preset.fontSans),
       // A merchant's heading font, or the preset's — NOT their body font.
       // Falling through to `font` made sense when every preset paired a face

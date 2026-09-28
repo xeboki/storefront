@@ -98,9 +98,17 @@
      every heading put a serif on 14px product names and card labels, where it
      reads as a mistake rather than a choice. h3 and below stay in the body
      face and earn their hierarchy from weight and colour. */
+  /* A multiplier on the ROOT size, never a pixel value: a shopper who has
+     set a larger default in their browser keeps it, and a shop that hardcodes
+     14px takes that away from them. */
+  html {
+    font-size: calc(100% * var(--body-size, 1));
+  }
+
   h1, h2 {
     font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
     letter-spacing: var(--heading-tracking);
+    font-weight: var(--heading-weight, 600);
   }
 
   /* Tabular figures so a column of prices lines up on the decimal instead of
@@ -214,25 +222,27 @@ input[type="range"].slider-thumb::-moz-range-thumb {
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 0.6875rem;
   font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  /* Tracking only makes sense on uppercase; set normally, the same value
+     crowds nothing and just looks loose. */
+  letter-spacing: var(--label-tracking, 0.18em);
+  text-transform: var(--label-case, uppercase);
   color: rgb(var(--color-fg-muted));
 }
 
 /* Hero. Clamped so it is dramatic on a desktop without wrapping to five lines
    on a phone. */
 .display-xl {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-size: clamp(calc(2.5rem * var(--type-scale, 1)), calc(6vw * var(--type-scale, 1)), calc(4.5rem * var(--type-scale, 1)));
   line-height: 1.02;
-  font-weight: 600;
+  font-weight: var(--heading-weight, 600);
   letter-spacing: -0.02em;
 }
 
 /* Section titles. */
 .display-lg {
-  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-size: clamp(calc(1.75rem * var(--type-scale, 1)), calc(3vw * var(--type-scale, 1)), calc(2.5rem * var(--type-scale, 1)));
   line-height: 1.1;
-  font-weight: 600;
+  font-weight: var(--heading-weight, 600);
   letter-spacing: -0.015em;
 }
 
@@ -317,7 +327,7 @@ body::before {
    Clamped hard: the whole effect depends on it filling the measure, so it has
    to scale with the viewport rather than sit at one size and look stranded. */
 .display-hero {
-  font-size: clamp(3rem, 13vw, 11rem);
+  font-size: clamp(calc(3rem * var(--type-scale, 1)), calc(13vw * var(--type-scale, 1)), calc(11rem * var(--type-scale, 1)));
   line-height: 0.88;
   font-weight: 600;
   letter-spacing: -0.035em;
