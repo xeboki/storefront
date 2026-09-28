@@ -3,6 +3,7 @@ import { loadStore } from '@/lib/sdk/store';
 import { storeName } from '@/lib/store-name';
 import { monogram } from '@/lib/monogram';
 import { buildTheme } from '@/lib/theme';
+import { embeddedFont } from '@/lib/embedded-font';
 
 /**
  * The shop's mark as an image, for the browser tab.
@@ -35,15 +36,27 @@ export async function GET(
 
   // The same lockup the header draws: a squircle, light falling across it, a
   // hairline edge so it keeps its shape against a dark browser chrome, and the
-  // letter in the shop's own heading face where the viewer happens to have it.
+  // letter in the shop's own heading face.
+  //
+  // The face has to travel INSIDE the image. A favicon is rendered in an
+  // isolated context that fetches no stylesheet and no web font, so naming the
+  // family only worked for a viewer who happened to have it installed — which
+  // is nobody, so every shop's tab fell back to Georgia while the header
+  // beside it showed the merchant's actual choice. `embeddedFont` subsets the
+  // face to the one letter drawn, which costs a couple of kilobytes, and
+  // returns nothing at all rather than failing: the fallback stack still
+  // renders a mark.
   const face = (storefrontConfig?.headingFont || '').trim();
-  const stack = [face && `'${face.replace(/'/g, '')}'`, 'Georgia', "'Times New Roman'", 'serif']
+  const inline = await embeddedFont(face, letter, 600);
+  const stack = [inline.family || (face && `'${face.replace(/'/g, '')}'`),
+                 'Georgia', "'Times New Roman'", 'serif']
     .filter(Boolean)
     .join(', ');
   const safeName = name.replace(/[<>&"]/g, '');
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="${safeName}">
   <defs>
+    <style>${inline.css}</style>
     <linearGradient id="sheen" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#fff" stop-opacity="0.30"/>
       <stop offset="0.5" stop-color="#fff" stop-opacity="0"/>
