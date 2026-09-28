@@ -9,9 +9,11 @@ import { useMoney } from '@/lib/currency';
 
 interface Props {
   storeSlug: string;
+  /** False when the shop has paused online ordering. */
+  acceptingOrders?: boolean;
 }
 
-export function CartView({ storeSlug }: Props) {
+export function CartView({ storeSlug, acceptingOrders = true }: Props) {
   const money = useMoney();
   const { items, updateQuantity, removeItem, subtotal } = useCartStore();
 
@@ -122,12 +124,20 @@ export function CartView({ storeSlug }: Props) {
             </div>
           </dl>
 
-          <Link
-            href={`/${storeSlug}/checkout`}
-            className="mt-6 flex h-12 w-full items-center justify-center rounded-brand bg-primary-solid text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            Proceed to Checkout
-          </Link>
+          {/* A basket a shopper cannot check out is worth keeping: the shop
+              is paused, not gone, and the server refuses the order anyway. */}
+          {acceptingOrders ? (
+            <Link
+              href={`/${storeSlug}/checkout`}
+              className="mt-6 flex h-12 w-full items-center justify-center rounded-brand bg-primary-solid text-xs font-semibold uppercase tracking-[0.14em] text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Proceed to Checkout
+            </Link>
+          ) : (
+            <p className="mt-6 flex min-h-12 w-full items-center justify-center rounded-brand border border-warning-border bg-warning-bg px-4 py-3 text-center text-xs font-semibold text-warning-fg">
+              This shop has paused online ordering. Your basket is saved.
+            </p>
+          )}
 
           <Link
             href={`/${storeSlug}/catalog`}

@@ -9,6 +9,7 @@ import { Marquee } from '@/components/layout/Marquee';
 import { showSection } from '@/lib/sections';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { PromoNotice } from '@/components/layout/PromoNotice';
+import { ClosedForOrders } from '@/components/layout/ClosedForOrders';
 import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
 import { activeLocale, availableLocales } from '@/lib/i18n/server';
@@ -111,6 +112,9 @@ export default async function StoreLayout({ params, children }: Props) {
           {showSection(storefrontConfig, 'announcement') && (
             <Marquee announcement={storefrontConfig?.announcement} />
           )}
+          {/* Said once, at the top. A shopper should not discover a shop is
+              closed at the end of a checkout they have already filled in. */}
+          <ClosedForOrders shown={storefrontConfig?.acceptOnlineOrders === false} />
 
           <StorefrontHeader
             storeConfig={storeConfig}
