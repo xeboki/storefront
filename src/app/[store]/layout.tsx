@@ -8,6 +8,7 @@ import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
 import { Marquee } from '@/components/layout/Marquee';
 import { showSection } from '@/lib/sections';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
+import { PromoNotice } from '@/components/layout/PromoNotice';
 import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
 import { activeLocale, availableLocales } from '@/lib/i18n/server';
@@ -108,7 +109,7 @@ export default async function StoreLayout({ params, children }: Props) {
             </div>
           )}
           {showSection(storefrontConfig, 'announcement') && (
-            <Marquee text={storefrontConfig?.announcementBar} />
+            <Marquee announcement={storefrontConfig?.announcement} />
           )}
 
           <StorefrontHeader
@@ -135,6 +136,11 @@ export default async function StoreLayout({ params, children }: Props) {
             storeSlug={slug}
             paymentMethods={storeConfig.paymentMethods ?? []}
           />
+          {/* Last in the tree, so it sits over the whole shop. It draws
+              nothing unless the merchant switched it on AND gave it words. */}
+          {storefrontConfig?.promoPopup && (
+            <PromoNotice popup={storefrontConfig.promoPopup} storeSlug={slug} />
+          )}
           </LocaleProvider>
       </StoreProviders>
     </>
