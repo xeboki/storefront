@@ -99,8 +99,7 @@ export default async function StoreLayout({ params, children }: Props) {
         />
       )}
       <AnalyticsScripts
-        ga4Id={storefrontConfig?.ga4MeasurementId}
-        metaPixelId={storefrontConfig?.metaPixelId}
+        analytics={storefrontConfig?.analytics}
       />
       <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
           <LocaleProvider locale={locale}>

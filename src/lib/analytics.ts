@@ -12,13 +12,35 @@
 type Params = Record<string, unknown>;
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+/**
+ * What this shop said it would report, written by `AnalyticsScripts`.
+ *
+ * Checked at the moment of the event and not only when the tag loads: the
+ * per-event switches on the Analytics tab exist so a shop can measure its
+ * traffic WITHOUT shipping basket contents to an ad network, and a tag that
+ * has loaded will happily send whatever it is handed.
+ *
+ * Anything unreadable means the event is not sent. A conversion reported by
+ * accident cannot be taken back.
+ */
+function consent(): Record<string, boolean> {
+  const w = window as any;
+  return (w.__xbkAnalytics && typeof w.__xbkAnalytics === 'object')
+    ? w.__xbkAnalytics
+    : {};
+}
+
 function gtag(...args: any[]): void {
   const w = window as any;
   if (typeof w.gtag === 'function') w.gtag(...args);
 }
-function fbq(...args: any[]): void {
+
+/** A pixel event, only if this shop allows this KIND of event. */
+function fbq(event: string, name: string, params?: any, allowed = true): void {
+  if (!allowed) return;
   const w = window as any;
-  if (typeof w.fbq === 'function') w.fbq(...args);
+  if (typeof w.fbq === 'function') w.fbq(event, name, params);
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
@@ -50,7 +72,8 @@ export function trackAddToCart(item: TrackItem, currency: string): void {
   if (typeof window === 'undefined') return;
   const value = item.price * (item.quantity ?? 1);
   gtag('event', 'add_to_cart', { currency, value, items: ga4Items([item]) });
-  fbq('track', 'AddToCart', { content_ids: [item.id], content_name: item.name, value, currency });
+  fbq('track', 'AddToCart', { content_ids: [item.id], content_name: item.name, value, currency },
+      consent().metaAddToCart !== false);
 }
 
 export function trackBeginCheckout(items: TrackItem[], value: number, currency: string): void {
@@ -90,7 +113,8 @@ export function trackPurchase(
     items: ga4Items(items),
     ...(extra ?? {}),
   });
-  fbq('track', 'Purchase', { content_ids: items.map((i) => i.id), value, currency });
+  fbq('track', 'Purchase', { content_ids: items.map((i) => i.id), value, currency },
+      consent().metaPurchases !== false);
 }
 
 
