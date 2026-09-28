@@ -19,6 +19,37 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // The four things a shop says that are not its brand. Each carries
+        // its own tint, hairline, solid fill and text, in light and dark —
+        // which is what `bg-emerald-50` never had.
+        success: {
+          DEFAULT: 'rgb(var(--color-success-solid) / <alpha-value>)',
+          bg: 'rgb(var(--color-success-bg) / <alpha-value>)',
+          border: 'rgb(var(--color-success-border) / <alpha-value>)',
+          fg: 'rgb(var(--color-success-fg) / <alpha-value>)',
+          on: 'rgb(var(--color-success-on) / <alpha-value>)',
+        },
+        warning: {
+          DEFAULT: 'rgb(var(--color-warning-solid) / <alpha-value>)',
+          bg: 'rgb(var(--color-warning-bg) / <alpha-value>)',
+          border: 'rgb(var(--color-warning-border) / <alpha-value>)',
+          fg: 'rgb(var(--color-warning-fg) / <alpha-value>)',
+          on: 'rgb(var(--color-warning-on) / <alpha-value>)',
+        },
+        danger: {
+          DEFAULT: 'rgb(var(--color-danger-solid) / <alpha-value>)',
+          bg: 'rgb(var(--color-danger-bg) / <alpha-value>)',
+          border: 'rgb(var(--color-danger-border) / <alpha-value>)',
+          fg: 'rgb(var(--color-danger-fg) / <alpha-value>)',
+          on: 'rgb(var(--color-danger-on) / <alpha-value>)',
+        },
+        info: {
+          DEFAULT: 'rgb(var(--color-info-solid) / <alpha-value>)',
+          bg: 'rgb(var(--color-info-bg) / <alpha-value>)',
+          border: 'rgb(var(--color-info-border) / <alpha-value>)',
+          fg: 'rgb(var(--color-info-fg) / <alpha-value>)',
+          on: 'rgb(var(--color-info-on) / <alpha-value>)',
+        },
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
           // The one to fill a shape with when words go on top of it.

@@ -15,6 +15,7 @@
  *   bg-primary/50  →  background: rgb(var(--color-primary) / 0.5)
  */
 import type { StorefrontConfig } from '@xeboki/sdk';
+import { roleVars } from './themes/roles';
 import {
   ensureContrast,
   liftForDark,
@@ -183,6 +184,11 @@ export function buildTheme(config: StorefrontConfig | null): Theme {
         liftForDark(primary, preset.dark.bg),
         liftForDark(secondary, preset.dark.bg),
       ),
+      // The four things a shop says that are not its brand. Built through the
+      // same scale, so they have a dark variant and readable text — sixty
+      // hardcoded `bg-emerald-50` classes had neither.
+      ...roleVars('l', config?.stateColors),
+      ...roleVars('d', config?.stateColors),
       '--radius': preset.radius,
       '--heading-tracking': preset.headingTracking,
       '--font-sans': fontStack(config?.font, preset.fontSans),

@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "dev:live": "XEBOKI_API_BASE_URL=http://localhost:7091 next dev -p 7090",
-    "dev:proxy": "cd ../API && python3 run_with_env.py storefront_dev_proxy.py"
+    "dev:proxy": "cd ../API && python3 run_with_env.py storefront_dev_proxy.py",
+    "check:colour": "npx tsx src/lib/themes/check-scale.ts"
   },
   "dependencies": {
     "next": "14.2.3",

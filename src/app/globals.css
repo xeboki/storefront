@@ -24,6 +24,29 @@
   --font-sans: 'Inter';
   --font-display: 'Inter';
   color-scheme: light;
+  /* What a shop says that is not its brand. The fallbacks are for routes
+     that render outside a store, where no theme has been written. */
+  --color-success-bg:     var(--l-success-bg, 236 253 245);
+  --color-success-border: var(--l-success-border, 167 243 208);
+  --color-success-solid:  var(--l-success-solid, 22 143 94);
+  --color-success-on:     var(--l-success-on, 255 255 255);
+  --color-success-fg:     var(--l-success-fg, 6 78 59);
+  --color-warning-bg:     var(--l-warning-bg, 255 251 235);
+  --color-warning-border: var(--l-warning-border, 253 230 138);
+  --color-warning-solid:  var(--l-warning-solid, 201 138 4);
+  --color-warning-on:     var(--l-warning-on, 17 24 39);
+  --color-warning-fg:     var(--l-warning-fg, 120 53 15);
+  --color-danger-bg:     var(--l-danger-bg, 254 242 242);
+  --color-danger-border: var(--l-danger-border, 254 202 202);
+  --color-danger-solid:  var(--l-danger-solid, 206 46 46);
+  --color-danger-on:     var(--l-danger-on, 255 255 255);
+  --color-danger-fg:     var(--l-danger-fg, 127 29 29);
+  --color-info-bg:     var(--l-info-bg, 239 246 255);
+  --color-info-border: var(--l-info-border, 191 219 254);
+  --color-info-solid:  var(--l-info-solid, 37 99 235);
+  --color-info-on:     var(--l-info-on, 255 255 255);
+  --color-info-fg:     var(--l-info-fg, 30 58 138);
+
 }
 
 :root.dark {
@@ -40,6 +63,29 @@
   --color-fg-muted:    var(--d-fg-muted, 148 163 184);
   --color-fg-subtle:   var(--d-fg-subtle, 100 116 139);
   color-scheme: dark;
+  /* What a shop says that is not its brand. The fallbacks are for routes
+     that render outside a store, where no theme has been written. */
+  --color-success-bg:     var(--d-success-bg, 6 40 30);
+  --color-success-border: var(--d-success-border, 16 82 60);
+  --color-success-solid:  var(--d-success-solid, 22 143 94);
+  --color-success-on:     var(--d-success-on, 255 255 255);
+  --color-success-fg:     var(--d-success-fg, 167 243 208);
+  --color-warning-bg:     var(--d-warning-bg, 43 31 6);
+  --color-warning-border: var(--d-warning-border, 92 62 12);
+  --color-warning-solid:  var(--d-warning-solid, 201 138 4);
+  --color-warning-on:     var(--d-warning-on, 17 24 39);
+  --color-warning-fg:     var(--d-warning-fg, 253 230 138);
+  --color-danger-bg:     var(--d-danger-bg, 45 14 14);
+  --color-danger-border: var(--d-danger-border, 96 30 30);
+  --color-danger-solid:  var(--d-danger-solid, 206 46 46);
+  --color-danger-on:     var(--d-danger-on, 255 255 255);
+  --color-danger-fg:     var(--d-danger-fg, 254 202 202);
+  --color-info-bg:     var(--d-info-bg, 16 26 51);
+  --color-info-border: var(--d-info-border, 34 58 110);
+  --color-info-solid:  var(--d-info-solid, 37 99 235);
+  --color-info-on:     var(--d-info-on, 255 255 255);
+  --color-info-fg:     var(--d-info-fg, 191 219 254);
+
 }
 
 @layer base {
