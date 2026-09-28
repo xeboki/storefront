@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { loadStore, loadCatalog, loadCategories, loadProduct } from '@/lib/sdk/store';
-import { HeroSection } from '@/components/layout/HeroSection';
+import { HeroSlideshow } from '@/components/layout/HeroSlideshow';
+import { resolveSlides } from '@/lib/hero-slides';
 import { FeaturedProducts } from '@/components/product/FeaturedProducts';
 import { CategoryGrid } from '@/components/product/CategoryGrid';
 import { SectionHeader } from '@/components/layout/SectionHeader';
@@ -43,11 +44,29 @@ export default async function StorePage({ params }: Props) {
   // the catalogue, so a curated product further down it silently failed to
   // match and the whole selection fell back — which is indistinguishable from
   // the bug this replaces. loadProduct is cached per id.
+  // The banners, and how they move. A shop that has never used the slideshow
+  // gets one slide composed from its `hero*` fields — the banner it has always
+  // had. The schedule is evaluated HERE, where the page is rendered, so it is
+  // only as fresh as the page: the storefront holds its config for five
+  // minutes, which is the accuracy a merchant gets on "this sale ends at
+  // midnight".
+  const heroSlides = resolveSlides(storefrontConfig, storeConfig, params.store);
+  const slideshow = storefrontConfig?.heroSlideshow;
+  // The preset has carried a heroStyle since presets existed. The merchant's
+  // own choice wins; the API already folds the legacy `hero_style` into
+  // `layout`, so this only has to supply the preset's when neither is set.
   const presetHero = buildTheme(storefrontConfig).shape.heroStyle;
-  const chosen = (storefrontConfig?.heroStyle || '').trim();
-  const heroVariant = (['banner', 'split', 'minimal'].includes(chosen)
-    ? chosen
-    : presetHero) as 'banner' | 'split' | 'minimal';
+  const presetLayout = presetHero === 'banner' ? 'full' : presetHero;
+  const heroSettings = {
+    ...(slideshow ?? {
+      layout: presetLayout, transition: 'slide', imageMotion: 'none',
+      interval: 'normal', indicator: 'dots', arrows: true, height: 'adapt',
+      mobileText: 'over', pauseOnHover: true, loop: true, maxSlides: 8,
+    }),
+    layout: (storefrontConfig?.heroStyle || slideshow?.layout)
+      ? (slideshow?.layout ?? presetLayout)
+      : presetLayout,
+  };
 
   // The three bands a business type turns on. Their words were fixed English
   // written for a category rather than a shop, and one of them — the drinking
@@ -108,12 +127,7 @@ export default async function StorePage({ params }: Props) {
 
       {/* The merchant's choice wins; otherwise the theme preset's, which has
           carried a heroStyle since presets existed and was never read. */}
-      <HeroSection
-        storefrontConfig={storefrontConfig}
-        storeConfig={storeConfig}
-        storeSlug={params.store}
-        variant={heroVariant}
-      />
+      <HeroSlideshow slides={heroSlides} settings={heroSettings} />
 
       {/* Business-type CTAs */}
       {hasAppointments(bt) && showSection(storefrontConfig, 'appointmentsCta') && (

@@ -18,6 +18,19 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        // Shopify's "ambient movement": the picture drifts and swells very
+        // slightly while its banner is up, so a still photograph does not look
+        // like a stalled video. Slow and small on purpose — anything faster
+        // reads as a bug, and it is applied motion-safe only.
+        'hero-drift': {
+          '0%, 100%': { transform: 'scale(1.06) translate3d(0, 0, 0)' },
+          '50%': { transform: 'scale(1.12) translate3d(-1.5%, -1%, 0)' },
+        },
+      },
+      animation: {
+        'hero-drift': 'hero-drift 22s ease-in-out infinite',
+      },
       colors: {
         primary: {
           DEFAULT: 'rgb(var(--color-primary) / <alpha-value>)',
