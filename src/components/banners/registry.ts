@@ -23,6 +23,9 @@ import type { BannerStyleProps } from './types';
 const STYLES: Record<string, ComponentType<BannerStyleProps>> = {
   slide: dynamic(() => import('./styles/SlideStyle')),
   fade: dynamic(() => import('./styles/FadeStyle')),
+  blur: dynamic(() => import('./styles/BlurStyle')),
+  wipe: dynamic(() => import('./styles/WipeStyle')),
+  cover: dynamic(() => import('./styles/CoverStyle')),
   vertical: dynamic(() => import('./styles/VerticalStyle')),
   zoom: dynamic(() => import('./styles/ZoomStyle')),
   carousel: dynamic(() => import('./styles/CarouselStyle')),

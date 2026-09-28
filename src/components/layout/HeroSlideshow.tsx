@@ -7,6 +7,7 @@ import type { ResolvedSlide } from '@/lib/hero-slides';
 import { INTERVAL_MS } from '@/lib/hero-slides';
 import { HeroSlideView } from './HeroSlideView';
 import { bannerStyle } from '@/components/banners/registry';
+import { Indicators } from '@/components/banners/Indicators';
 
 interface Props {
   slides: ResolvedSlide[];
@@ -184,10 +185,12 @@ export function HeroSlideshow({ slides, settings }: Props) {
         </>
       )}
 
-      <Indicator
+      <Indicators
         kind={settings.indicator}
         index={index}
-        count={count}
+        slides={slides}
+        intervalMs={interval}
+        paused={!autoplay}
         onSelect={go}
       />
 
@@ -216,53 +219,5 @@ function Control({
     >
       <Icon size={20} />
     </button>
-  );
-}
-
-/**
- * Where the shopper is in the list.
- *
- * Shopify's three: dots, a "2 / 5" counter, and a numbered row. They are not
- * interchangeable — dots stop being readable past about six, which is why a
- * counter exists.
- */
-function Indicator({
-  kind, index, count, onSelect,
-}: { kind: string; index: number; count: number; onSelect: (i: number) => void }) {
-  if (kind === 'none') return null;
-
-  if (kind === 'counter') {
-    return (
-      <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/25 bg-black/35 px-3.5 py-1.5 text-sm font-medium tabular-nums text-white backdrop-blur-sm">
-        {index + 1} / {count}
-      </div>
-    );
-  }
-
-  return (
-    <div className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2">
-      {Array.from({ length: count }, (_, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => onSelect(i)}
-          aria-label={`Banner ${i + 1}`}
-          aria-current={i === index}
-          className={
-            kind === 'numbers'
-              ? `h-7 min-w-7 rounded-full px-2 text-xs font-semibold tabular-nums transition ${
-                  i === index
-                    ? 'bg-white text-slate-900'
-                    : 'border border-white/35 text-white/80 hover:bg-white/15'
-                }`
-              : `h-2 rounded-full transition-all ${
-                  i === index ? 'w-7 bg-white' : 'w-2 bg-white/45 hover:bg-white/70'
-                }`
-          }
-        >
-          {kind === 'numbers' ? i + 1 : <span className="sr-only">{i + 1}</span>}
-        </button>
-      ))}
-    </div>
   );
 }

@@ -1,0 +1,179 @@
+/*
+ * Where the shopper is in the list.
+ *
+ * Eight of them because they are not interchangeable. Dots stop being
+ * countable past about six, so a shop running eight wants the counter or the
+ * bar; thumbnails only make sense when the banners look different from each
+ * other; and the bar is the only one that also shows how long is left.
+ */
+.row {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transform: translateX(-50%);
+}
+
+.tap {
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* ── dots ─────────────────────────────────────────────────────────────── */
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.45);
+  transition: background-color 250ms ease;
+}
+
+.dot:hover { background: rgb(255 255 255 / 0.75); }
+.dotOn { background: #fff; }
+
+/* ── pill: the current one stretches ──────────────────────────────────── */
+.pill {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.45);
+  transition: width 320ms cubic-bezier(0.22, 0.61, 0.36, 1), background-color 250ms ease;
+}
+
+.pillOn {
+  width: 1.75rem;
+  background: #fff;
+}
+
+/* ── lines: the ticks a story marks its pages with ────────────────────── */
+.line {
+  height: 2px;
+  width: 1.5rem;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.4);
+  transition: background-color 250ms ease;
+}
+
+.lineOn { background: #fff; }
+
+/* ── bar: a track that fills over the interval ────────────────────────── */
+.barRow { gap: 0.375rem; }
+
+.barSegment {
+  position: relative;
+  height: 3px;
+  width: 2.5rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.3);
+}
+
+.barFill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: #fff;
+}
+
+/* Filled and done: a banner already passed stays full. */
+.barDone .barFill { transform: scaleX(1); }
+
+/* Waiting its turn. */
+.barWaiting .barFill { transform: scaleX(0); }
+
+/* The current one runs. The duration is set inline from the shop's own
+   interval, because that is the number this is showing. */
+.barRunning .barFill {
+  animation-name: fill;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Paused under a pointer, so the bar agrees with the timer it is showing. */
+.barPaused .barFill { animation-play-state: paused; }
+
+/* With no timer there is nothing to count down; it becomes a plain track. */
+.barStatic .barFill { transform: scaleX(1); }
+
+/* ── counter ──────────────────────────────────────────────────────────── */
+.counter {
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.25);
+  background: rgb(0 0 0 / 0.35);
+  padding: 0.375rem 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+/* ── numbers ──────────────────────────────────────────────────────────── */
+.number {
+  height: 1.75rem;
+  min-width: 1.75rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: rgb(255 255 255 / 0.8);
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.number:hover { background: rgb(255 255 255 / 0.15); }
+
+.numberOn {
+  background: #fff;
+  color: #0f172a;
+  border-color: #fff;
+}
+
+/* ── thumbnails ───────────────────────────────────────────────────────── */
+.thumbRow { gap: 0.5rem; }
+
+.thumb {
+  height: 2.25rem;
+  width: 3.25rem;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  border: 2px solid transparent;
+  opacity: 0.55;
+  transition: opacity 220ms ease, border-color 220ms ease;
+}
+
+.thumb:hover { opacity: 0.85; }
+
+.thumbOn {
+  opacity: 1;
+  border-color: #fff;
+}
+
+.thumb img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* A banner with no picture still needs a tile to stand for it. */
+.thumbBlank {
+  height: 100%;
+  width: 100%;
+  background: rgb(255 255 255 / 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot, .pill, .line, .number, .thumb { transition: none; }
+  .barRunning .barFill { animation: none; transform: scaleX(1); }
+}

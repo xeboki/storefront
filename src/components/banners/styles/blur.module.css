@@ -1,0 +1,27 @@
+/*
+ * The outgoing banner softens out as the next one sharpens in.
+ *
+ * A plain cross-fade passes through a moment where both are half visible and
+ * the picture reads as dirty. Blurring the one leaving takes it out of focus
+ * before it is out of sight, so the eye follows the one arriving instead.
+ */
+.panel {
+  transition: opacity 650ms ease-out, filter 650ms ease-out, transform 650ms ease-out;
+}
+
+.current {
+  opacity: 1;
+  filter: blur(0);
+  transform: scale(1);
+}
+
+.resting {
+  opacity: 0;
+  filter: blur(14px);
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+  .resting { filter: none; transform: none; }
+}
