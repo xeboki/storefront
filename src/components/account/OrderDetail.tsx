@@ -14,6 +14,12 @@ interface Props {
   order: OrderingOrder;
   storeSlug: string;
   isGuest?: boolean;
+  /**
+   * The merchant's own words after an order is placed. Written on the Checkout
+   * tab since it shipped and shown nowhere — a shop wanting to say "we'll text
+   * you when it's ready" had no way to.
+   */
+  thankYouMessage?: string;
 }
 
 // Statuses after which we stop polling — the order won't change further.
@@ -27,7 +33,9 @@ const STATUS_STEPS = [
   { key: 'completed', label: 'Delivered' },
 ];
 
-export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) {
+export function OrderDetail({
+  order: initialOrder, storeSlug, isGuest, thankYouMessage,
+}: Props) {
   const money = useMoney();
   const [order, setOrder] = useState<OrderingOrder>(initialOrder);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
@@ -92,6 +100,14 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
 
   return (
     <div className="space-y-6">
+      {/* The shop's own words, first: a thank-you that arrives below the
+          fold is not a thank-you. */}
+      {thankYouMessage && (
+        <p className="rounded-brand border border-success-border bg-success-bg px-4 py-3 text-sm text-success-fg">
+          {thankYouMessage}
+        </p>
+      )}
+
       {/* Back link */}
       <Link
         href={isGuest ? `/${storeSlug}` : `/${storeSlug}/account`}

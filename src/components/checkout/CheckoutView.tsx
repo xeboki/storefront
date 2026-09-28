@@ -124,6 +124,15 @@ export function CheckoutView({
   // Guest contact
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
+  // The details a shop can ask for on its Checkout tab. Eleven settings there
+  // were written since it shipped and read by nothing — these four fields did
+  // not exist on the form at all, so "require a VAT number" could not have
+  // worked however it was read.
+  const [phone, setPhone] = useState('');
+  const [company, setCompany] = useState('');
+  const [vatNumber, setVatNumber] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Fulfillment
   const [deliveryType, setDeliveryType] = useState<DeliveryType>(isTableBusiness ? 'dineIn' : 'pickup');
@@ -297,6 +306,24 @@ export function CheckoutView({
   const isGuest = !customer;
   const guestValid = !isGuest || (guestName.trim().length > 0 && guestEmail.trim().length > 0);
 
+  const asks = storefrontConfig?.checkout;
+  /** The extra details this shop requires, and whether each has been given. */
+  const extraFields = [
+    { key: 'phone', label: 'Phone', type: 'tel',
+      required: asks?.requirePhone ?? false, value: phone, set: setPhone },
+    { key: 'company', label: 'Company', type: 'text',
+      required: asks?.requireCompany ?? false, value: company, set: setCompany },
+    { key: 'vat', label: 'VAT number', type: 'text',
+      required: asks?.requireVat ?? false, value: vatNumber, set: setVatNumber },
+    { key: 'dob', label: 'Date of birth', type: 'date',
+      required: asks?.requireDob ?? false, value: dateOfBirth, set: setDateOfBirth },
+  ] as const;
+
+  // The server refuses an order missing any of these, so the form must not
+  // let a shopper reach that refusal having filled everything else in.
+  const extrasValid = extraFields.every((f) => !f.required || f.value.trim().length > 0);
+  const termsValid = !(asks?.showTerms ?? false) || termsAccepted;
+
   function cartPayload() {
     return items.map((item) => ({
       productId: item.productId,
@@ -319,6 +346,12 @@ export function CheckoutView({
       customerId: customer?.customerId,
       guestName: isGuest ? guestName.trim() : undefined,
       guestEmail: isGuest ? guestEmail.trim() : undefined,
+      // Asked for because the shop said so, so they travel with the order —
+      // collecting a VAT number and dropping it is worse than never asking.
+      customerPhone: phone.trim() || undefined,
+      company: company.trim() || undefined,
+      vatNumber: vatNumber.trim() || undefined,
+      dateOfBirth: dateOfBirth.trim() || undefined,
       tableId: deliveryType === 'dineIn' && tableNumber ? tableNumber : undefined,
       discountCode: discountState ? discountCode : undefined,
       giftCardCode: giftCardState ? giftCardCode : undefined,
@@ -408,6 +441,21 @@ export function CheckoutView({
   async function handleContinue() {
     if (!guestValid) {
       setError('Please enter your name and email to continue.');
+      return;
+    }
+
+    if (!extrasValid) {
+      // Named, not "please complete the form": a shopper who has filled in
+      // nine fields should not have to hunt for the tenth.
+      const missing = extraFields
+        .filter((f) => f.required && !f.value.trim())
+        .map((f) => f.label.toLowerCase());
+      setError(`This shop also needs your ${missing.join(' and ')}.`);
+      return;
+    }
+
+    if (!termsValid) {
+      setError('Please accept the terms to continue.');
       return;
     }
 
@@ -597,6 +645,27 @@ export function CheckoutView({
               </div>
             </div>
           )}
+
+          {/* What this shop asks for on top. Only the ones it asked for: a
+              checkout that demands a VAT number of every shopper because one
+              shop needs it is worse than the setting not existing. */}
+          {extraFields.some((f) => f.required) && (
+            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {extraFields.filter((f) => f.required).map((field) => (
+                <div key={field.key}>
+                  <label className="mb-1 block text-xs font-medium text-fg-muted">
+                    {field.label} <span className="text-danger-fg">*</span>
+                  </label>
+                  <input
+                    type={field.type}
+                    value={field.value}
+                    onChange={(e) => field.set(e.target.value)}
+                    className="w-full rounded-brand border border-line px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* 2 — Fulfillment */}
@@ -703,6 +772,9 @@ export function CheckoutView({
             </div>
           )}
 
+          {/* A shop can turn the notes box off — a kitchen that cannot honour
+              "no onions" is better not being asked. */}
+          {(asks?.allowNotes ?? true) && (
           <div className="mt-3">
             <label className="block text-xs font-medium text-fg-muted mb-1">
               Order notes <span className="text-fg-subtle font-normal">(optional)</span>
@@ -715,6 +787,32 @@ export function CheckoutView({
               className="w-full px-3 py-2 border border-line rounded-brand text-sm focus:outline-none focus:border-primary resize-none"
             />
           </div>
+          )}
+
+          {/* The terms box only appears when there is something to read: a box
+              that cannot be honestly ticked is worse than no box. */}
+          {asks?.showTerms && (
+            <label className="mt-4 flex items-start gap-2.5 text-sm text-fg-muted">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mt-0.5 h-4 w-4 flex-shrink-0 accent-primary"
+              />
+              <span>
+                I accept the{' '}
+                <a
+                  href={asks.termsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary underline"
+                >
+                  terms and conditions
+                </a>
+                .
+              </span>
+            </label>
+          )}
         </section>
 
         {/* 3 — Discount code */}

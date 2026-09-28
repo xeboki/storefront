@@ -38,6 +38,7 @@ export default async function OrderPage({ params }: Props) {
         order={order}
         storeSlug={params.store}
         isGuest={!session}
+        thankYouMessage={resolved?.storefrontConfig?.checkout?.thankYouMessage}
       />
     </div>
   );
