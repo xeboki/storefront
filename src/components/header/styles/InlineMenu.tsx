@@ -41,7 +41,7 @@ import styles from './inline.module.css';
 const FLOOR = 0;
 
 export default function InlineMenu({
-  entries, allHref, allLabel, links, menuLabel, linkCase, onDark,
+  entries, allHref, allLabel, links, menuLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -80,7 +80,8 @@ export default function InlineMenu({
     // Everything at once, if everything fits. Worth asking first: it is the
     // only case with no trigger to pay for, and it is the common one for the
     // small catalogue this arrangement is meant for.
-    const whole = departments.reduce((sum, el) => sum + width(el), width(escape));
+    const base = showAll ? width(escape) : 0;
+    const whole = departments.reduce((sum, el) => sum + width(el), base);
     if (whole <= available) {
       setVisible(departments.length);
       return;
@@ -89,7 +90,7 @@ export default function InlineMenu({
     // Otherwise the trigger is certain, so its width comes off the top rather
     // than being re-checked per item — a per-item check can pass for the last
     // one and then leave nowhere to put the trigger it implies.
-    const room = available - width(escape) - width(trigger);
+    const room = available - base - width(trigger);
     let used = 0;
     let count = 0;
     for (const el of departments) {
@@ -98,7 +99,7 @@ export default function InlineMenu({
       count += 1;
     }
     setVisible(Math.max(FLOOR, count));
-  }, []);
+  }, [showAll]);
 
   // Before paint, so the bar is never shown with the wrong number for a frame.
   useLayoutEffect(fit, [fit, entries, links]);
@@ -141,7 +142,8 @@ export default function InlineMenu({
       ref={navRef}
       aria-label={allLabel}
       data-dark={onDark || undefined}
-      className={clsx(styles.nav, linkCase === 'upper' && styles.upper, 'hidden lg:flex')}
+      className={clsx(styles.nav, linkCase === 'upper' && styles.upper,
+        align === 'centre' && 'justify-center', 'hidden lg:flex')}
     >
       {/* Every item at its natural width, laid out and never shown. The real
           row below can only say how wide things are once they have been
@@ -162,7 +164,7 @@ export default function InlineMenu({
           can never also cut off the control that reaches the rest of them —
           and so the panel, which hangs out of the bar, is not clipped either. */}
       <div className={styles.row}>
-        {item(allLabel, allHref, false, '__all')}
+        {showAll && item(allLabel, allHref, false, '__all')}
         {shown.map((entry) => item(entry.label, entry.href, false, entry.id))}
       </div>
 

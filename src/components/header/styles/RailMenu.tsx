@@ -20,7 +20,7 @@ import type { MenuStyleProps } from '../types';
 import styles from './rail.module.css';
 
 export default function RailMenu({
-  entries, allHref, allLabel, links, collapsed, linkCase, onDark,
+  entries, allHref, allLabel, links, collapsed, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   if (entries.length === 0 && links.length === 0) return null;
 
@@ -40,14 +40,23 @@ export default function RailMenu({
           className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
           trackClassName={clsx(
             'flex items-center gap-6 py-3 text-sm font-medium',
+            align === 'centre' && '[justify-content:safe_center]',
             // Was always uppercase. Shouting is now the shop's call, not a
             // decision baked into one of the four menus.
             linkCase === 'upper' && 'uppercase tracking-wide',
           )}
         >
-          <Link href={allHref} className="whitespace-nowrap text-fg transition-colors hover:text-primary">
-            {allLabel}
-          </Link>
+          {showAll && (
+            <Link
+              href={allHref}
+              className={clsx(
+                'whitespace-nowrap transition-colors',
+                onDark ? 'text-white hover:text-white/80' : 'text-fg hover:text-primary',
+              )}
+            >
+              {allLabel}
+            </Link>
+          )}
           {entries.map((entry) => (
             <Link
               key={entry.id}

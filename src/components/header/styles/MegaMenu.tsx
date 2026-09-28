@@ -37,7 +37,7 @@ function columnise<T>(items: T[]): T[][] {
 }
 
 export default function MegaMenu({
-  entries, allHref, allLabel, links, menuLabel, linkCase, onDark,
+  entries, allHref, allLabel, links, menuLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -50,13 +50,19 @@ export default function MegaMenu({
   const columns = columnise(shown);
 
   return (
-    <div className="hidden lg:block" ref={ref} data-dark={onDark || undefined}>
+    <div className={clsx('hidden lg:block', align === 'centre' && 'text-center')} ref={ref} data-dark={onDark || undefined}>
       <button
         type="button"
         aria-expanded={open}
         aria-haspopup="true"
-        onClick={() => setOpen((v) => !v)}
+        // Open-only, deliberately. Hovering the trigger opens the panel, so
+        // a toggle means the click a shopper instinctively makes on the thing
+        // they just pointed at closes what they were reaching for. It shuts
+        // on the way out, on Escape, and on a click anywhere else — three
+        // ways, none of which is "the control you aimed at".
+        onClick={() => setOpen(true)}
         onMouseEnter={() => setOpen(true)}
+        onFocus={() => setOpen(true)}
         className={clsx(styles.trigger, linkCase === 'upper' && styles.upper)}
       >
         {menuLabel}
@@ -119,10 +125,12 @@ export default function MegaMenu({
 
           {/* The way out. Also where the departments go that the columns
               could not hold, said plainly rather than hidden. */}
+          {showAll && (
           <Link href={allHref} onClick={close} className={styles.escape}>
             {spilled > 0 ? `${allLabel} (${spilled} more)` : allLabel}
             <ArrowRight size={15} />
           </Link>
+          )}
         </div>
       )}
     </div>

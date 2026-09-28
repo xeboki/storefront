@@ -46,6 +46,23 @@ export interface MenuStyleProps {
   linkCase: 'normal' | 'upper';
   /** White type, because the bar is dark or sitting on a picture. */
   onDark: boolean;
+  /**
+   * Where the departments sit in their row, under a centred mark.
+   *
+   * `safe centre` rather than centre: a row long enough to overflow, centred,
+   * pushes its first item off the left edge with no way to scroll back to it,
+   * because scrolling cannot go negative. `safe` falls back to the start
+   * exactly when that would happen.
+   */
+  align: 'start' | 'centre';
+  /**
+   * Whether this menu draws the way out to the whole catalogue.
+   *
+   * False for the second half of a split menu, which is the same menu drawn
+   * twice — one escape hatch, not two, and it belongs on the half the eye
+   * reaches first.
+   */
+  showAll: boolean;
 }
 
 /**

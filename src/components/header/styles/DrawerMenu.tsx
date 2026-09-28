@@ -17,11 +17,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useDismiss } from '../chrome';
+import { Portal } from '../Portal';
 import type { MenuStyleProps } from '../types';
 import styles from './drawer.module.css';
 
 export default function DrawerMenu({
-  entries, allHref, allLabel, links, menuLabel, linkCase, onDark,
+  entries, allHref, allLabel, links, menuLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -41,7 +42,7 @@ export default function DrawerMenu({
   if (entries.length === 0 && links.length === 0) return null;
 
   return (
-    <div className="hidden lg:block" data-dark={onDark || undefined}>
+    <div className={clsx('hidden lg:block', align === 'centre' && 'text-center')} data-dark={onDark || undefined}>
       <button
         type="button"
         aria-expanded={open}
@@ -53,6 +54,7 @@ export default function DrawerMenu({
       </button>
 
       {open && (
+        <Portal>
         <div className={styles.overlay}>
           <button type="button" aria-label="Close menu" className={styles.scrim} onClick={close} />
           <div className={styles.panel} ref={ref} role="navigation" aria-label={menuLabel}>
@@ -64,9 +66,11 @@ export default function DrawerMenu({
             </div>
 
             <nav className={styles.list}>
-              <Link href={allHref} onClick={close} className={styles.all}>
-                {allLabel}
-              </Link>
+              {showAll && (
+                <Link href={allHref} onClick={close} className={styles.all}>
+                  {allLabel}
+                </Link>
+              )}
               {entries.map((entry) => (
                 <Link key={entry.id} href={entry.href} onClick={close} className={styles.entry}>
                   <span>{entry.label}</span>
@@ -88,6 +92,7 @@ export default function DrawerMenu({
             </nav>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   );

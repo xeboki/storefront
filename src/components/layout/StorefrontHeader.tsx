@@ -207,15 +207,19 @@ export function StorefrontHeader({
    * Where the mark sits, and what the menu does around it.
    *
    * `split` puts the departments either side of a centred mark, so it needs a
-   * menu that lists them. A mega or drawer menu is one trigger and there is
-   * nothing to split, so it falls back to a centred mark with the trigger
-   * under it — the nearest arrangement that exists, rather than a header with
-   * a gap where half a menu should be. The back office says so beside the
-   * name, so a merchant is not left to discover it.
+   * menu that puts them IN the bar and can stop when it runs out of room —
+   * which is the inline one, and only that one. A mega or drawer menu is a
+   * single trigger with nothing to split. A rail is a row under the bar, and
+   * a rail split in half around a mark above it is two scrolling strips with
+   * two sets of arrows, which is what it looked like.
+   *
+   * So anything else falls back to a centred mark with the menu under it:
+   * the nearest arrangement that exists, rather than a header with a gap
+   * where half a menu should be. The back office says so beside the name, so
+   * a merchant is not left to discover it.
    */
-  const listsDepartments = placement === 'below' || elastic;
   const asked = asLogoPosition(header?.logoPosition);
-  const logoAt = asked === 'split' && !listsDepartments ? 'centred' : asked;
+  const logoAt = asked === 'split' && !elastic ? 'centred' : asked;
   const markCentred = logoAt === 'centred' || logoAt === 'split';
 
   const menuHasNothingToShow = railStyle === 'off' || (entries.length === 0 && links.length === 0);
@@ -260,7 +264,7 @@ export function StorefrontHeader({
   );
 
   /** One menu, or one half of a split one. */
-  const drawMenu = (slice: MenuEntry[], links_: MenuLink[]) => (
+  const drawMenu = (slice: MenuEntry[], links_: MenuLink[], showAll = true) => (
     <Menu
       entries={slice}
       allHref={catalogHref(null)}
@@ -270,6 +274,8 @@ export function StorefrontHeader({
       menuLabel={t('nav.menu')}
       linkCase={linkCase}
       onDark={onDark}
+      align={logoAt === 'centred' ? 'centre' : 'start'}
+      showAll={showAll}
     />
   );
 
@@ -282,7 +288,10 @@ export function StorefrontHeader({
       storeSlug={storeSlug}
       placement={header?.searchPlacement ?? 'centre'}
       width={searchWidth}
-      behaviour={header?.searchBehaviour ?? 'open'}
+      // A split bar is departments, mark, departments, icons. There is no
+      // room left for a field, so the search is its icon — the same demotion
+      // `crowded` makes to the width, one step further along.
+      behaviour={menuRow === 'split' ? 'tap' : header?.searchBehaviour ?? 'open'}
       spacers={!crowded}
       iconClassName={iconButton}
     />
@@ -365,7 +374,8 @@ export function StorefrontHeader({
                 markCentred ? 'min-w-0 justify-end' : 'ml-auto',
               )}
             >
-              {menuRow === 'split' && drawMenu(entries.slice(half), links)}
+              {/* The way out sits on the half the eye reaches first. */}
+              {menuRow === 'split' && drawMenu(entries.slice(half), links, false)}
               {markCentred && menuRow === 'split' && searchSlot}
 
               {header?.showCurrency === true && (
@@ -445,9 +455,31 @@ export function StorefrontHeader({
             </div>
           )}
 
-          {menuRow === 'below' && (
-            <div className={clsx(logoAt === 'centred' && 'text-center')}>{menuNode}</div>
+          {/* A style that asked for the bar and was moved under it by the
+              mark's position brings no page gutter of its own — the bar was
+              providing it. Without this the trigger sits flush against the
+              window edge while the mark sits at the gutter, which is what
+              `stacked` looked like. The rail already has its own container,
+              so it is not given a second one. */}
+          {menuRow === 'below' && placement === 'bar' && menuNode && (
+            <div
+              className={clsx(
+                'hidden lg:block',
+                header?.showBorder !== false &&
+                  (onDark ? 'border-t border-white/15' : 'border-t border-line'),
+              )}
+            >
+              <div
+                className={clsx(
+                  'mx-auto flex max-w-7xl px-4 py-1.5 sm:px-6 lg:px-8',
+                  logoAt === 'centred' ? 'justify-center' : 'justify-start',
+                )}
+              >
+                {menuNode}
+              </div>
+            </div>
           )}
+          {menuRow === 'below' && placement === 'below' && menuNode}
         </div>
       </header>
 
