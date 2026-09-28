@@ -190,16 +190,31 @@ input[type="range"].slider-thumb::-moz-range-thumb {
   letter-spacing: -0.015em;
 }
 
-/* A short rule that sits beside an eyebrow, as an editorial page would set it. */
-.eyebrow-rule::before {
+/* A short rule that sits beside an eyebrow, as an editorial page would set it.
+   Which SIDE follows the alignment: a single leading rule under a centred
+   headline pulls the eyebrow off the centre it is supposed to share, and under
+   a right-aligned one it points away from the words it introduces. */
+.eyebrow-rule::before,
+.eyebrow-rule-both::before,
+.eyebrow-rule-both::after,
+.eyebrow-rule-end::after {
   content: "";
   display: inline-block;
   width: 2rem;
   height: 1px;
-  margin-right: 0.75rem;
   vertical-align: middle;
   background: currentColor;
   opacity: 0.5;
+}
+
+.eyebrow-rule::before,
+.eyebrow-rule-both::before {
+  margin-right: 0.75rem;
+}
+
+.eyebrow-rule-both::after,
+.eyebrow-rule-end::after {
+  margin-left: 0.75rem;
 }
 
 /* ── Surface texture ─────────────────────────────────────────────────────────

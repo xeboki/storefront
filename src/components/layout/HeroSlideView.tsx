@@ -72,6 +72,50 @@ const ALIGN_DESKTOP: Record<string, string> = {
   right: 'sm:items-end sm:text-right',
 };
 
+/**
+ * Centring the column is not centring what is in it.
+ *
+ * `text-center` centres the words inside each box, and `items-center` centres
+ * the column. Neither touches a box that is NARROWER than the column: the
+ * supporting line is held to a readable measure and the buttons are a flex row
+ * that starts at its own beginning. So on a centred banner the headline sat
+ * centred while the line under it and its button sat left of it, which reads
+ * as the setting half working.
+ *
+ * Written out in full, `sm:` variants and all — a class name composed at
+ * runtime is never in a file Tailwind scans and never gets a rule.
+ */
+const MEASURE_MOBILE: Record<string, string> = {
+  left: 'mr-auto',
+  centre: 'mx-auto',
+  right: 'ml-auto',
+};
+
+const MEASURE_DESKTOP: Record<string, string> = {
+  left: 'sm:mr-auto sm:ml-0',
+  centre: 'sm:mx-auto',
+  right: 'sm:ml-auto sm:mr-0',
+};
+
+const BUTTONS_MOBILE: Record<string, string> = {
+  left: 'justify-start',
+  centre: 'justify-center',
+  right: 'justify-end',
+};
+
+/** Which side the eyebrow's rule sits on, so it points at its own words. */
+const EYEBROW_RULE: Record<string, string> = {
+  left: 'eyebrow-rule',
+  centre: 'eyebrow-rule-both',
+  right: 'eyebrow-rule-end',
+};
+
+const BUTTONS_DESKTOP: Record<string, string> = {
+  left: 'sm:justify-start',
+  centre: 'sm:justify-center',
+  right: 'sm:justify-end',
+};
+
 const VERTICAL: Record<string, string> = {
   top: 'justify-start',
   middle: 'justify-center',
@@ -122,7 +166,13 @@ export function HeroSlideView({
     >
       <div className={layout === 'split' ? 'max-w-2xl' : 'max-w-xl'}>
         {slide.eyebrow && (
-          <p className="eyebrow eyebrow-rule text-white/70">{slide.eyebrow}</p>
+          <p
+            className={`eyebrow text-white/70 ${
+              EYEBROW_RULE[slide.align] ?? EYEBROW_RULE.left
+            }`}
+          >
+            {slide.eyebrow}
+          </p>
         )}
 
         <h2 className={`${TITLE_SIZE[slide.titleSize] ?? TITLE_SIZE.large} mt-5 text-white drop-shadow-sm`}>
@@ -130,13 +180,21 @@ export function HeroSlideView({
         </h2>
 
         {slide.subtitle && (
-          <p className="mt-5 max-w-md text-lg leading-relaxed text-white/85">
+          <p
+            className={`mt-5 max-w-md text-lg leading-relaxed text-white/85 ${
+              MEASURE_MOBILE[slide.alignMobile] ?? MEASURE_MOBILE.left
+            } ${MEASURE_DESKTOP[slide.align] ?? MEASURE_DESKTOP.left}`}
+          >
             {slide.subtitle}
           </p>
         )}
 
         {(slide.ctaText || slide.showSecondary) && (
-          <div className="mt-7 flex flex-wrap items-center gap-3 sm:mt-9">
+          <div
+            className={`mt-7 flex flex-wrap items-center gap-3 sm:mt-9 ${
+              BUTTONS_MOBILE[slide.alignMobile] ?? BUTTONS_MOBILE.left
+            } ${BUTTONS_DESKTOP[slide.align] ?? BUTTONS_DESKTOP.left}`}
+          >
             {slide.ctaText && (
               <Link
                 href={slide.ctaHref}
