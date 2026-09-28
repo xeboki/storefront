@@ -11,6 +11,8 @@ import { useMoney } from '@/lib/currency';
 import { canBuy, variantIsSellable } from '@/lib/availability';
 import { ProductImage } from './ProductImage';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
+import { deliveryEstimateText } from '@/lib/delivery-estimate';
+import type { DeliveryEstimate } from '@xeboki/sdk';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import { ProductReviews } from './ProductReviews';
 import type { OrderingProduct, ProductVariant } from '@xeboki/sdk';
@@ -18,9 +20,16 @@ import type { OrderingProduct, ProductVariant } from '@xeboki/sdk';
 interface Props {
   product: OrderingProduct;
   storeSlug: string;
+  /**
+   * How long delivery takes, when the shop has said. Shown HERE and not only
+   * at checkout: it is the one thing a shopper wants before they decide, and
+   * the commonest reason a basket is abandoned is finding out too late.
+   */
+  deliveryEstimate?: DeliveryEstimate | null;
 }
 
-export function ProductDetail({ product, storeSlug }: Props) {
+export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
+  const delivery = deliveryEstimateText(deliveryEstimate);
   const money = useMoney();
   const variants: ProductVariant[] = product.hasVariants ? product.variants ?? [] : [];
   const axes = product.variantOptions ?? [];
@@ -366,6 +375,19 @@ export function ProductDetail({ product, storeSlug }: Props) {
               {isAvailable ? 'In stock at your store' : 'Not available at your store'}
             </dd>
           </div>
+          {/* Absent when the shop has never said. A delivery promise nobody
+              made is worse than none, because a shopper holds you to it. */}
+          {delivery && (
+            <div className="flex justify-between gap-4 py-3">
+              <dt className="text-fg-muted">Delivery</dt>
+              <dd className="text-right text-fg">
+                {delivery.range}
+                {delivery.cutoff && (
+                  <span className="block text-xs text-fg-muted">{delivery.cutoff}</span>
+                )}
+              </dd>
+            </div>
+          )}
         </dl>
       </div>
     </div>

@@ -18,6 +18,7 @@ import {
   taxRateFor,
 } from '@/lib/shipping';
 import { trackBeginCheckout } from '@/lib/analytics';
+import { deliveryEstimateText } from '@/lib/delivery-estimate';
 import type { StorefrontConfig, StorePaymentMethod } from '@xeboki/sdk';
 import { CheckoutForm } from './CheckoutForm';
 import { PayPalPaymentPanel } from './PayPalPaymentPanel';
@@ -307,6 +308,7 @@ export function CheckoutView({
   const guestValid = !isGuest || (guestName.trim().length > 0 && guestEmail.trim().length > 0);
 
   const asks = storefrontConfig?.checkout;
+  const deliveryDays = deliveryEstimateText(storefrontConfig?.deliveryEstimate);
   /** The extra details this shop requires, and whether each has been given. */
   const extraFields = [
     { key: 'phone', label: 'Phone', type: 'tel',
@@ -692,6 +694,15 @@ export function CheckoutView({
           </div>
 
           {/* Delivery city (city/location-based routing) */}
+          {/* Said again here, because the shopper chose delivery a moment
+              ago and this is where they commit to it. */}
+          {deliveryType === 'delivery' && deliveryDays && (
+            <p className="mt-3 rounded-brand border border-info-border bg-info-bg px-3 py-2 text-xs text-info-fg">
+              <span className="font-semibold">Arrives in {deliveryDays.range}.</span>
+              {deliveryDays.cutoff && ` ${deliveryDays.cutoff} to start today.`}
+            </p>
+          )}
+
           {deliveryType === 'delivery' && (
             <div className="mt-3">
               <label className="block text-xs font-medium text-fg-muted mb-1">

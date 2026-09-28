@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { storeName } from '@/lib/store-name';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { loadStore, loadCategories } from '@/lib/sdk/store';
 
 import { StoreProviders } from '@/components/layout/StoreProviders';
@@ -16,6 +16,8 @@ import { activeLocale, availableLocales } from '@/lib/i18n/server';
 import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
 import { activeLocation, needsStoreChoice, onlineStores } from '@/lib/location';
 import { StoreGate } from '@/components/location/StoreGate';
+import { headers } from 'next/headers';
+import { getSession } from '@/lib/auth/session';
 
 interface Props {
   params: { store: string };
@@ -67,6 +69,22 @@ export async function generateMetadata({ params }: { params: { store: string } }
 export default async function StoreLayout({ params, children }: Props) {
   const resolved = await loadStore(params.store);
   if (!resolved) notFound();
+
+  // A shop can put itself behind a sign-in. The switch has been on the
+  // Overview tab since it shipped and read by nothing, so a trade-only shop
+  // that asked for this was wide open.
+  //
+  // Gated in the LAYOUT, not on the catalogue: a guard that covers the listing
+  // and leaves the product pages, the search and the sitemap open guards
+  // nothing. The sign-in and register pages are the exception, or there is no
+  // way in.
+  if (resolved.storefrontConfig?.requireLoginToBrowse) {
+    const path = headers().get('x-invoke-path') ?? headers().get('x-pathname') ?? '';
+    const isWayIn = /\/(login|register)(\/|$)/.test(path);
+    if (!isWayIn && !(await getSession())) {
+      redirect(`/${params.store}/login`);
+    }
+  }
 
   const { storeConfig, storefrontConfig, slug } = resolved;
   // Resolved from the shopper's choice, not just the deployment default —

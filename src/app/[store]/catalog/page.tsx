@@ -53,7 +53,11 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   // actually sell them. Passing the location alone only scopes the stock FIGURE
   // — every product still came back, so a branch holding nothing listed the
   // whole 158-product catalogue and none of it was fulfillable there.
-  const scopedToStock = locationFirst || inStockOnly
+  // A shop can choose not to list what it cannot sell. The switch has been on
+  // the Overview tab since it shipped and read by nothing, so "hide
+  // out-of-stock products" listed them anyway.
+  const hideSoldOut = store.storefrontConfig?.showOutOfStock === false
+  const scopedToStock = locationFirst || inStockOnly || hideSoldOut
 
   // Search / category / paging all happen SERVER-SIDE against the API, so the
   // catalog is no longer capped at a client-loaded slice.

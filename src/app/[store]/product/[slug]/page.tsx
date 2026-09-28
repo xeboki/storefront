@@ -72,7 +72,11 @@ export default async function ProductPage({ params, searchParams }: Props) {
       {/* pb-28 on phones clears the sticky buy bar, which is fixed to the
           bottom and would otherwise sit over the end of the page. */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 sm:pb-8">
-        <ProductDetail product={product} storeSlug={params.store} />
+        <ProductDetail
+          product={product}
+          storeSlug={params.store}
+          deliveryEstimate={resolved?.storefrontConfig?.deliveryEstimate}
+        />
         {upsells.length > 0 && (
           <section className="mt-16">
             <h2 className="text-xl font-bold text-fg mb-6">You might also like</h2>
