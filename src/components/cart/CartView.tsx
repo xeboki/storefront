@@ -89,7 +89,7 @@ export function CartView({ storeSlug }: Props) {
 
               <button
                 onClick={() => removeItem(item.productId, item.variantId)}
-                className="p-1 text-fg-subtle hover:text-rose-500 transition-colors"
+                className="p-1 text-fg-subtle hover:text-danger-fg transition-colors"
                 aria-label="Remove"
               >
                 <Trash2 size={16} />

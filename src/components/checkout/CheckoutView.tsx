@@ -554,7 +554,7 @@ export function CheckoutView({
                 <p className="text-sm font-semibold text-fg truncate">{customer.name}</p>
                 <p className="text-xs text-fg-muted truncate">{customer.email}</p>
               </div>
-              <span className="text-xs text-emerald-600 font-medium bg-emerald-50 border border-emerald-200 rounded px-2 py-0.5">
+              <span className="text-xs text-success-fg font-medium bg-success-bg border border-success-border rounded px-2 py-0.5">
                 Signed in
               </span>
             </div>
@@ -572,7 +572,7 @@ export function CheckoutView({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-fg-muted mb-1">
-                    Full name <span className="text-rose-500">*</span>
+                    Full name <span className="text-danger-fg">*</span>
                   </label>
                   <input
                     type="text"
@@ -584,7 +584,7 @@ export function CheckoutView({
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-fg-muted mb-1">
-                    Email <span className="text-rose-500">*</span>
+                    Email <span className="text-danger-fg">*</span>
                   </label>
                   <input
                     type="email"
@@ -637,12 +637,12 @@ export function CheckoutView({
               />
               {deliveryCity.trim() !== '' && (
                 deliveryBranch ? (
-                  <p className="text-xs text-emerald-600 mt-1.5">
+                  <p className="text-xs text-success-fg mt-1.5">
                     Delivered from {deliveryBranch.locationName} · est.{' '}
                     {deliveryBranch.minDays}–{deliveryBranch.maxDays} days
                   </p>
                 ) : (
-                  <p className="text-xs text-amber-600 mt-1.5">
+                  <p className="text-xs text-warning-fg mt-1.5">
                     No branch delivers to “{deliveryCity.trim()}” — a standard delivery fee applies.
                   </p>
                 )
@@ -678,7 +678,7 @@ export function CheckoutView({
           )}
 
           {fulfilledElsewhere && (
-            <p className="mt-3 rounded-brand border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200">
+            <p className="mt-3 rounded-brand border border-warning-border bg-warning-bg px-3 py-2 text-xs text-warning-fg">
               You were shopping at{' '}
               <strong>{shoppedAt!.locationName || shoppedAt!.city}</strong>, but this
               order will be fulfilled by{' '}
@@ -731,14 +731,14 @@ export function CheckoutView({
           {showDiscount && (
             <div className="mt-3">
               {discountState ? (
-                <div className="flex items-center justify-between p-3 rounded-brand bg-emerald-50 border border-emerald-200 text-sm">
+                <div className="flex items-center justify-between p-3 rounded-brand bg-success-bg border border-success-border text-sm">
                   <div>
-                    <span className="font-semibold text-emerald-800">{discountState.code}</span>
-                    <span className="text-emerald-700 ml-2">
+                    <span className="font-semibold text-success-fg">{discountState.code}</span>
+                    <span className="text-success-fg ml-2">
                       −{money(discountState.discountAmount ?? 0)}
                     </span>
                   </div>
-                  <button onClick={removeDiscount} className="text-emerald-600 hover:text-rose-600 transition-colors text-xs font-medium">
+                  <button onClick={removeDiscount} className="text-success-fg hover:text-danger-fg transition-colors text-xs font-medium">
                     Remove
                   </button>
                 </div>
@@ -761,7 +761,7 @@ export function CheckoutView({
                   </button>
                 </div>
               )}
-              {discountError && <p className="text-xs text-rose-600 mt-1.5">{discountError}</p>}
+              {discountError && <p className="text-xs text-danger-fg mt-1.5">{discountError}</p>}
             </div>
           )}
         </section>
@@ -787,7 +787,7 @@ export function CheckoutView({
                       Balance: {money(giftCardState.balance)} · Applying {money(giftCardApplied)}
                     </span>
                   </div>
-                  <button onClick={removeGiftCard} className="text-violet-600 hover:text-rose-600 transition-colors text-xs font-medium">
+                  <button onClick={removeGiftCard} className="text-violet-600 hover:text-danger-fg transition-colors text-xs font-medium">
                     Remove
                   </button>
                 </div>
@@ -810,14 +810,14 @@ export function CheckoutView({
                   </button>
                 </div>
               )}
-              {giftCardError && <p className="text-xs text-rose-600 mt-1.5">{giftCardError}</p>}
+              {giftCardError && <p className="text-xs text-danger-fg mt-1.5">{giftCardError}</p>}
             </div>
           )}
         </section>
 
         {loyalty && loyaltyPerPoint > 0 && (
           <section>
-            <label className="flex items-start gap-3 p-4 rounded-brand border border-amber-200 bg-amber-50/60 cursor-pointer">
+            <label className="flex items-start gap-3 p-4 rounded-brand border border-warning-border bg-warning-bg cursor-pointer">
               <input
                 type="checkbox"
                 checked={redeemLoyalty}
@@ -825,8 +825,8 @@ export function CheckoutView({
                 className="mt-0.5"
               />
               <span className="text-sm">
-                <span className="font-semibold text-amber-800">Use my loyalty points</span>
-                <span className="block text-amber-700">
+                <span className="font-semibold text-warning-fg">Use my loyalty points</span>
+                <span className="block text-warning-fg">
                   You have {loyalty.points} points
                   {redeemLoyalty && loyaltyPointsRedeemed > 0
                     ? ` — redeeming ${loyaltyPointsRedeemed} for ${money(loyaltyDiscount)} off`
@@ -878,14 +878,14 @@ export function CheckoutView({
         </section>
 
         {belowMinimum && deliveryBranch && (
-          <p className="rounded-brand border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200">
+          <p className="rounded-brand border border-warning-border bg-warning-bg px-3 py-2 text-sm text-warning-fg">
             {deliveryBranch.locationName || deliveryBranch.city} has a minimum
             delivery order of {money(minOrder)}. Add {money(minOrder - goods)}{' '}
             more to continue, or collect in store instead.
           </p>
         )}
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && <p className="text-sm text-danger-fg">{error}</p>}
 
         <button
           onClick={handleContinue}
@@ -961,7 +961,7 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
           <span>{money(subtotal)}</span>
         </div>
         {discountAmount > 0 && (
-          <div className="flex justify-between text-emerald-600">
+          <div className="flex justify-between text-success-fg">
             <span>Discount</span>
             <span>−{money(discountAmount)}</span>
           </div>
@@ -971,7 +971,7 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
           <span>{shipping > 0 ? money(shipping) : 'Free'}</span>
         </div>
         {loyaltyDiscount > 0 && (
-          <div className="flex justify-between text-amber-600">
+          <div className="flex justify-between text-warning-fg">
             <span>Loyalty points</span>
             <span>−{money(loyaltyDiscount)}</span>
           </div>

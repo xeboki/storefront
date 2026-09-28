@@ -26,7 +26,7 @@ function StarRow({ rating, size = 16 }: { rating: number; size?: number }) {
         <Star
           key={i}
           size={size}
-          className={i < rating ? 'text-amber-400 fill-amber-400' : 'text-line fill-line'}
+          className={i < rating ? 'text-warning fill-warning' : 'text-line fill-line'}
         />
       ))}
     </div>
@@ -140,7 +140,7 @@ export function ProductReviews({ storeSlug, productId }: Props) {
                     className={clsx(
                       'transition-colors',
                       i < (hoverRating || rating)
-                        ? 'text-amber-400 fill-amber-400'
+                        ? 'text-warning fill-warning'
                         : 'text-line fill-line',
                     )}
                   />
@@ -175,7 +175,7 @@ export function ProductReviews({ storeSlug, productId }: Props) {
             />
           </div>
 
-          {submitError && <p className="text-sm text-rose-600">{submitError}</p>}
+          {submitError && <p className="text-sm text-danger-fg">{submitError}</p>}
 
           <div className="flex gap-2">
             <button
@@ -197,7 +197,7 @@ export function ProductReviews({ storeSlug, productId }: Props) {
       )}
 
       {submitted && (
-        <div className="rounded-brand border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+        <div className="rounded-brand border border-success-border bg-success-bg p-4 text-sm text-success-fg">
           Thank you! Your review has been submitted for approval.
         </div>
       )}

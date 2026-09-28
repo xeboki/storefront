@@ -37,7 +37,7 @@ export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
         </div>
         <button
           onClick={() => logout(storeSlug)}
-          className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-rose-600 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-fg-muted hover:text-danger-fg transition-colors"
         >
           <LogOut size={16} />
           Sign out
@@ -126,9 +126,9 @@ export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
 
 function statusColor(status: string): string {
   switch (status) {
-    case 'completed': return 'bg-green-50 text-green-700';
-    case 'cancelled': return 'bg-red-50 text-red-700';
-    case 'pending': return 'bg-amber-50 text-amber-700';
+    case 'completed': return 'bg-success-bg text-success-fg';
+    case 'cancelled': return 'bg-danger-bg text-danger-fg';
+    case 'pending': return 'bg-warning-bg text-warning-fg';
     default: return 'bg-surface-alt text-fg-muted';
   }
 }

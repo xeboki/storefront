@@ -127,10 +127,10 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
 
 function statusBadge(status: string): string {
   switch (status) {
-    case 'completed':  return 'bg-emerald-50 text-emerald-700';
-    case 'cancelled':  return 'bg-rose-50 text-rose-700';
-    case 'pending':    return 'bg-amber-50 text-amber-700';
-    case 'ready':      return 'bg-blue-50 text-blue-700';
+    case 'completed':  return 'bg-success-bg text-success-fg';
+    case 'cancelled':  return 'bg-danger-bg text-danger-fg';
+    case 'pending':    return 'bg-warning-bg text-warning-fg';
+    case 'ready':      return 'bg-info-bg text-info-fg';
     case 'preparing':  return 'bg-violet-50 text-violet-700';
     default:           return 'bg-surface-alt text-fg-muted';
   }

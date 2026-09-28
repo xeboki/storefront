@@ -231,7 +231,7 @@ export function ProductDetail({ product, storeSlug }: Props) {
           <div key={group.id} className="space-y-2">
             <p className="text-sm font-semibold text-fg">
               {group.name}
-              {group.required && <span className="text-rose-500 ml-1">*</span>}
+              {group.required && <span className="text-danger-fg ml-1">*</span>}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {group.options.map((option) => (
@@ -298,11 +298,11 @@ export function ProductDetail({ product, storeSlug }: Props) {
             className={clsx(
               'p-3 rounded-brand border transition-colors',
               isWishlisted
-                ? 'border-rose-300 bg-rose-50 text-rose-500'
-                : 'border-line text-fg-subtle hover:border-rose-300 hover:text-rose-500',
+                ? 'border-danger-border bg-danger-bg text-danger-fg'
+                : 'border-line text-fg-subtle hover:border-danger-border hover:text-danger-fg',
             )}
           >
-            <Heart size={20} className={isWishlisted ? 'fill-rose-500' : ''} />
+            <Heart size={20} className={isWishlisted ? 'fill-danger-fg' : ''} />
           </button>
         </div>
 
@@ -333,11 +333,11 @@ export function ProductDetail({ product, storeSlug }: Props) {
             className={clsx(
               'p-3 rounded-brand border transition-colors',
               isWishlisted
-                ? 'border-rose-300 bg-rose-50 text-rose-500'
-                : 'border-line text-fg-subtle hover:border-rose-300 hover:text-rose-500',
+                ? 'border-danger-border bg-danger-bg text-danger-fg'
+                : 'border-line text-fg-subtle hover:border-danger-border hover:text-danger-fg',
             )}
           >
-            <Heart size={20} className={isWishlisted ? 'fill-rose-500' : ''} />
+            <Heart size={20} className={isWishlisted ? 'fill-danger-fg' : ''} />
           </button>
         </div>
 

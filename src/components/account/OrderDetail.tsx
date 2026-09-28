@@ -126,8 +126,8 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
         {!isTerminal && (
           <div className="flex items-center gap-2 text-xs text-fg-subtle">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
             </span>
             Live tracking · Updated {formatTime(lastRefreshed)}
             <button
@@ -216,7 +216,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
 
       {/* Cancellation notice */}
       {isCancelled && (
-        <div className="p-4 rounded-brand bg-rose-50 border border-rose-200 text-sm text-rose-700">
+        <div className="p-4 rounded-brand bg-danger-bg border border-danger-border text-sm text-danger-fg">
           This order has been cancelled.
         </div>
       )}
@@ -284,7 +284,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
             </div>
           )}
           {order.discount > 0 && (
-            <div className="flex justify-between text-emerald-700">
+            <div className="flex justify-between text-success-fg">
               <span>Discount</span>
               <span>−{money(order.discount)}</span>
             </div>
@@ -296,7 +296,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
             </div>
           )}
           {order.loyaltyDiscount > 0 && (
-            <div className="flex justify-between text-amber-600">
+            <div className="flex justify-between text-warning-fg">
               <span>Loyalty points</span>
               <span>−{money(order.loyaltyDiscount)}</span>
             </div>
@@ -306,7 +306,7 @@ export function OrderDetail({ order: initialOrder, storeSlug, isGuest }: Props) 
             <span>{money(order.total)}</span>
           </div>
           {order.paidTotal > 0 && order.paidTotal < order.total && (
-            <div className="flex justify-between text-amber-700 text-xs">
+            <div className="flex justify-between text-warning-fg text-xs">
               <span>Amount due</span>
               <span>{money(order.total - order.paidTotal)}</span>
             </div>
@@ -344,12 +344,12 @@ function formatTime(d: Date): string {
 
 function statusBadge(status: string): string {
   switch (status) {
-    case 'completed':  return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-    case 'cancelled':  return 'bg-rose-50 text-rose-700 border border-rose-200';
-    case 'pending':    return 'bg-amber-50 text-amber-700 border border-amber-200';
-    case 'ready':      return 'bg-blue-50 text-blue-700 border border-blue-200';
+    case 'completed':  return 'bg-success-bg text-success-fg border border-success-border';
+    case 'cancelled':  return 'bg-danger-bg text-danger-fg border border-danger-border';
+    case 'pending':    return 'bg-warning-bg text-warning-fg border border-warning-border';
+    case 'ready':      return 'bg-info-bg text-info-fg border border-info-border';
     case 'preparing':  return 'bg-violet-50 text-violet-700 border border-violet-200';
-    case 'confirmed':  return 'bg-sky-50 text-sky-700 border border-sky-200';
+    case 'confirmed':  return 'bg-info-bg text-info-fg border border-info-border';
     default:           return 'bg-surface-alt text-fg-muted border border-line';
   }
 }

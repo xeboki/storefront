@@ -341,7 +341,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
             {loadingSlots ? (
               <p className="text-sm text-fg-subtle py-4">Checking availability…</p>
             ) : slotsError ? (
-              <p className="text-sm text-red-600 py-4">{slotsError}</p>
+              <p className="text-sm text-danger-fg py-4">{slotsError}</p>
             ) : selectedDay && !selectedDay.is_open ? (
               // Said outright. A closed shop and a fully booked one look
               // identical from an empty grid, and a customer reads them very
@@ -454,7 +454,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
         </div>
 
         {!customer && (
-          <div className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-brand p-3">
+          <div className="text-sm text-warning-fg bg-warning-bg border border-warning-border rounded-brand p-3">
             You must be signed in to book.{' '}
             <a href={`/${storeSlug}/login?next=/${storeSlug}/book`} className="font-semibold underline">
               Sign in
@@ -462,7 +462,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
           </div>
         )}
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
+        {error && <p className="text-sm text-danger-fg">{error}</p>}
 
         <button
           onClick={handleBook}
@@ -479,7 +479,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
 
   return (
     <div className="flex flex-col items-center text-center py-8 space-y-4">
-      <CheckCircle size={56} className="text-emerald-500" />
+      <CheckCircle size={56} className="text-success-fg" />
       <h2 className="text-xl font-bold text-fg">Appointment Booked!</h2>
       <p className="text-sm text-fg-muted max-w-xs">
         Your appointment for <strong>{selectedService?.name}</strong> has been confirmed. We&apos;ll see you then!

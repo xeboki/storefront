@@ -98,7 +98,7 @@ export function WishlistClient({ storeSlug }: Props) {
               </button>
               <button
                 onClick={() => removeItem(item.productId, storeSlug, item.variantId)}
-                className="p-1.5 text-fg-subtle hover:text-rose-600 transition-colors"
+                className="p-1.5 text-fg-subtle hover:text-danger-fg transition-colors"
                 aria-label="Remove from wishlist"
               >
                 <Trash2 size={15} />

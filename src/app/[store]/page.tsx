@@ -120,7 +120,7 @@ export default async function StorePage({ params }: Props) {
           age is: 21 in the United States, 18 across most of Europe, and a
           shop that states the wrong one is making a claim about the law. */}
       {needsAgeGate(bt) && showSection(storefrontConfig, 'ageGate') && (
-        <div className="bg-amber-50 border-b border-amber-200 py-2 px-4 text-center text-sm text-amber-800">
+        <div className="bg-warning-bg border-b border-warning-border py-2 px-4 text-center text-sm text-warning-fg">
           {ageWords.title}
         </div>
       )}

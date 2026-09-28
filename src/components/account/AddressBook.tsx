@@ -110,7 +110,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
             <div className="flex items-center gap-2">
               {addr.label && <span className="font-semibold text-fg">{addr.label}</span>}
               {addr.isDefault && (
-                <span className="inline-flex items-center gap-0.5 text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-0.5 text-xs text-warning-fg bg-warning-bg px-2 py-0.5 rounded-full">
                   <Star size={10} /> Default
                 </span>
               )}
@@ -124,7 +124,7 @@ export function AddressBook({ initialAddresses, customerId, storeSlug }: Props) 
           </div>
           <button
             onClick={() => handleDelete(addr.id)}
-            className="p-1.5 text-fg-subtle hover:text-rose-500 transition-colors"
+            className="p-1.5 text-fg-subtle hover:text-danger-fg transition-colors"
             aria-label="Delete address"
           >
             <Trash2 size={16} />

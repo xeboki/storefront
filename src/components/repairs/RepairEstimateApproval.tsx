@@ -151,7 +151,7 @@ export function RepairEstimateApproval({
     return (
       <div
         role="alert"
-        className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3"
+        className="bg-danger-bg border border-danger-border text-danger-fg rounded-lg px-4 py-3"
       >
         {error}
       </div>
@@ -180,9 +180,9 @@ export function RepairEstimateApproval({
           ? 'Thank you — the shop has your answer and will do the work you approved.'
           : 'Thank you — the shop has your approval and will get started.'
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl px-6 py-6">
-        <h2 className="font-semibold text-green-900 mb-1">Answer received</h2>
-        <p className="text-green-800 text-sm">{message}</p>
+      <div className="bg-success-bg border border-success-border rounded-xl px-6 py-6">
+        <h2 className="font-semibold text-success-fg mb-1">Answer received</h2>
+        <p className="text-success-fg text-sm">{message}</p>
       </div>
     )
   }
@@ -280,7 +280,7 @@ export function RepairEstimateApproval({
       {error && (
         <div
           role="alert"
-          className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3"
+          className="bg-danger-bg border border-danger-border text-danger-fg rounded-lg px-4 py-3"
         >
           {error}
         </div>

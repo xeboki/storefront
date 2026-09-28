@@ -104,8 +104,8 @@ export default function AccountProfilePage({ params }: Props) {
           />
         </div>
 
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        {saved && <p className="text-sm text-emerald-600">Profile saved.</p>}
+        {error && <p className="text-sm text-danger-fg">{error}</p>}
+        {saved && <p className="text-sm text-success-fg">Profile saved.</p>}
 
         <button
           type="submit"

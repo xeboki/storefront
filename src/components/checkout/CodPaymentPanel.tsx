@@ -90,7 +90,7 @@ export function CodPaymentPanel({
 
   return (
     <div className="space-y-5">
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+      <div className="rounded-lg border border-warning-border bg-warning-bg p-4 text-sm text-warning-fg">
         <p className="font-semibold mb-1">
           {deliveryType === 'delivery' ? 'Pay on Delivery' : 'Pay at Pickup'}
         </p>

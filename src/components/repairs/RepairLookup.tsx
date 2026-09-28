@@ -173,7 +173,7 @@ export function RepairLookup({
       {error && (
         <div
           role="alert"
-          className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3"
+          className="bg-danger-bg border border-danger-border text-danger-fg rounded-lg px-4 py-3"
         >
           {error}
         </div>
@@ -246,7 +246,7 @@ export function RepairLookup({
           </dl>
 
           {repair.isReady && (
-            <div className="bg-green-50 border-t border-green-200 px-6 py-4 text-green-800 text-sm">
+            <div className="bg-success-bg border-t border-success-border px-6 py-4 text-success-fg text-sm">
               Your repair is ready to collect
               {storeName ? ` from ${storeName}` : ''}.
             </div>

@@ -24,15 +24,15 @@ const STATUS_FILTERS = [
 
 function statusBadge(status: string): string {
   switch (status) {
-    case 'confirmed':  return 'bg-emerald-50 text-emerald-700';
-    case 'scheduled':  return 'bg-blue-50 text-blue-700';
+    case 'confirmed':  return 'bg-success-bg text-success-fg';
+    case 'scheduled':  return 'bg-info-bg text-info-fg';
     // A shop that reviews its bookings leaves them here until somebody
     // accepts. This was missing entirely, so a pending booking got the grey
     // "unknown status" badge and read as though something had gone wrong.
-    case 'pending':    return 'bg-amber-50 text-amber-700';
+    case 'pending':    return 'bg-warning-bg text-warning-fg';
     case 'completed':  return 'bg-surface-alt text-fg-muted';
-    case 'cancelled':  return 'bg-rose-50 text-rose-700';
-    case 'no_show':    return 'bg-amber-50 text-amber-700';
+    case 'cancelled':  return 'bg-danger-bg text-danger-fg';
+    case 'no_show':    return 'bg-warning-bg text-warning-fg';
     default:           return 'bg-surface-alt text-fg-muted';
   }
 }
@@ -154,7 +154,7 @@ export function AppointmentsListClient({ initialAppointments, storeSlug }: Props
                     <button
                       onClick={() => cancelAppointment(appt.id)}
                       disabled={cancelling === appt.id}
-                      className="flex-shrink-0 flex items-center gap-1 text-xs text-fg-subtle hover:text-rose-600 transition-colors disabled:opacity-50"
+                      className="flex-shrink-0 flex items-center gap-1 text-xs text-fg-subtle hover:text-danger-fg transition-colors disabled:opacity-50"
                     >
                       <XCircle size={14} />
                       Cancel

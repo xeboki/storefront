@@ -108,7 +108,7 @@ export function ClassList({ storeSlug }: Props) {
 
   if (loadError) {
     return (
-      <div className="flex items-center gap-2 text-sm text-red-600">
+      <div className="flex items-center gap-2 text-sm text-danger-fg">
         <AlertCircle className="h-4 w-4" />
         {loadError}
       </div>
@@ -164,7 +164,7 @@ export function ClassList({ storeSlug }: Props) {
                 )}
 
                 {isBooked ? (
-                  <span className="inline-flex items-center gap-1 text-sm font-medium text-green-600">
+                  <span className="inline-flex items-center gap-1 text-sm font-medium text-success-fg">
                     <CheckCircle className="h-4 w-4" />
                     Booked
                   </span>
@@ -187,7 +187,7 @@ export function ClassList({ storeSlug }: Props) {
             </div>
 
             {error !== null && error.id === session.id && (
-              <p className="mt-3 flex items-center gap-1.5 text-sm text-red-600">
+              <p className="mt-3 flex items-center gap-1.5 text-sm text-danger-fg">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {error.message}
               </p>
