@@ -1,0 +1,139 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(var(--color-fg));
+  transition: background-color 150ms ease;
+}
+
+.trigger:hover {
+  background: rgb(var(--color-surface-alt));
+}
+
+.chevron { transition: transform 180ms ease; }
+.chevronOpen { transform: rotate(180deg); }
+
+/* Full width of the header, not of the trigger: the panel is anchored to the
+   <header>, which is why that element carries `position: relative`. */
+.panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  z-index: 45;
+  border-top: 1px solid rgb(var(--color-border));
+  border-bottom: 1px solid rgb(var(--color-border));
+  background: rgb(var(--color-surface));
+  box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.35);
+}
+
+.inner {
+  margin: 0 auto;
+  display: flex;
+  max-width: 80rem;
+  gap: 2.5rem;
+  padding: 1.75rem 1rem 1.25rem;
+}
+
+.columns {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.25rem 2rem;
+}
+
+.column {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--radius);
+  padding: 0.4rem 0.5rem;
+  font-size: 0.875rem;
+  color: rgb(var(--color-fg-muted));
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.entry:hover {
+  background: rgb(var(--color-surface-alt));
+  color: rgb(var(--color-fg));
+}
+
+.dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+}
+
+.entryLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.count {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  color: rgb(var(--color-fg-subtle));
+}
+
+.aside {
+  margin: 0;
+  padding: 0 0 0 2.5rem;
+  list-style: none;
+  border-left: 1px solid rgb(var(--color-border));
+  min-width: 11rem;
+}
+
+.asideLink {
+  display: block;
+  padding: 0.4rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(var(--color-fg));
+}
+
+.asideLink:hover { color: rgb(var(--color-primary)); }
+
+.escape {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-top: 1px solid rgb(var(--color-border));
+  background: rgb(var(--color-surface-alt));
+  padding: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: rgb(var(--color-fg));
+}
+
+.escape:hover { color: rgb(var(--color-primary)); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel { animation: unfurl 200ms ease-out; }
+}
+
+@keyframes unfurl {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}

@@ -1,0 +1,17 @@
+/* A grid track, because `height: auto` cannot be animated and a max-height
+   either clips a wrapped row or leaves a gap under a short one. */
+.rail {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.folded {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rail {
+    transition: grid-template-rows 300ms ease-out, opacity 300ms ease-out;
+  }
+}
