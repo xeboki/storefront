@@ -44,8 +44,10 @@ import { MobileNav, asMobileMenu } from '../header/MobileNav';
 import { MenuIndex } from '../header/MenuIndex';
 import { UtilityBar } from '../header/UtilityBar';
 import {
-  asLinkCase, asScroll, asSurface, useOverBanner, OVER_BANNER_SURFACES,
+  asLinkCase, asScroll, asSurface, useOverBanner, usePastTop,
+  OVER_BANNER_SURFACES,
 } from '../header/chrome';
+import { CompactBar } from '../header/CompactBar';
 import type { Scroll } from '../header/chrome';
 import { resolveMenu, targetHref } from '@/lib/navigation';
 import type { MenuNode } from '@/lib/navigation';
@@ -73,6 +75,7 @@ const SCROLL_POSITION: Record<Scroll, string> = {
   'fixed':    'sticky top-0',
   'condense': 'sticky top-0',
   'hide':     'sticky top-0',
+  'compact':  'sticky top-0',
   'static':   'relative',
 };
 
@@ -273,6 +276,15 @@ export function StorefrontHeader({
   // `condense` is the only behaviour that asks a below-bar menu to fold, and
   // the only one that tightens the bar.
   const condensed = scroll === 'condense' && goingDown;
+  /**
+   * Whether the header has been replaced by the short one.
+   *
+   * Only `compact` does this, and only once the reader is properly into the
+   * page — see `usePastTop`, which comes back higher than it leaves so
+   * sitting on the boundary cannot flicker between two headers.
+   */
+  const past = usePastTop();
+  const compact = scroll === 'compact' && past;
 
   const iconButton = clsx(
     'flex h-10 w-10 items-center justify-center rounded-full transition-colors',
@@ -586,7 +598,7 @@ export function StorefrontHeader({
 
   return (
     <>
-      {strip && (
+      {strip && !compact && (
         <UtilityBar
           message={(header?.utilityMessage ?? '').trim()}
           controls={
@@ -634,7 +646,19 @@ export function StorefrontHeader({
           )}
         >
           {/* Everything above is the chrome; where the parts go is the
-              style's business and nothing else's. */}
+              style's business and nothing else's — until the reader is into
+              the page, when the header stops introducing the shop and
+              becomes a way back, a way to everything, and the basket. */}
+          {compact ? (
+            <CompactBar
+              brand={brand}
+              menuIndex={menuIndex}
+              search={searchSlot}
+              action={action}
+              cart={utilities.cart}
+              container={container}
+            />
+          ) : (
           <Layout
             brand={brand}
             brandLockup={brandLockup}
@@ -654,6 +678,7 @@ export function StorefrontHeader({
             barHeight={clsx('transition-[height] duration-300', condensed ? 'h-14' : 'h-16')}
             rule={rule}
           />
+          )}
         </div>
       </header>
 

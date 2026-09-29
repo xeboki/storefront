@@ -8,7 +8,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 
-export const SCROLLS = ['condense', 'fixed', 'hide', 'static'] as const;
+export const SCROLLS = ['condense', 'fixed', 'hide', 'static', 'compact'] as const;
 export const SURFACES = ['solid', 'transparent', 'gradient', 'inverse', 'floating'] as const;
 
 /**
@@ -99,6 +99,40 @@ export function useDismiss(open: boolean, close: () => void) {
   }, [open, close]);
 
   return ref;
+}
+
+/**
+ * Whether the reader has gone past the top of the page for good.
+ *
+ * Not the same question as `scrolled`, which answers "has it moved at all"
+ * and flips a few pixels down. This one is for a header that REPLACES itself
+ * — swapping the bar on a nudge would be a page that flickers between two
+ * headers every time somebody adjusts their position.
+ *
+ * Hysteresis rather than one line: it comes back at a HIGHER point than it
+ * left, so scrolling to sit exactly on the boundary cannot oscillate.
+ */
+export function usePastTop(at = 220): boolean {
+  const [past, setPast] = useState(false);
+
+  useEffect(() => {
+    let frame = 0;
+    const read = () => {
+      frame = 0;
+      setPast((was) => (was ? window.scrollY > at * 0.6 : window.scrollY > at));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read);
+    };
+    read();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [at]);
+
+  return past;
 }
 
 /**
