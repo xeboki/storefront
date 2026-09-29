@@ -1,138 +1,154 @@
 'use client';
 
 /**
- * Everything at once, in columns, behind one word in the bar.
+ * Top-level entries in the bar; the ones with a submenu open a panel the
+ * width of the header.
  *
- * For a catalogue too big for a row and too big for a list — the panel is the
- * only arrangement that lets a shopper see the whole shop without scrolling
- * through it. The shape follows what the navigation research is consistent
- * about, because a mega menu drawn badly is worse than no mega menu:
+ * Each top-level entry is its own trigger, the way every shop theme does it —
+ * not one "Menu" button for the whole shop. That was the shape a flat
+ * department list forced, and it meant the panel could only ever be one
+ * undifferentiated grid of everything.
  *
- *   · at most [MAX_COLUMNS] columns, so the eye has somewhere to land;
- *   · at most [PER_COLUMN] departments in each, so a column is scannable;
- *   · one escape hatch — "everything" — because the commonest thing a shopper
- *     wants from a menu is out of it.
+ * With a tree, the panel is what the merchant built: each child of the open
+ * entry is a column, that child's own label is the column's heading, and its
+ * children are the links under it. A child carrying a picture becomes a promo
+ * tile instead — the last column in most themes.
  *
- * Past what the columns hold, the rest go to the catalogue page rather than
- * making the panel taller than the screen. A shop with two hundred departments
- * is not one a panel can show, and pretending otherwise is the failure mode.
+ * A top-level entry with no submenu is just a link. A shop can mix them.
  */
-import Link from 'next/link';
 import { useCallback, useState } from 'react';
+import Link from 'next/link';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useDismiss } from '../chrome';
+import { NodeLink } from '../NodeLink';
+import type { MenuNode } from '@/lib/navigation';
 import type { MenuStyleProps } from '../types';
 import styles from './mega.module.css';
 
+/**
+ * At most this many columns, and at most this many links in each.
+ *
+ * The navigation research is consistent about both, and a mega menu drawn
+ * badly is worse than no mega menu: past four columns the eye has nowhere to
+ * land, and past eight links a column stops being scannable. A merchant who
+ * builds more gets the rest behind the way out rather than a panel taller
+ * than the screen.
+ */
 const MAX_COLUMNS = 4;
 const PER_COLUMN = 8;
 
-/** Split into as few columns as will hold them, never more than [MAX_COLUMNS]. */
-function columnise<T>(items: T[]): T[][] {
-  if (items.length === 0) return [];
-  const count = Math.min(MAX_COLUMNS, Math.ceil(items.length / PER_COLUMN) || 1);
-  const size = Math.ceil(items.length / count);
-  return Array.from({ length: count }, (_, i) => items.slice(i * size, (i + 1) * size));
-}
-
 export default function MegaMenu({
-  entries, allHref, allLabel, links, menuLabel, linkCase, onDark, align, showAll,
+  nodes, allHref, allLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
-  const [open, setOpen] = useState(false);
-  const close = useCallback(() => setOpen(false), []);
-  const ref = useDismiss(open, close);
+  const [open, setOpen] = useState<string | null>(null);
+  const close = useCallback(() => setOpen(null), []);
+  const ref = useDismiss(open !== null, close);
 
-  if (entries.length === 0 && links.length === 0) return null;
+  if (nodes.length === 0) return null;
 
-  const shown = entries.slice(0, MAX_COLUMNS * PER_COLUMN);
-  const spilled = entries.length - shown.length;
-  const columns = columnise(shown);
+  const panelFor = (node: MenuNode) => {
+    // A column is a child with children. A child WITHOUT children is a link
+    // in its own right, so the flat ones are gathered into one column rather
+    // than each taking a column of its own and leaving four one-line stacks.
+    const promos = node.children.filter((c) => c.imageUrl);
+    const grouped = node.children.filter((c) => !c.imageUrl && c.children.length > 0);
+    const loose = node.children.filter((c) => !c.imageUrl && c.children.length === 0);
+    const columns: MenuNode[][] = grouped.slice(0, MAX_COLUMNS).map((c) => c.children.slice(0, PER_COLUMN));
+    const headings = grouped.slice(0, MAX_COLUMNS);
 
-  return (
-    <div className={clsx('hidden lg:block', align === 'centre' && 'text-center')} ref={ref} data-dark={onDark || undefined}>
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-haspopup="true"
-        // Open-only, deliberately. Hovering the trigger opens the panel, so
-        // a toggle means the click a shopper instinctively makes on the thing
-        // they just pointed at closes what they were reaching for. It shuts
-        // on the way out, on Escape, and on a click anywhere else — three
-        // ways, none of which is "the control you aimed at".
-        onClick={() => setOpen(true)}
-        onMouseEnter={() => setOpen(true)}
-        onFocus={() => setOpen(true)}
-        className={clsx(styles.trigger, linkCase === 'upper' && styles.upper)}
-      >
-        {menuLabel}
-        <ChevronDown size={15} className={clsx(styles.chevron, open && styles.chevronOpen)} />
-      </button>
-
-      {open && (
-        <div
-          className={styles.panel}
-          onMouseLeave={close}
-          role="navigation"
-          aria-label={menuLabel}
-        >
-          <div className={styles.inner}>
-            <div className={styles.columns}>
-              {columns.map((column, index) => (
-                <ul key={index} className={styles.column}>
-                  {column.map((entry) => (
-                    <li key={entry.id}>
-                      <Link href={entry.href} onClick={close} className={styles.entry}>
-                        {/* The department's own colour from the till. A shop
-                            that never set one gets no dot rather than a grey
-                            one pretending to be a category. */}
-                        {entry.colour && (
-                          <span
-                            aria-hidden
-                            className={styles.dot}
-                            style={{ background: entry.colour }}
-                          />
-                        )}
-                        <span className={styles.entryLabel}>{entry.label}</span>
-                        {entry.count > 0 && <span className={styles.count}>{entry.count}</span>}
-                      </Link>
+    return (
+      <div className={styles.panel} onMouseLeave={close} role="navigation" aria-label={node.label}>
+        <div className={styles.inner}>
+          <div className={styles.columns}>
+            {headings.map((heading, i) => (
+              <div key={heading.id} className={styles.column}>
+                <p className={styles.heading}>{heading.label}</p>
+                <ul className={styles.list}>
+                  {columns[i].map((leaf) => (
+                    <li key={leaf.id}>
+                      <NodeLink node={leaf} className={styles.entry} onNavigate={close} />
                     </li>
                   ))}
                 </ul>
-              ))}
-            </div>
+              </div>
+            ))}
 
-            {links.length > 0 && (
-              <ul className={styles.aside}>
-                {links.map((link) =>
-                  link.external ? (
-                    <li key={link.url}>
-                      <a href={link.url} onClick={close} className={styles.asideLink}>
-                        {link.label}
-                      </a>
+            {loose.length > 0 && (
+              <div className={styles.column}>
+                <ul className={styles.list}>
+                  {loose.slice(0, PER_COLUMN).map((leaf) => (
+                    <li key={leaf.id}>
+                      <NodeLink node={leaf} className={styles.entry} onNavigate={close} />
                     </li>
-                  ) : (
-                    <li key={link.url}>
-                      <Link href={link.url} onClick={close} className={styles.asideLink}>
-                        {link.label}
-                      </Link>
-                    </li>
-                  ),
-                )}
-              </ul>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
-          {/* The way out. Also where the departments go that the columns
-              could not hold, said plainly rather than hidden. */}
-          {showAll && (
+          {promos.slice(0, 2).map((promo) => (
+            <NodeLink key={promo.id} node={promo} className={styles.promo} onNavigate={close}>
+              {/* The merchant's own picture. Unoptimised on purpose: it is
+                  their file at their dimensions, and a menu tile that waited
+                  on a resize would pop in after the panel it sits in. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={promo.imageUrl} alt="" className={styles.promoImage} />
+            </NodeLink>
+          ))}
+        </div>
+
+        {showAll && (
           <Link href={allHref} onClick={close} className={styles.escape}>
-            {spilled > 0 ? `${allLabel} (${spilled} more)` : allLabel}
+            {allLabel}
             <ArrowRight size={15} />
           </Link>
-          )}
-        </div>
-      )}
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      className={clsx('hidden lg:block', align === 'centre' && styles.centred)}
+      ref={ref}
+      data-dark={onDark || undefined}
+    >
+      <div className={styles.bar}>
+        {nodes.map((node) =>
+          node.children.length === 0 ? (
+            <NodeLink
+              key={node.id}
+              node={node}
+              className={clsx(styles.trigger, linkCase === 'upper' && styles.upper)}
+            />
+          ) : (
+            <div key={node.id} className={styles.slot}>
+              <button
+                type="button"
+                aria-expanded={open === node.id}
+                aria-haspopup="true"
+                // Open-only, deliberately. Hovering opens the panel, so a
+                // toggle means the click a shopper instinctively makes on the
+                // thing they just pointed at closes what they were reaching
+                // for. It shuts on the way out, on Escape, and on a click
+                // anywhere else — none of which is the control they aimed at.
+                onClick={() => setOpen(node.id)}
+                onMouseEnter={() => setOpen(node.id)}
+                onFocus={() => setOpen(node.id)}
+                className={clsx(styles.trigger, linkCase === 'upper' && styles.upper)}
+              >
+                {node.label}
+                <ChevronDown
+                  size={14}
+                  className={clsx(styles.chevron, open === node.id && styles.chevronOpen)}
+                />
+              </button>
+              {open === node.id && panelFor(node)}
+            </div>
+          ),
+        )}
+      </div>
     </div>
   );
 }

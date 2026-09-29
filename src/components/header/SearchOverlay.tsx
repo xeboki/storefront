@@ -80,7 +80,7 @@ export function SearchOverlay({ storeSlug, iconClassName, brand, container }: Pr
               <div className={clsx(container, styles.row)}>
                 <div className={styles.brand}>{brand}</div>
                 <div className={styles.field} ref={field}>
-                  <span className={styles.label}>{t('search.placeholder')}</span>
+                  <span className={styles.label}>{t('search.label')}</span>
                   <HeaderSearch storeSlug={storeSlug} />
                 </div>
                 <button

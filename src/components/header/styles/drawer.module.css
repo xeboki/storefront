@@ -134,6 +134,18 @@
   color: rgb(var(--color-fg-subtle));
 }
 
+/* A top-level entry that has a submenu under it. Reads as a section title,
+   because in a panel that is what it is. */
+.group {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: rgb(var(--color-fg));
+}
+
 .rule {
   margin: 0.5rem 0.75rem;
   border: 0;
@@ -147,3 +159,13 @@
 
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slide { from { transform: translateX(-100%); } to { transform: none; } }
+
+
+/* Centres the TRIGGER, for a header that puts its menu in the middle of the
+   bar. Not the panel: that is a list to read down its own left edge, and
+   `text-align: center` on the wrapper reached it too — the departments came
+   out ragged-centred with their colour dots floating away from them. */
+.centred {
+  display: flex;
+  justify-content: center;
+}

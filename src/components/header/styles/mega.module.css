@@ -1,3 +1,16 @@
+/* The top-level entries, in the bar. */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* A positioned ancestor for the panel — on the ENTRY, not the bar, so the
+   panel opens under the word that opened it. */
+.slot {
+  position: static;
+}
+
 .trigger {
   display: inline-flex;
   align-items: center;
@@ -12,18 +25,24 @@
   font-size: 0.875rem;
   font-weight: 600;
   color: rgb(var(--color-fg));
-  transition: background-color 150ms ease;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 .trigger:hover {
   background: rgb(var(--color-surface-alt));
 }
 
+.upper {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .chevron { transition: transform 180ms ease; }
 .chevronOpen { transform: rotate(180deg); }
 
-/* Full width of the header, not of the trigger: the panel is anchored to the
-   <header>, which is why that element carries `position: relative`. */
+/* Full width of the header, not of the entry that opened it — which is why
+   `.slot` is `position: static` and the <header> carries `position:
+   relative`. A panel the width of one word is a dropdown, not a mega menu. */
 .panel {
   position: absolute;
   left: 0;
@@ -41,21 +60,37 @@
   display: flex;
   max-width: 80rem;
   gap: 2.5rem;
-  padding: 1.75rem 1rem 1.25rem;
+  padding: 2rem 1rem 1.5rem;
 }
 
-/* Capped, not stretched. `1fr` spread two columns of six names across the
-   whole panel, so the eye had to travel the width of the page between a
-   department and the one beside it. A column is a list to read down. */
+/* Capped, not stretched. `1fr` spread the columns across the whole panel, so
+   the eye had to travel the width of the page between one entry and the one
+   beside it. A column is a list to read down. */
 .columns {
   display: grid;
   flex: 1;
   grid-template-columns: repeat(auto-fit, minmax(10rem, 15rem));
   justify-content: start;
-  gap: 0.25rem 2.5rem;
+  gap: 1.5rem 2.5rem;
 }
 
 .column {
+  min-width: 0;
+}
+
+/* The column's title, with the short rule under it that tells the eye where
+   one column's list begins. */
+.heading {
+  margin: 0 0 0.75rem;
+  border-bottom: 1px solid rgb(var(--color-border));
+  padding-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgb(var(--color-fg));
+}
+
+.list {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -64,57 +99,32 @@
 .entry {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   border-radius: var(--radius);
-  padding: 0.4rem 0.5rem;
+  padding: 0.3rem 0;
   font-size: 0.875rem;
   color: rgb(var(--color-fg-muted));
-  transition: background-color 150ms ease, color 150ms ease;
+  transition: color 150ms ease;
 }
 
 .entry:hover {
-  background: rgb(var(--color-surface-alt));
-  color: rgb(var(--color-fg));
+  color: rgb(var(--color-primary));
 }
 
-.dot {
-  height: 0.5rem;
-  width: 0.5rem;
-  flex-shrink: 0;
-  border-radius: 999px;
-}
-
-.entryLabel {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.count {
-  flex-shrink: 0;
-  font-size: 0.6875rem;
-  font-variant-numeric: tabular-nums;
-  color: rgb(var(--color-fg-subtle));
-}
-
-.aside {
-  margin: 0;
-  padding: 0 0 0 2.5rem;
-  list-style: none;
-  border-left: 1px solid rgb(var(--color-border));
-  min-width: 11rem;
-}
-
-.asideLink {
+/* The merchant's own tile, at the end of the row. Fixed width so a tall
+   picture cannot stretch the panel taller than the columns beside it. */
+.promo {
   display: block;
-  padding: 0.4rem 0;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: rgb(var(--color-fg));
+  width: 13rem;
+  flex: none;
+  overflow: hidden;
+  border-radius: calc(var(--radius) * 1.75);
 }
 
-.asideLink:hover { color: rgb(var(--color-primary)); }
+.promoImage {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 
 .escape {
   display: flex;
@@ -133,6 +143,16 @@
 
 .escape:hover { color: rgb(var(--color-primary)); }
 
+[data-dark] .trigger { color: rgb(255 255 255); }
+[data-dark] .trigger:hover { background: rgb(255 255 255 / 0.14); }
+
+/* Centres the TRIGGERS, for a header that puts its menu in the middle of the
+   bar. Not the panel: that is a list to read down its own left edge. */
+.centred {
+  display: flex;
+  justify-content: center;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .panel { animation: unfurl 200ms ease-out; }
 }
@@ -140,20 +160,4 @@
 @keyframes unfurl {
   from { opacity: 0; transform: translateY(-8px); }
   to   { opacity: 1; transform: none; }
-}
-
-
-.upper {
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* Only the trigger goes white — the panel has its own background and stays
-   on the shop's own colours whatever the bar is sitting on. */
-[data-dark] .trigger {
-  color: rgb(255 255 255);
-}
-
-[data-dark] .trigger:hover {
-  background: rgb(255 255 255 / 0.14);
 }

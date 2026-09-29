@@ -108,8 +108,23 @@
   box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.28);
 }
 
+/* A group's name inside the dropdown, where two levels are flattened into
+   one list. Without it the shopper gets one undifferentiated column. */
+.panelHeading {
+  margin: 0.5rem 0 0.25rem;
+  padding: 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--color-fg-subtle));
+}
+
+.panelHeading:first-child { margin-top: 0; }
+
 .panelItem {
-  display: block;
+  display: flex;
+  align-items: center;
   border-radius: var(--radius);
   padding: 0.5rem 0.625rem;
   font-size: 0.875rem;

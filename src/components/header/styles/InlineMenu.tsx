@@ -1,62 +1,56 @@
 'use client';
 
 /**
- * The departments in the bar itself, with no second row.
+ * The entries in the bar itself, with no second row.
  *
- * The shallow header a small catalogue wants: every department is one click
- * away and the page starts higher up the screen. What makes it work is that
- * it never tries to show more than fits — the ones past the edge fold into
- * "More" rather than pushing the search box off the bar.
+ * The shallow header a small menu wants: everything is one click away and the
+ * page starts higher up the screen. What makes it work is that it never tries
+ * to show more than fits — the entries past the edge fold into "More" rather
+ * than pushing the search box off the bar.
  *
  * That count is measured, not guessed. A fixed number is wrong at almost
- * every width: seven departments fit beside a short shop name at 1440px and
- * three fit beside a long one at 1024px, and a guess that is too high does
- * not merely look tight — a flex row whose items refuse to shrink overflows
- * its box and paints over whatever is beside it, which is what the search
- * field and the store picker looked like before this.
+ * every width, and a guess that is too high does not merely look tight: a
+ * flex row whose items refuse to shrink overflows its box and paints over
+ * whatever is beside it, which is what the search field looked like.
  *
- * So the items are laid out twice: once hidden, at their natural width, to
- * find out how wide each one is, and once for real with as many as fit. The
- * hidden row costs one layout pass per resize and is the only honest way to
- * ask the question, because the visible row's widths are already the answer
- * to a different one.
+ * So the entries are laid out twice — once hidden, at natural width, to find
+ * out how wide each is, and once for real with as many as fit. The hidden row
+ * costs one layout pass per resize and is the only honest way to ask, because
+ * the visible row's widths are already the answer to a different question.
+ *
+ * An entry with a submenu opens a short panel under itself. A panel the width
+ * of the bar belongs to the mega menu; this one is a list.
  */
 import Link from 'next/link';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useDismiss } from '../chrome';
+import { NodeLink } from '../NodeLink';
+import type { MenuNode } from '@/lib/navigation';
 import type { MenuStyleProps } from '../types';
 import styles from './inline.module.css';
 
 /**
- * The fewest departments the bar will carry.
+ * The fewest entries the bar will carry.
  *
  * Zero, deliberately. A floor sounds kinder and is not: it forces names into
  * a row too narrow for them, so they come out cut off mid-word, which reads
  * as broken rather than as full. A shop whose name and search box leave room
- * for nothing gets "All products" and a menu button — which is honest, and is
+ * for nothing gets the way out and a menu button — which is honest, and is
  * the thing that tells the merchant this arrangement is wrong for their shop.
  */
 const FLOOR = 0;
 
 export default function InlineMenu({
-  entries, allHref, allLabel, links, menuLabel, linkCase, onDark, align, showAll,
+  nodes, allHref, allLabel, menuLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
-  const [open, setOpen] = useState(false);
-  const close = useCallback(() => setOpen(false), []);
-  const dismissRef = useDismiss(open, close);
+  const [open, setOpen] = useState<string | null>(null);
+  const close = useCallback(() => setOpen(null), []);
+  const dismissRef = useDismiss(open !== null, close);
 
   const navRef = useRef<HTMLElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
-  /**
-   * How many departments are in the bar.
-   *
-   * Starts at the floor and grows once measured, never the other way round.
-   * Starting with all of them would draw one frame of a row too wide for its
-   * box, and a flex row that cannot shrink does not clip — it paints over the
-   * search field beside it.
-   */
   const [visible, setVisible] = useState(FLOOR);
 
   const fit = useCallback(() => {
@@ -68,22 +62,21 @@ export default function InlineMenu({
     if (available === 0) return;
 
     const children = Array.from(row.children) as HTMLElement[];
-    // [0] is "everything", then one per department, then the trigger.
+    // [0] is the way out, then one per entry, then the overflow trigger.
     const escape = children[0];
     const trigger = children.at(-1);
-    const departments = children.slice(1, -1);
+    const items = children.slice(1, -1);
     if (!escape || !trigger) return;
 
     const gap = parseFloat(getComputedStyle(row).columnGap) || 0;
     const width = (el: HTMLElement) => el.offsetWidth + gap;
+    const base = showAll ? width(escape) : 0;
 
     // Everything at once, if everything fits. Worth asking first: it is the
-    // only case with no trigger to pay for, and it is the common one for the
-    // small catalogue this arrangement is meant for.
-    const base = showAll ? width(escape) : 0;
-    const whole = departments.reduce((sum, el) => sum + width(el), base);
+    // only case with no trigger to pay for, and it is the common one.
+    const whole = items.reduce((sum, el) => sum + width(el), base);
     if (whole <= available) {
-      setVisible(departments.length);
+      setVisible(items.length);
       return;
     }
 
@@ -93,7 +86,7 @@ export default function InlineMenu({
     const room = available - base - width(trigger);
     let used = 0;
     let count = 0;
-    for (const el of departments) {
+    for (const el of items) {
       if (used + width(el) > room) break;
       used += width(el);
       count += 1;
@@ -102,7 +95,7 @@ export default function InlineMenu({
   }, [showAll]);
 
   // Before paint, so the bar is never shown with the wrong number for a frame.
-  useLayoutEffect(fit, [fit, entries, links]);
+  useLayoutEffect(fit, [fit, nodes]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -112,29 +105,48 @@ export default function InlineMenu({
     return () => observer.disconnect();
   }, [fit]);
 
-  if (entries.length === 0 && links.length === 0) return null;
+  if (nodes.length === 0) return null;
 
-  const shown = entries.slice(0, visible);
-  const overflow = [
-    ...entries.slice(visible).map((e) => ({ key: e.id, label: e.label, href: e.href, external: false })),
-    ...links.map((l) => ({ key: l.url, label: l.label, href: l.url, external: l.external })),
-  ];
+  const shown = nodes.slice(0, visible);
+  const overflow = nodes.slice(visible);
 
-  const item = (
-    label: string,
-    href: string,
-    external: boolean,
-    key: string,
-    onClick?: () => void,
-  ) =>
-    external ? (
-      <a key={key} href={href} onClick={onClick} className={styles.item}>
-        {label}
-      </a>
+  /** An entry in the bar: a link, or a trigger when it has a submenu. */
+  const inBar = (node: MenuNode) =>
+    node.children.length === 0 ? (
+      <NodeLink key={node.id} node={node} className={styles.item} />
     ) : (
-      <Link key={key} href={href} onClick={onClick} className={styles.item}>
-        {label}
-      </Link>
+      <div key={node.id} className={styles.slot}>
+        <button
+          type="button"
+          aria-expanded={open === node.id}
+          onClick={() => setOpen(node.id)}
+          onMouseEnter={() => setOpen(node.id)}
+          onFocus={() => setOpen(node.id)}
+          className={clsx(styles.item, styles.trigger)}
+        >
+          {node.label}
+          <ChevronDown
+            size={14}
+            className={clsx(styles.chevron, open === node.id && styles.chevronOpen)}
+          />
+        </button>
+        {open === node.id && (
+          <div className={styles.panel} onMouseLeave={close}>
+            {node.children.flatMap((child) =>
+              // Two levels flattened into one list: a submenu inside a
+              // dropdown is a panel, and a panel is the mega menu's job.
+              child.children.length > 0
+                ? [
+                    <p key={child.id} className={styles.panelHeading}>{child.label}</p>,
+                    ...child.children.map((leaf) => (
+                      <NodeLink key={leaf.id} node={leaf} className={styles.panelItem} onNavigate={close} />
+                    )),
+                  ]
+                : [<NodeLink key={child.id} node={child} className={styles.panelItem} onNavigate={close} />],
+            )}
+          </div>
+        )}
+      </div>
     );
 
   return (
@@ -142,16 +154,23 @@ export default function InlineMenu({
       ref={navRef}
       aria-label={allLabel}
       data-dark={onDark || undefined}
-      className={clsx(styles.nav, linkCase === 'upper' && styles.upper,
-        align === 'centre' && 'justify-center', 'hidden lg:flex')}
+      className={clsx(
+        styles.nav,
+        linkCase === 'upper' && styles.upper,
+        align === 'centre' && 'justify-center',
+        'hidden lg:flex',
+      )}
     >
-      {/* Every item at its natural width, laid out and never shown. The real
+      {/* Every entry at its natural width, laid out and never shown. The real
           row below can only say how wide things are once they have been
           squeezed, which is the question this one exists to avoid. */}
       <div ref={measureRef} aria-hidden className={styles.measure}>
         <span className={styles.item}>{allLabel}</span>
-        {entries.map((entry) => (
-          <span key={entry.id} className={styles.item}>{entry.label}</span>
+        {nodes.map((node) => (
+          <span key={node.id} className={styles.item}>
+            {node.label}
+            {node.children.length > 0 && <ChevronDown size={14} />}
+          </span>
         ))}
         <span className={clsx(styles.item, styles.trigger)}>
           {menuLabel}
@@ -159,13 +178,16 @@ export default function InlineMenu({
         </span>
       </div>
 
-      {/* The departments clip; the trigger does not. They are siblings rather
-          than nested so that a row narrow enough to cut a department in half
-          can never also cut off the control that reaches the rest of them —
-          and so the panel, which hangs out of the bar, is not clipped either. */}
+      {/* The entries clip; the overflow trigger does not. They are siblings
+          rather than nested so a row narrow enough to cut an entry in half
+          can never also cut off the control that reaches the rest of them. */}
       <div className={styles.row}>
-        {showAll && item(allLabel, allHref, false, '__all')}
-        {shown.map((entry) => item(entry.label, entry.href, false, entry.id))}
+        {showAll && (
+          <Link href={allHref} className={styles.item}>
+            {allLabel}
+          </Link>
+        )}
+        {shown.map(inBar)}
       </div>
 
       <div ref={dismissRef}>
@@ -173,26 +195,21 @@ export default function InlineMenu({
           <div className={styles.slot}>
             <button
               type="button"
-              aria-expanded={open}
-              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open === '__more'}
+              onClick={() => setOpen((v) => (v === '__more' ? null : '__more'))}
               className={clsx(styles.item, styles.trigger)}
             >
               {menuLabel}
-              <ChevronDown size={14} className={clsx(styles.chevron, open && styles.chevronOpen)} />
+              <ChevronDown
+                size={14}
+                className={clsx(styles.chevron, open === '__more' && styles.chevronOpen)}
+              />
             </button>
-            {open && (
+            {open === '__more' && (
               <div className={styles.panel}>
-                {overflow.map((o) =>
-                  o.external ? (
-                    <a key={o.key} href={o.href} className={styles.panelItem} onClick={close}>
-                      {o.label}
-                    </a>
-                  ) : (
-                    <Link key={o.key} href={o.href} className={styles.panelItem} onClick={close}>
-                      {o.label}
-                    </Link>
-                  ),
-                )}
+                {overflow.map((node) => (
+                  <NodeLink key={node.id} node={node} className={styles.panelItem} onNavigate={close} />
+                ))}
               </div>
             )}
           </div>

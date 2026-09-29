@@ -1,12 +1,16 @@
 'use client';
 
 /**
- * The departments as a scrolling row under the bar.
+ * The menu as a scrolling row under the bar.
  *
- * Copes with any number of them and hides none, at the cost of a second row
- * and of the far end being off screen. It is the default because it is the
- * only one of the four that cannot be wrong: a shop with sixty departments
+ * Copes with any number of entries and hides none, at the cost of a second
+ * row and of the far end being off screen. It is the default because it is
+ * the only one of the four that cannot be wrong: a shop with sixty entries
  * gets sixty, and a shop with three gets three.
+ *
+ * Top level only. A rail is a strip a finger drags sideways, and a panel
+ * hanging off a strip that is itself moving is not something anybody can
+ * aim at — a shop that wants submenus wants one of the other three.
  *
  * The row folds away on the way down the page and returns on the way up —
  * `condense`. Animating a height to `auto` is not possible and a fixed
@@ -16,13 +20,19 @@
 import Link from 'next/link';
 import { clsx } from 'clsx';
 import { ScrollRail } from '../../layout/ScrollRail';
+import { NodeLink } from '../NodeLink';
 import type { MenuStyleProps } from '../types';
 import styles from './rail.module.css';
 
 export default function RailMenu({
-  entries, allHref, allLabel, links, collapsed, linkCase, onDark, align, showAll,
+  nodes, allHref, allLabel, collapsed, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
-  if (entries.length === 0 && links.length === 0) return null;
+  if (nodes.length === 0) return null;
+
+  const item = clsx(
+    'flex items-center whitespace-nowrap transition-colors',
+    onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary',
+  );
 
   return (
     <nav
@@ -57,29 +67,9 @@ export default function RailMenu({
               {allLabel}
             </Link>
           )}
-          {entries.map((entry) => (
-            <Link
-              key={entry.id}
-              href={entry.href}
-              className={clsx(
-                'whitespace-nowrap transition-colors',
-                onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary',
-              )}
-            >
-              {entry.label}
-            </Link>
+          {nodes.map((node) => (
+            <NodeLink key={node.id} node={node} className={item} />
           ))}
-          {links.map((link) =>
-            link.external ? (
-              <a key={link.url} href={link.url} className={clsx('whitespace-nowrap transition-colors', onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary')}>
-                {link.label}
-              </a>
-            ) : (
-              <Link key={link.url} href={link.url} className={clsx('whitespace-nowrap transition-colors', onDark ? 'text-white/80 hover:text-white' : 'text-fg-muted hover:text-primary')}>
-                {link.label}
-              </Link>
-            ),
-          )}
         </ScrollRail>
       </div>
     </nav>

@@ -25,6 +25,10 @@ export const MESSAGES = {
     'common.shopNow': 'Shop Now',
     'common.total': 'Total',
     'search.placeholder': 'Search products…',
+    // The word over the field when search has a row to itself. Short on
+    // purpose: the field already says what it is, and repeating the
+    // placeholder above it says it twice.
+    'search.label': 'Search',
     'search.noMatches': 'Nothing matched “{term}”.',
     'search.inCategory': 'Category',
     'search.seeAll': 'See all {count} results',
@@ -56,6 +60,7 @@ export const MESSAGES = {
     'common.shopNow': 'Comprar ahora',
     'common.total': 'Total',
     'search.placeholder': 'Buscar productos…',
+    'search.label': 'Buscar',
     'search.noMatches': 'Nada coincide con «{term}».',
     'search.inCategory': 'Categoría',
     'search.seeAll': 'Ver los {count} resultados',

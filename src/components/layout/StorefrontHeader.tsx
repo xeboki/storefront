@@ -45,7 +45,8 @@ import {
   asLinkCase, asScroll, asSurface, useOverBanner, OVER_BANNER_SURFACES,
 } from '../header/chrome';
 import type { Scroll } from '../header/chrome';
-import type { MenuEntry, MenuLink } from '../header/types';
+import { resolveMenu } from '@/lib/navigation';
+import type { MenuNode } from '@/lib/navigation';
 import type { MenuSlice } from '../header/layout-types';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useScrollDirection } from '@/lib/use-scroll-direction';
@@ -148,7 +149,20 @@ export function StorefrontHeader({
     [storefrontConfig?.featuredCategoryIds],
   );
 
-  const entries: MenuEntry[] = useMemo(
+  /**
+   * The shop's menu.
+   *
+   * Built from the tree the merchant owns, or — for every shop that predates
+   * one — generated from the departments exactly as this header always did.
+   * `resolveMenu` owns both, so a style never sees the difference and the
+   * back office can offer "start from my departments" by writing out what it
+   * already generates.
+   *
+   * The merchant's hidden-department list and their featured set still apply:
+   * those say which departments belong in a shop window at all, which is a
+   * different question from what order a menu puts them in.
+   */
+  const visibleCategories = useMemo(
     () =>
       categories
         .filter((c) => c.id !== '_uncategorized')
@@ -161,24 +175,27 @@ export function StorefrontHeader({
         .sort((a, b) =>
           railStyle === 'featured' && featuredIds.length
             ? featuredIds.indexOf(a.id) - featuredIds.indexOf(b.id)
-            : 0)
-        .map((c) => ({
-          id: c.id,
-          label: c.name,
-          href: catalogHref(c.id),
-          count: c.productCount ?? 0,
-          colour: c.color,
-        })),
-    [categories, hiddenCategories, railStyle, featuredIds, catalogHref],
+            : 0),
+    [categories, hiddenCategories, railStyle, featuredIds],
   );
 
-  const links: MenuLink[] = useMemo(() => {
-    const out: MenuLink[] = [];
-    if (showBooking) out.push({ label: 'Book', url: `/${storeSlug}/book`, external: false });
-    if (showTracking) out.push({ label: 'Track Order', url: `/${storeSlug}/repairs`, external: false });
-    for (const link of customNavLinks) out.push({ label: link.label, url: link.url, external: true });
-    return out;
-  }, [showBooking, showTracking, customNavLinks, storeSlug]);
+  const nodes: MenuNode[] = useMemo(
+    () =>
+      resolveMenu(storefrontConfig, {
+        storeSlug,
+        categories: visibleCategories,
+        catalogHref,
+        hasBooking: showBooking,
+        hasRepairs: showTracking,
+        labels: {
+          allProducts: t('nav.allProducts'),
+          book: 'Book',
+          repairs: 'Track Order',
+          account: t('nav.account'),
+        },
+      }),
+    [storefrontConfig, storeSlug, visibleCategories, catalogHref, showBooking, showTracking, t],
+  );
 
   // `transparent` and `gradient` only mean anything over a picture, and the
   // only page with one is the shop's front. Everywhere else they start solid,
@@ -228,7 +245,7 @@ export function StorefrontHeader({
   const { placement, elastic, Component: Menu } =
     needsInBar && wanted.placement === 'below' ? menuStyle('inline') : wanted;
 
-  const menuHasNothingToShow = railStyle === 'off' || (entries.length === 0 && links.length === 0);
+  const menuHasNothingToShow = railStyle === 'off' || nodes.length === 0;
 
   /** Which row the departments end up in, once the style has had its say. */
   const menuRow: 'bar' | 'below' | 'split' =
@@ -276,11 +293,9 @@ export function StorefrontHeader({
   const drawMenu = useCallback(
     ({ from = 0, to, showAll = true, align }: MenuSlice = {}) => (
       <Menu
-        entries={entries.slice(from, to)}
+        nodes={nodes.slice(from, to)}
         allHref={catalogHref(null)}
         allLabel={t('nav.allProducts')}
-        // The shop's own links go with the last slice, where the eye finishes.
-        links={to === undefined ? links : []}
         collapsed={condensed}
         menuLabel={t('nav.menu')}
         linkCase={linkCase}
@@ -289,7 +304,7 @@ export function StorefrontHeader({
         showAll={showAll}
       />
     ),
-    [Menu, entries, links, catalogHref, t, condensed, linkCase, onDark, markCentred],
+    [Menu, nodes, catalogHref, t, condensed, linkCase, onDark, markCentred],
   );
 
   const menuNode = menuHasNothingToShow ? null : drawMenu();
@@ -470,7 +485,7 @@ export function StorefrontHeader({
             menuInBar={menuRow === 'bar' ? menuNode : null}
             menuBelow={menuBelow}
             menuEmpty={menuHasNothingToShow}
-            departments={entries.length}
+            departments={nodes.length}
             utilities={utilities}
             utilityRow={utilityRow}
             onDark={onDark}
@@ -488,8 +503,7 @@ export function StorefrontHeader({
         presentation={asMobileMenu(header?.mobileMenu)}
         open={mobileOpen}
         onClose={closeMobile}
-        entries={entries}
-        links={links}
+        nodes={nodes}
         allHref={catalogHref(null)}
         allLabel={t('nav.allProducts')}
         menuLabel={t('nav.menu')}

@@ -1,34 +1,26 @@
 /**
  * What every menu style is handed.
  *
- * The header resolves the departments once — filtering, ordering and the
- * links that go with them — and each style decides only how to draw them.
- * A style that computed its own list would drift from the others the first
- * time a merchant hid a department.
+ * One tree, resolved once by StorefrontHeader. A style that built its own
+ * would drift from the others the first time a merchant reordered something —
+ * the same reason the API serves the list of style names rather than each app
+ * keeping a copy.
+ *
+ * The tree replaced a flat list of departments plus a separate list of the
+ * shop's own links. Two lists could not express what a menu is: a shop's
+ * navigation has depth, it has entries that are not departments, and it has
+ * an order somebody chose.
  */
-export interface MenuEntry {
-  id: string;
-  label: string;
-  href: string;
-  /** How many products sit in it. 0 when the shop does not count. */
-  count: number;
-  /** The department's own colour from the till, if it has one. */
-  colour: string | null;
-}
+export type { MenuNode } from '@/lib/navigation';
 
-export interface MenuLink {
-  label: string;
-  url: string;
-  /** A shop's own link goes out through <a>; ours routes through <Link>. */
-  external: boolean;
-}
+import type { MenuNode } from '@/lib/navigation';
 
 export interface MenuStyleProps {
-  entries: MenuEntry[];
+  /** The menu, top level first. Children are one and two levels down. */
+  nodes: MenuNode[];
   /** Where "everything" lives, and what this shop's language calls it. */
   allHref: string;
   allLabel: string;
-  links: MenuLink[];
   /**
    * The header has asked for its second row back — `condense`, on the way
    * down the page. A style that lives in the bar has nothing to give back
@@ -38,7 +30,7 @@ export interface MenuStyleProps {
   /** The word on a trigger, in the shopper's language. */
   menuLabel: string;
   /**
-   * Whether the department names shout.
+   * Whether the entry names shout.
    *
    * A setting rather than a look, because it was hardcoded in two places and
    * disagreed with itself: the rail shouted and the inline menu did not.
@@ -47,7 +39,7 @@ export interface MenuStyleProps {
   /** White type, because the bar is dark or sitting on a picture. */
   onDark: boolean;
   /**
-   * Where the departments sit in their row, under a centred mark.
+   * Where the entries sit in their row, under a centred mark.
    *
    * `safe centre` rather than centre: a row long enough to overflow, centred,
    * pushes its first item off the left edge with no way to scroll back to it,

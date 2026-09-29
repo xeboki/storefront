@@ -1,0 +1,24 @@
+.label {
+  min-width: 0;
+}
+
+/* Beside the label, never under it: a menu row has one line of height and a
+   badge that wraps pushes every row below it down. */
+.badge {
+  flex-shrink: 0;
+  margin-left: 0.4rem;
+  border-radius: 999px;
+  background: rgb(var(--color-primary) / 0.14);
+  padding: 0.05rem 0.4rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgb(var(--color-primary));
+  white-space: nowrap;
+}
+
+/* A label with nowhere to go. Not a link, and not styled like one. */
+.heading {
+  cursor: default;
+}

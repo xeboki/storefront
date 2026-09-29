@@ -18,11 +18,13 @@ import { Menu, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useDismiss } from '../chrome';
 import { Portal } from '../Portal';
+import { NodeLink } from '../NodeLink';
+import type { MenuNode } from '@/lib/navigation';
 import type { MenuStyleProps } from '../types';
 import styles from './drawer.module.css';
 
 export default function DrawerMenu({
-  entries, allHref, allLabel, links, menuLabel, linkCase, onDark, align, showAll,
+  nodes, allHref, allLabel, menuLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -39,10 +41,22 @@ export default function DrawerMenu({
     };
   }, [open]);
 
-  if (entries.length === 0 && links.length === 0) return null;
+  if (nodes.length === 0) return null;
+
+  /** The whole tree as an indented list — a panel has the height for it. */
+  const branch = (node: MenuNode, depth: number): React.ReactNode => (
+    <div key={node.id} style={{ paddingLeft: depth * 12 }}>
+      <NodeLink
+        node={node}
+        onNavigate={close}
+        className={depth === 0 && node.children.length > 0 ? styles.group : styles.entry}
+      />
+      {node.children.map((child) => branch(child, depth + 1))}
+    </div>
+  );
 
   return (
-    <div className={clsx('hidden lg:block', align === 'centre' && 'text-center')} data-dark={onDark || undefined}>
+    <div className={clsx('hidden lg:block', align === 'centre' && styles.centred)} data-dark={onDark || undefined}>
       <button
         type="button"
         aria-expanded={open}
@@ -71,24 +85,7 @@ export default function DrawerMenu({
                   {allLabel}
                 </Link>
               )}
-              {entries.map((entry) => (
-                <Link key={entry.id} href={entry.href} onClick={close} className={styles.entry}>
-                  <span>{entry.label}</span>
-                  {entry.count > 0 && <span className={styles.count}>{entry.count}</span>}
-                </Link>
-              ))}
-              {links.length > 0 && <hr className={styles.rule} />}
-              {links.map((link) =>
-                link.external ? (
-                  <a key={link.url} href={link.url} onClick={close} className={styles.entry}>
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link key={link.url} href={link.url} onClick={close} className={styles.entry}>
-                    {link.label}
-                  </Link>
-                ),
-              )}
+              {nodes.map((node) => branch(node, 0))}
             </nav>
           </div>
         </div>

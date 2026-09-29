@@ -120,6 +120,19 @@
 .all:active,
 .entry:active { background: rgb(var(--color-surface-alt)); }
 
+/* A top-level entry with a submenu under it: a section title, because on a
+   phone that is what it is. */
+.group {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: rgb(var(--color-fg));
+}
+
 .withIcon { display: inline-flex; align-items: center; gap: 0.5rem; }
 .icon { color: rgb(var(--color-fg-subtle)); }
 

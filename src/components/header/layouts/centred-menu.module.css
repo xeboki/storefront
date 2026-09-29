@@ -1,19 +1,25 @@
-/* Three columns, and the two sides are forced EQUAL.
+/* Sides sized to what is in them, middle takes the rest.
  *
- * That is what centres the departments on the page. A mark and a row of
- * icons are never the same width, so sizing the sides to their content and
- * letting the middle take the rest puts the menu off-centre by half the
- * difference — the version that looks almost right and cannot be explained.
+ * Equal `1fr` sides would centre the departments on the PAGE, which is what
+ * this arrangement is for — but only while both sides fit in a third of the
+ * bar. A shop with a store picker, a language switcher and four icons does
+ * not fit, and a grid column does not shrink its contents: the icons ran
+ * leftward out of their column, over the departments, with the cart clipped
+ * off the end of the bar.
  *
- * The middle is a fraction and not `auto` for a second reason: the inline
- * menu measures the width it has been given to decide how many departments
- * fit. A column sized to its content would make that width depend on the
- * answer, and the count settles well under the room actually free. A
- * fraction is the same width whatever is in it.
+ * So the sides get what they need and the departments are centred on what is
+ * left. When the mark and the icons are close in width — the common case, and
+ * the case this arrangement is drawn for — that is the same thing. When they
+ * are not, this is off-centre by half the difference, which is a good deal
+ * better than a clipped cart.
+ *
+ * The middle is `1fr` and not `auto` for a second reason: the inline menu
+ * measures the width it is given to decide how many departments fit, so a
+ * column sized to its content would make that width depend on the answer.
  */
 .bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.75rem;
 }
@@ -42,9 +48,7 @@
 }
 
 /* Below the middle column's breakpoint the departments are in the phone
-   menu, so the bar is a mark and the icons — the side columns would leave a
-   third of the row empty between them. */
+   menu, so the bar is a mark and the icons with nothing between them. */
 @media (max-width: 1023px) {
-  .bar { grid-template-columns: auto 0 1fr; }
   .middle { display: none; }
 }
