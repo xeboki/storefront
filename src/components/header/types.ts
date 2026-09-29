@@ -55,6 +55,21 @@ export interface MenuStyleProps {
    * reaches first.
    */
   showAll: boolean;
+  /**
+   * The shop's mark, for a menu that opens a panel big enough to carry one.
+   *
+   * The drawer is a page of its own more than it is a menu, and a panel that
+   * covers the header has to say whose shop it belongs to — without it a
+   * shopper is looking at a list of words over a dimmed page.
+   */
+  brand?: React.ReactNode;
+  /**
+   * A search field, for the same reason.
+   *
+   * A panel with room for the whole menu has room for the one thing a
+   * shopper does when the menu does not have what they came for.
+   */
+  search?: React.ReactNode;
 }
 
 /**

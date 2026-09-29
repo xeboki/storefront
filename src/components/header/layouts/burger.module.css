@@ -1,0 +1,26 @@
+/* Equal sides, so the mark is centred on the page. It works because this is
+   a `spare` layout — three icons, not a store picker with a town name in it,
+   which would outweigh a menu button by four to one and put the mark well
+   left of centre. */
+.bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .bar { gap: 1.5rem; }
+}
+
+.side {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.end {
+  justify-content: flex-end;
+  gap: 0.25rem;
+}

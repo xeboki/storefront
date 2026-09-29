@@ -229,13 +229,19 @@ export function StorefrontHeader({
   const chosen = headerStyle(header?.style);
   const { Component: Layout, centred: markCentred } = chosen;
 
-  // A style with one row has nowhere to put a rail, which is a full-width
-  // row that brings its own page gutter — drawn inside a column a third of
-  // the page wide it is not a rail, it is a mess. Swap it for the in-bar
-  // list, which is the same departments in the space that exists.
+  // A style whose bar is a single button names its own menu: there is
+  // nowhere to draw a rail or a row of departments, so three of the four
+  // choices could not be honoured.
+  //
+  // Otherwise: a style with one row has nowhere to put a rail, which is a
+  // full-width row that brings its own page gutter — drawn inside a column a
+  // third of the page wide it is not a rail, it is a mess. Swap it for the
+  // in-bar list, which is the same departments in the space that exists.
   const needsInBar = chosen.menuRow === 'bar';
   const { placement, elastic, Component: Menu } =
-    needsInBar && wanted.placement === 'below' ? menuStyle('inline') : wanted;
+    chosen.forceMenu ? menuStyle(chosen.forceMenu)
+    : needsInBar && wanted.placement === 'below' ? menuStyle('inline')
+    : wanted;
 
   const menuHasNothingToShow = railStyle === 'off' || nodes.length === 0;
 
@@ -275,32 +281,13 @@ export function StorefrontHeader({
 
   /** One menu, or one half of a split one. */
   /**
-   * The departments.
+   * A plain search field, for a menu that opens a panel with room for one.
    *
-   * Every style draws the same menu through this — one place where the menu's
-   * props are decided, so a new style cannot forget the link case or pass a
-   * way-out the merchant never asked for.
+   * Not the header's search slot: that one is placed, sized and possibly an
+   * icon, and none of those decisions mean anything inside a panel a column
+   * wide. A shop that has switched search off gets none here either.
    */
-  const drawMenu = useCallback(
-    ({ showAll = true, align }: MenuOptions = {}) => (
-      <Menu
-        nodes={nodes}
-        allHref={catalogHref(null)}
-        allLabel={t('nav.allProducts')}
-        collapsed={condensed}
-        menuLabel={t('nav.menu')}
-        linkCase={linkCase}
-        onDark={onDark}
-        align={align ?? (markCentred ? 'centre' : 'start')}
-        // Only the generated menu gets a way-out added to it. In a menu the
-        // merchant built it is an entry they never added and cannot move.
-        showAll={showAll && menu.generated}
-      />
-    ),
-    [Menu, nodes, menu.generated, catalogHref, t, condensed, linkCase, onDark, markCentred],
-  );
-
-  const menuNode = menuHasNothingToShow ? null : drawMenu();
+  const panelSearch = searchOn ? <HeaderSearch storeSlug={storeSlug} /> : null;
 
   /** The page gutter every row shares, so rows line up with the page. */
   const container = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
@@ -317,6 +304,38 @@ export function StorefrontHeader({
       <StoreLogo logoUrl={storefrontConfig?.logoUrl} name={storeName(storeConfig)} />
     </Link>
   );
+
+  /**
+   * The departments.
+   *
+   * Every style draws the same menu through this — one place where the menu's
+   * props are decided, so a new style cannot forget the link case or pass a
+   * way-out the merchant never asked for.
+   */
+  const drawMenu = useCallback(
+    ({ showAll = true, align }: MenuOptions = {}) => (
+      <Menu
+        nodes={nodes}
+        allHref={catalogHref(null)}
+        allLabel={t('nav.allProducts')}
+        collapsed={condensed}
+        menuLabel={t('nav.menu')}
+        linkCase={linkCase}
+        onDark={onDark}
+        // Only a panel menu uses these, and only it has room for them.
+        brand={brand}
+        search={panelSearch}
+        align={align ?? (markCentred ? 'centre' : 'start')}
+        // Only the generated menu gets a way-out added to it. In a menu the
+        // merchant built it is an entry they never added and cannot move.
+        showAll={showAll && menu.generated}
+      />
+    ),
+    [Menu, nodes, menu.generated, catalogHref, t, condensed, linkCase, onDark,
+     markCentred, brand, panelSearch],
+  );
+
+  const menuNode = menuHasNothingToShow ? null : drawMenu();
 
   const utilities = {
     currency: header?.showCurrency === true ? (

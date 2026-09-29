@@ -53,6 +53,15 @@ interface Style {
    * search overlay makes, for the same reason.
    */
   spare: boolean;
+  /**
+   * A menu this style requires, overriding the shop's choice.
+   *
+   * Only for a bar that has nowhere to put anything else. A header whose
+   * navigation is a single button cannot draw a rail or a row of
+   * departments — the button IS the menu — so offering the merchant four
+   * menus here would be three that cannot be honoured.
+   */
+  forceMenu?: string;
 }
 
 export const HEADER_STYLES: Record<string, Style> = {
@@ -65,6 +74,12 @@ export const HEADER_STYLES: Record<string, Style> = {
   // it has one. This style has no second row, so it says false and centres
   // the menu itself.
   centred_menu: { centred: false, menuRow: 'bar', spare: true, Component: dynamic(() => import('./CentredMenuHeader')) },
+  // The bar is a button, a mark and the icons. Everything else is behind the
+  // button, which is why this one names its menu.
+  burger: {
+    centred: true, menuRow: 'bar', spare: true, forceMenu: 'drawer',
+    Component: dynamic(() => import('./BurgerHeader')),
+  },
 };
 
 /** What the API falls back to, and so must this. */
