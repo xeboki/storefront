@@ -25,22 +25,22 @@
   border-bottom: 1px solid rgb(var(--color-border));
 }
 
-/* Sides to content, field takes the rest.
- *
- * Equal `1fr` sides would centre the field on the PAGE, which is what this
- * arrangement wants — but only while both sides fit in one. A shop with a
- * store picker, a language switcher and three icons does not, and a grid
- * column does not shrink its contents: the icons ran leftward out of their
- * column and sat on top of the field. Same trade as the bar this replaces —
- * off-centre by half the difference beats a field with a store picker
- * printed across it. */
+/* Equal sides, so the field is centred on the PAGE and not on the gap left
+   over between a name and a row of icons — those are never the same width.
+   It only works because the overlay carries three controls rather than six:
+   a grid column does not shrink its contents, and with the store picker and
+   the language switcher here the right side overflowed leftward and sat on
+   top of the field.
+   `align-items: center` lines everything up on the INPUT, because the label
+   above it is taken out of the flow below. */
 .row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: 1fr minmax(0, 42rem) 1fr;
   align-items: center;
   gap: 1.5rem;
-  padding-top: 1.75rem;
-  padding-bottom: 1.75rem;
+  /* Deeper at the top: that is where the label sits, out of flow. */
+  padding-top: 3rem;
+  padding-bottom: 2rem;
   /* Room for the cross in the corner above, so the two never meet however
      narrow the window gets. */
   padding-right: 2.5rem;
@@ -53,17 +53,20 @@
 }
 
 .field {
-  display: flex;
-  width: 100%;
+  position: relative;
   min-width: 0;
-  max-width: 42rem;
-  margin-inline: auto;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
-/* Sits on the field's own left edge, not the column's. */
+/* Above the field and OUT of the flow.
+   In flow it made the middle cell taller than the two beside it, so centring
+   the row centred the label-and-field pair — and the input itself came out
+   sitting below the mark and the icons. Out of flow, the cell is exactly as
+   tall as the input and everything lines up on it. */
 .label {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 0.5rem;
   font-size: 0.8125rem;
   color: rgb(var(--color-fg-muted));
 }

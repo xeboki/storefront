@@ -31,12 +31,16 @@ interface Props {
   /** The mark, so the open bar is still recognisably this shop's header. */
   brand: React.ReactNode;
   /**
-   * The account, saved and cart controls.
+   * The account, saved and cart controls — and only those.
    *
-   * They stay. The bar is borrowed, not replaced — a shopper who opens search
-   * and then decides to check their basket should not have to close anything
-   * first, and a header whose right-hand side empties out reads as having
-   * navigated somewhere.
+   * They stay because the bar is borrowed, not replaced: a shopper who opens
+   * search and then decides to check their basket should not have to close
+   * anything first, and a header whose right-hand side empties out reads as
+   * having navigated somewhere.
+   *
+   * The store picker, language and currency do not come, which is the
+   * caller's decision and not this component's — they belong to browsing
+   * rather than to typing a query.
    */
   utilities: React.ReactNode;
   container: string;

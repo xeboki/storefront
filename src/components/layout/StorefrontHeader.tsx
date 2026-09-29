@@ -417,9 +417,17 @@ export function StorefrontHeader({
       spacers={!crowded}
       iconClassName={iconButton}
       brand={brand}
-      // The overlay keeps them: a shopper who opens search and then decides
-      // to check their basket should not have to close anything first.
-      utilities={utilityRow}
+      // Only the three a shopper might reach for mid-search. The store
+      // picker, the language switcher and the currency belong to browsing,
+      // not to typing a query — and they are wide, which is what stopped the
+      // field being centred on the page at all.
+      utilities={
+        <>
+          {utilities.account}
+          {utilities.wishlist}
+          {utilities.cart}
+        </>
+      }
       container={container}
     />
   ) : null;
