@@ -26,21 +26,17 @@ interface Style {
   /**
    * Which row the departments go in.
    *
-   *   'menu'  — whatever the chosen menu wanted. A rail becomes a row, an
-   *             inline list stays in the bar. Only a style with room for
-   *             either can say this.
-   *   'below' — always a row of its own, whatever the menu wanted. A centred
-   *             or stacked mark leaves no room beside it.
+   *   'below' — a row of its own, whatever the menu wanted. For a style
+   *             whose bar has no room beside the mark.
    *   'bar'   — always inside the bar. A style with a single row has nowhere
    *             else to put them, so a menu that wanted a row of its own is
    *             swapped for the in-bar one rather than drawn full width
    *             inside a column a third of the page wide.
    *
-   * `below` and `bar` are both in the vocabulary because a style that has a
-   * second row and one that does not are the two shapes every header takes;
-   * only `bar` is in use today.
+   * Both stay in the vocabulary because a header with a second row and one
+   * without are the two shapes there are; only `bar` is in use today.
    */
-  menuRow: 'menu' | 'below' | 'bar';
+  menuRow: 'below' | 'bar';
   /**
    * Whether the bar carries only the three controls a shopper reaches for.
    *
@@ -65,10 +61,6 @@ interface Style {
 }
 
 export const HEADER_STYLES: Record<string, Style> = {
-  // What the storefront drew before styles existed, and what every shop that
-  // has never chosen one still gets. Not a design anybody picked — it is the
-  // floor, and it stays whatever else is added above it.
-  classic: { centred: false, menuRow: 'menu', spare: false, Component: dynamic(() => import('./ClassicHeader')) },
   // The departments are centred here, but the MARK is not — `centred` is
   // about the mark, and it is what tells a menu to centre its own row when
   // it has one. This style has no second row, so it says false and centres
@@ -82,8 +74,14 @@ export const HEADER_STYLES: Record<string, Style> = {
   },
 };
 
-/** What the API falls back to, and so must this. */
-export const DEFAULT_STYLE = 'classic';
+/**
+ * What the API falls back to, and so must this.
+ *
+ * A shop that has never chosen renders this one. It is not "the old header":
+ * the arrangement that predated styles was removed with them, so an existing
+ * shop moves to this the first time it is served.
+ */
+export const DEFAULT_STYLE = 'centred_menu';
 
 export function headerStyle(name: string | null | undefined): Style {
   return HEADER_STYLES[name ?? ''] ?? HEADER_STYLES[DEFAULT_STYLE];
