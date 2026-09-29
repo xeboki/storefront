@@ -35,25 +35,37 @@ interface Style {
    *             else to put them, so a menu that wanted a row of its own is
    *             swapped for the in-bar one rather than drawn full width
    *             inside a column a third of the page wide.
-   *   'own'   — the style places the departments itself, in slices. Needs a
-   *             menu that puts them in the bar AND can stop when it runs out
-   *             of room; anything else falls back to the centred style,
-   *             because half a menu around a mark is worse than the nearest
-   *             arrangement that exists.
+   *   'own'   — the style places the departments itself. Needs a menu that
+   *             puts them in the bar AND can stop when it runs out of room;
+   *             anything else falls back to the centred style, because a
+   *             single trigger stranded beside a centred mark is worse than
+   *             the nearest arrangement that exists.
    */
   menuRow: 'menu' | 'below' | 'bar' | 'own';
+  /**
+   * Whether the bar carries only the three controls a shopper reaches for.
+   *
+   * A layout that centres something needs its two sides to weigh the same,
+   * and a store picker with a town name in it is what makes that impossible:
+   * the mark is ~150px and the full control set is ~400px, so "centred" lands
+   * half the difference off and the side that lost gets squeezed to nothing.
+   * These layouts keep account, saved and cart, and drop the three that
+   * describe the shop rather than serve the shopper — the same call the
+   * search overlay makes, for the same reason.
+   */
+  spare: boolean;
 }
 
 export const HEADER_STYLES: Record<string, Style> = {
-  classic: { centred: false, menuRow: 'menu',  Component: dynamic(() => import('./ClassicHeader')) },
-  centred: { centred: true,  menuRow: 'below', Component: dynamic(() => import('./CentredHeader')) },
-  stacked: { centred: false, menuRow: 'below', Component: dynamic(() => import('./StackedHeader')) },
-  split:   { centred: true,  menuRow: 'own',   Component: dynamic(() => import('./SplitHeader')) },
+  classic: { centred: false, menuRow: 'menu',  spare: false, Component: dynamic(() => import('./ClassicHeader')) },
+  centred: { centred: true,  menuRow: 'below', spare: false, Component: dynamic(() => import('./CentredHeader')) },
+  stacked: { centred: false, menuRow: 'below', spare: false, Component: dynamic(() => import('./StackedHeader')) },
+  split:   { centred: true,  menuRow: 'own',   spare: true,  Component: dynamic(() => import('./SplitHeader')) },
   // The departments are centred here, but the MARK is not — `centred` is
   // about the mark, and it is what tells the menu to centre its own row when
   // it has one. This style has no second row, so it says false and centres
   // the menu itself.
-  centred_menu: { centred: false, menuRow: 'bar', Component: dynamic(() => import('./CentredMenuHeader')) },
+  centred_menu: { centred: false, menuRow: 'bar', spare: true, Component: dynamic(() => import('./CentredMenuHeader')) },
 };
 
 /** What the API falls back to, and so must this. */

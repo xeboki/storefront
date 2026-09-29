@@ -1,34 +1,36 @@
 'use client';
 
 /**
- * Style 4 — split.
+ * Mark in the middle, departments to one side of it, icons to the other.
  *
- * Departments, mark, departments — the centred mark with navigation either
- * side. Squarespace dropped it in 7.1 and people are still writing CSS to get
- * it back, which is a fair measure of how much it is wanted.
+ * The mark is the centrepiece and the menu is a single run, which is the
+ * arrangement a lot of fashion and editorial shops use.
  *
- * It wants a short list, three or four a side. The departments go in the bar
- * itself, so it only applies to a menu that puts them there; anything else
- * falls back to a centred mark before it reaches this file.
+ * It used to cut the departments in half and put a few either side of the
+ * mark. That reads badly and is worth saying why: a menu is one list in one
+ * order, and halving it around a logo breaks the run in the middle — the eye
+ * finishes the left group, jumps the mark, and starts again, so two entries
+ * that belong beside each other end up on opposite sides of the bar. It also
+ * fails on any shop whose icons are wider than its mark, because the half
+ * sharing a column with them gets squeezed to a "More" button.
  *
- * The way out to the whole catalogue sits on the first half only — one escape
- * hatch per header — and the shop's own links go with the second, where the
- * eye finishes.
+ * Three columns with equal sides, so the mark is centred on the PAGE rather
+ * than on the gap between a menu and a row of icons — those are never the
+ * same width, and centring on what is left over is what makes a mark look
+ * very slightly off with no obvious reason.
  */
 import { clsx } from 'clsx';
 import type { HeaderLayoutProps } from '../layout-types';
 import styles from './split.module.css';
 
 export default function SplitHeader({
-  brand, search, menu, departments, utilityRow, container, barHeight,
+  brand, search, menu, menuEmpty, utilityRow, container, barHeight,
 }: HeaderLayoutProps) {
-  const half = Math.ceil(departments / 2);
   return (
     <div className={clsx(container, styles.bar, barHeight)}>
-      <div className={styles.side}>{menu({ to: half })}</div>
+      <div className={styles.side}>{menuEmpty ? null : menu()}</div>
       {brand}
       <div className={clsx(styles.side, styles.end)}>
-        {menu({ from: half, showAll: false })}
         {search}
         {utilityRow}
       </div>

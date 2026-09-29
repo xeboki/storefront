@@ -126,13 +126,31 @@ function generated(ctx: Context, navLinks: { label: string; url: string }[]): Me
   return nodes;
 }
 
+export interface ResolvedMenu {
+  nodes: MenuNode[];
+  /**
+   * True when this is the list assembled from the departments rather than one
+   * the merchant built.
+   *
+   * It decides whether the header adds its own way-out to the catalogue. That
+   * link belongs to the GENERATED menu, where it is the only route to
+   * everything — in a built menu it is an entry the merchant never added,
+   * cannot reorder and cannot remove, sitting in front of the ones they did.
+   * A merchant who wants it adds an "All products" entry, which is one of the
+   * kinds the editor offers.
+   */
+  generated: boolean;
+}
+
 export function resolveMenu(
   config: StorefrontConfig | null,
   ctx: Context,
-): MenuNode[] {
+): ResolvedMenu {
   const built = config?.navigation?.main ?? [];
-  if (built.length > 0) return built.flatMap((item) => toNode(item, ctx, 1));
-  return generated(ctx, config?.navLinks ?? []);
+  if (built.length > 0) {
+    return { nodes: built.flatMap((item) => toNode(item, ctx, 1)), generated: false };
+  }
+  return { nodes: generated(ctx, config?.navLinks ?? []), generated: true };
 }
 
 /** Whether this menu has a second level anywhere — a mega panel needs one. */

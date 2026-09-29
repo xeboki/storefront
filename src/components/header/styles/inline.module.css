@@ -20,6 +20,19 @@
   align-items: center;
 }
 
+/* Centred under a centred mark — and the ROW has to stop growing for that to
+   mean anything. `justify-content: center` on the nav did nothing while its
+   only child filled it, which is why the departments sat hard left under a
+   mark in the middle of the bar. The nav keeps its full width, because that
+   is the width the measurement below asks about. */
+.centred {
+  justify-content: center;
+}
+
+.centred .row {
+  flex: 0 1 auto;
+}
+
 .row {
   display: flex;
   flex: 1 1 0%;

@@ -157,7 +157,7 @@ export default function InlineMenu({
       className={clsx(
         styles.nav,
         linkCase === 'upper' && styles.upper,
-        align === 'centre' && 'justify-center',
+        align === 'centre' && styles.centred,
         'hidden lg:flex',
       )}
     >

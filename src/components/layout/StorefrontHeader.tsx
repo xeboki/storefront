@@ -179,7 +179,7 @@ export function StorefrontHeader({
     [categories, hiddenCategories, railStyle, featuredIds],
   );
 
-  const nodes: MenuNode[] = useMemo(
+  const menu = useMemo(
     () =>
       resolveMenu(storefrontConfig, {
         storeSlug,
@@ -196,6 +196,7 @@ export function StorefrontHeader({
       }),
     [storefrontConfig, storeSlug, visibleCategories, catalogHref, showBooking, showTracking, t],
   );
+  const nodes: MenuNode[] = menu.nodes;
 
   // `transparent` and `gradient` only mean anything over a picture, and the
   // only page with one is the shop's front. Everywhere else they start solid,
@@ -301,10 +302,12 @@ export function StorefrontHeader({
         linkCase={linkCase}
         onDark={onDark}
         align={align ?? (markCentred ? 'centre' : 'start')}
-        showAll={showAll}
+        // Only the generated menu gets a way-out added to it. In a menu the
+        // merchant built it is an entry they never added and cannot move.
+        showAll={showAll && menu.generated}
       />
     ),
-    [Menu, nodes, catalogHref, t, condensed, linkCase, onDark, markCentred],
+    [Menu, nodes, menu.generated, catalogHref, t, condensed, linkCase, onDark, markCentred],
   );
 
   const menuNode = menuHasNothingToShow ? null : drawMenu();
@@ -392,11 +395,18 @@ export function StorefrontHeader({
     ) : null,
   };
 
+  /**
+   * The three a shopper reaches for, and the three that describe the shop.
+   *
+   * A `spare` layout keeps only the first three — see the registry. The
+   * short version: a store picker with a town name in it is what stops
+   * anything being centred, and it is not what a shopper opens a menu for.
+   */
   const utilityRow = (
     <>
-      {utilities.currency}
-      {utilities.location}
-      {utilities.language}
+      {!chosen.spare && utilities.currency}
+      {!chosen.spare && utilities.location}
+      {!chosen.spare && utilities.language}
       {utilities.account}
       {utilities.wishlist}
       {utilities.cart}
