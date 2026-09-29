@@ -16,13 +16,14 @@ import type { HeaderLayoutProps } from '../layout-types';
 interface Style {
   Component: ComponentType<HeaderLayoutProps>;
   /**
-   * Whether the mark sits in the middle of the bar.
+   * Whether the departments are centred in the space they are given.
    *
-   * The menu has to know before either is drawn: a centred mark leaves no
-   * room beside it, so the departments go under the bar whatever the menu
-   * would have preferred.
+   * Named for what it does, not for where the mark is — those are separate,
+   * and a style can have a centred mark with a left-aligned menu beside it.
+   * The menu has to be told, because only it knows how to centre a row that
+   * might be too long to centre safely.
    */
-  centred: boolean;
+  centreMenu: boolean;
   /**
    * Which row the departments go in.
    *
@@ -61,16 +62,23 @@ interface Style {
 }
 
 export const HEADER_STYLES: Record<string, Style> = {
-  // The departments are centred here, but the MARK is not — `centred` is
-  // about the mark, and it is what tells a menu to centre its own row when
-  // it has one. This style has no second row, so it says false and centres
-  // the menu itself.
-  centred_menu: { centred: false, menuRow: 'bar', spare: true, Component: dynamic(() => import('./CentredMenuHeader')) },
+  // This one centres the departments with CSS rather than through
+  // `centreMenu`, because the centring is the grid's job here: the menu sits
+  // in a middle column with equal columns either side of it.
+  centred_menu: { centreMenu: false, menuRow: 'bar', spare: true, Component: dynamic(() => import('./CentredMenuHeader')) },
   // The bar is a button, a mark and the icons. Everything else is behind the
   // button, which is why this one names its menu.
   burger: {
-    centred: true, menuRow: 'bar', spare: true, forceMenu: 'drawer',
+    // Nothing to align: the menu is one button.
+    centreMenu: false, menuRow: 'bar', spare: true, forceMenu: 'drawer',
     Component: dynamic(() => import('./BurgerHeader')),
+  },
+  // Departments left, mark centred, everything else right. The only centred
+  // arrangement that keeps the wide controls — a language switcher and a
+  // currency — because the run of departments on the left balances them.
+  centred_mark: {
+    centreMenu: false, menuRow: 'bar', spare: false,
+    Component: dynamic(() => import('./CentredMarkHeader')),
   },
 };
 

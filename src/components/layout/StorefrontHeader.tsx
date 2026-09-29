@@ -227,7 +227,7 @@ export function StorefrontHeader({
    * a merchant is not left to discover it.
    */
   const chosen = headerStyle(header?.style);
-  const { Component: Layout, centred: markCentred } = chosen;
+  const { Component: Layout, centreMenu: markCentred } = chosen;
 
   // A style whose bar is a single button names its own menu: there is
   // nowhere to draw a rail or a row of departments, so three of the four
