@@ -74,7 +74,15 @@ const LOADED_FONTS: Record<string, string> = {
   baskerville: 'var(--font-baskerville)',
   lora: 'var(--font-lora)',
   'space grotesk': 'var(--font-space-grotesk)',
+  // Script — for the shop's name standing in for a logo, nothing else.
+  'dancing script': 'var(--font-dancing-script)',
+  'great vibes': 'var(--font-great-vibes)',
+  sacramento: 'var(--font-sacramento)',
+  pacifico: 'var(--font-pacifico)',
+  caveat: 'var(--font-caveat)',
+  parisienne: 'var(--font-parisienne)',
 };
+
 
 /**
  * Resolves a merchant's font name to a loaded family, falling back to the
@@ -202,6 +210,12 @@ export function buildTheme(config: StorefrontConfig | null): Theme {
       // a merchant who set only a body font had the pairing silently replaced
       // by one face used twice.
       '--font-display': fontStack(config?.headingFont, preset.fontDisplay),
+      // The shop's name, when it has no logo. Falls through to the heading
+      // face, which is what it was set in before this was a choice — so a
+      // shop that never picks one is unmoved.
+      '--font-wordmark': fontStack(
+        config?.wordmarkFont, fontStack(config?.headingFont, preset.fontDisplay)),
+
     },
     shape: {
       presetId: preset.id,

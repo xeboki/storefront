@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import {
-  Cormorant_Garamond, DM_Sans, DM_Serif_Display, Figtree, Inter, Lato,
-  Libre_Baskerville, Lora, Montserrat, Playfair_Display, Poppins, Roboto,
+  Caveat, Cormorant_Garamond, Dancing_Script, DM_Sans, DM_Serif_Display,
+  Figtree, Great_Vibes, Inter, Lato, Libre_Baskerville, Lora, Montserrat,
+  Pacifico, Parisienne, Playfair_Display, Poppins, Roboto, Sacramento,
   Space_Grotesk, Work_Sans,
 } from 'next/font/google';
 import { headers } from 'next/headers';
@@ -75,11 +76,33 @@ const lora = Lora({ subsets: ['latin'], display: 'swap', preload: false,
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], display: 'swap', preload: false,
   weight: ['400', '500', '600', '700'], variable: '--font-space-grotesk' });
 
+/**
+ * For the shop's NAME, when it has no logo and the name is the mark.
+ *
+ * Their own group, not more entries in the display list, because a paragraph
+ * set in any of them is unreadable — these are for four words at most. Most
+ * ship a single weight, which is why the weights differ face to face rather
+ * than being copied down the list.
+ */
+const dancingScript = Dancing_Script({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-dancing-script' });
+const greatVibes = Great_Vibes({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400'], variable: '--font-great-vibes' });
+const sacramento = Sacramento({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400'], variable: '--font-sacramento' });
+const pacifico = Pacifico({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400'], variable: '--font-pacifico' });
+const caveat = Caveat({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400', '500', '600', '700'], variable: '--font-caveat' });
+const parisienne = Parisienne({ subsets: ['latin'], display: 'swap', preload: false,
+  weight: ['400'], variable: '--font-parisienne' });
+
 // Each loader has to be its own module-scope const — next/font rejects a call
 // inside an object literal, so the list is assembled afterwards.
 const FONT_VARS = [
   display, poppins, roboto, lato, montserrat, dmSans, workSans, figtree,
   dmSerif, cormorant, baskerville, lora, spaceGrotesk,
+  dancingScript, greatVibes, sacramento, pacifico, caveat, parisienne,
 ].map((f) => f.variable).join(' ');
 
 export const metadata: Metadata = {

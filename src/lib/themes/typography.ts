@@ -64,7 +64,23 @@ const LABEL_TRACKING: Record<string, string> = {
   normal: '0.01em',
 };
 
+/**
+ * How large the shop's NAME is set when it stands in for a logo.
+ *
+ * Named sizes, because a wordmark is type in a row with controls beside it —
+ * a free number is how a shop ends up with a name taller than its own bar.
+ * A script face also runs visually smaller than a grotesk at the same size,
+ * which is the second reason these are drawn rather than typed.
+ */
+const WORDMARK_SIZE: Record<string, string> = {
+  small: '1.05rem',
+  medium: '1.35rem',
+  large: '1.75rem',
+  xlarge: '2.15rem',
+};
+
 const TABLES = {
+  'wordmark-size': WORDMARK_SIZE,
   'type-scale': TYPE_SCALE,
   'body-size': BODY_SIZE,
   'heading-weight': HEADING_WEIGHT,
@@ -87,6 +103,7 @@ export function typographyVars(config: StorefrontConfig | null): Record<string, 
   const labelCase = t['label_case'] && LABEL_CASE[t['label_case']] ? t['label_case'] : 'upper';
 
   return {
+    '--wordmark-size': pick('wordmark-size', 'wordmark_size', 'medium'),
     '--type-scale': pick('type-scale', 'type_scale', 'balanced'),
     '--body-size': pick('body-size', 'body_size', 'normal'),
     '--heading-weight': pick('heading-weight', 'heading_weight', 'semibold'),

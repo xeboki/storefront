@@ -16,9 +16,12 @@ interface Props {
  * on a shop's own header it reads as a missing image rather than as a brand.
  * A shop with no logo has a name, and a name set well IS a wordmark.
  *
- * It is set in the shop's own display face, the serif or grotesk the merchant
- * picked for their headings, so two shops using this never look the same. That
- * was the good half of the monogram and it survives here.
+ * Its face and its size are the shop's to choose. A name doing a logo's job
+ * has to carry the brand on its own, and the heading face a shop picked for
+ * reading paragraphs under is rarely the one for that — hence the script
+ * group, which exists for this and nothing else. Both fall through to the
+ * heading face at a middling size, which is what it was before either was a
+ * choice, so a shop that never opens the screen is unmoved.
  *
  * The name is NOT hidden on a phone. It used to be — it sat beside a tile that
  * carried the mark on small screens — and with the tile gone that would leave
@@ -29,7 +32,8 @@ interface Props {
  * name.
  */
 export function StoreLogo({ logoUrl, name, className = '', size = 'sm' }: Props) {
-  const word = size === 'md' ? 'text-2xl' : 'text-xl';
+  // `md` is the footer, where the mark stands alone and can afford a step up.
+  const word = size === 'md' ? 'text-wordmark scale-110 origin-left' : 'text-wordmark';
 
   return (
     <span className={`flex min-w-0 items-center gap-2.5 ${className}`}>
@@ -41,7 +45,7 @@ export function StoreLogo({ logoUrl, name, className = '', size = 'sm' }: Props)
         className="h-9 w-auto object-contain"
         fallback={
           <span
-            className={`truncate font-display font-semibold leading-none tracking-tight ${word}`}
+            className={`truncate font-wordmark font-semibold leading-none tracking-tight ${word}`}
           >
             {name}
           </span>

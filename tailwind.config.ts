@@ -76,6 +76,9 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-sans)', 'system-ui', 'sans-serif'],
         display: ['var(--font-display)', 'var(--font-sans)', 'system-ui', 'sans-serif'],
+        // The shop's name when it has no logo. Falls through to the heading
+        // face, which is what it used before this was a choice.
+        wordmark: ['var(--font-wordmark)', 'var(--font-display)', 'var(--font-sans)', 'serif'],
       },
       borderRadius: {
         brand: 'var(--radius)',
@@ -84,6 +87,9 @@ const config: Config = {
       },
       letterSpacing: {
         heading: 'var(--heading-tracking)',
+      },
+      fontSize: {
+        wordmark: 'var(--wordmark-size)',
       },
     },
   },

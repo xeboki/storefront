@@ -21,6 +21,10 @@
   --color-fg-subtle:   var(--l-fg-subtle, 148 163 184);
   --radius: 0.5rem;
   --heading-tracking: 0;
+  /* The shop's name, when it has no logo and the name is the mark. The
+     fallback is for routes that render outside a store, where no theme has
+     been written. */
+  --wordmark-size: 1.35rem;
   --font-sans: 'Inter';
   --font-display: 'Inter';
   color-scheme: light;
