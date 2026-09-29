@@ -1,0 +1,20 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .bar { gap: 1rem; }
+}
+
+.end {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
+@media (min-width: 768px) {
+  .end { gap: 0.25rem; }
+}

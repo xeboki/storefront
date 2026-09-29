@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Search, X } from 'lucide-react';
 import { clsx } from 'clsx';
 import { HeaderSearch } from './HeaderSearch';
+import { SearchOverlay } from '../header/SearchOverlay';
 import { useT } from '@/lib/i18n/client';
 
 interface Props {
@@ -23,8 +24,11 @@ interface Props {
   placement: string;
   /** fill | small | medium | large */
   width: string;
-  /** open | tap */
+  /** open | tap | overlay */
   behaviour: string;
+  /** The mark, which the overlay keeps so the open bar is still the shop's. */
+  brand?: React.ReactNode;
+  container?: string;
   /**
    * Whether the box may push itself around with elastic spacers.
    *
@@ -48,6 +52,7 @@ const WIDTHS: Record<string, string> = {
 
 export function HeaderSearchSlot({
   storeSlug, placement, width, behaviour, spacers = true, iconClassName,
+  brand = null, container = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
 }: Props) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -84,6 +89,19 @@ export function HeaderSearchSlot({
   const measure = fills ? 'flex-1' : WIDTHS[width] ?? WIDTHS.small;
   /** `fill` leaves nothing to space, and neither does an elastic neighbour. */
   const pad = spacers && !fills;
+
+  // Takes the header over rather than squeezing into it, so it needs none of
+  // the placement and width below — there is nothing to place it beside.
+  if (behaviour === 'overlay') {
+    return (
+      <SearchOverlay
+        storeSlug={storeSlug}
+        iconClassName={iconClassName}
+        brand={brand}
+        container={container}
+      />
+    );
+  }
 
   if (behaviour === 'tap') {
     return (

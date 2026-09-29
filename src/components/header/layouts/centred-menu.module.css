@@ -1,0 +1,50 @@
+/* Three columns, and the two sides are forced EQUAL.
+ *
+ * That is what centres the departments on the page. A mark and a row of
+ * icons are never the same width, so sizing the sides to their content and
+ * letting the middle take the rest puts the menu off-centre by half the
+ * difference — the version that looks almost right and cannot be explained.
+ *
+ * The middle is a fraction and not `auto` for a second reason: the inline
+ * menu measures the width it has been given to decide how many departments
+ * fit. A column sized to its content would make that width depend on the
+ * answer, and the count settles well under the room actually free. A
+ * fraction is the same width whatever is in it.
+ */
+.bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 1024px) {
+  .bar { gap: 1.5rem; }
+}
+
+.middle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.end {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.125rem;
+}
+
+@media (min-width: 768px) {
+  .end { gap: 0.25rem; }
+}
+
+/* Below the middle column's breakpoint the departments are in the phone
+   menu, so the bar is a mark and the icons — the side columns would leave a
+   third of the row empty between them. */
+@media (max-width: 1023px) {
+  .bar { grid-template-columns: auto 0 1fr; }
+  .middle { display: none; }
+}

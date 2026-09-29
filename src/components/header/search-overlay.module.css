@@ -1,0 +1,79 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The page, dimmed. Below the sheet in the stack but covering everything
+   else, so a click anywhere on the page closes the search. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgb(0 0 0 / 0.45);
+  cursor: default;
+}
+
+/* Deeper than the bar it replaces: the field has a label above it, and the
+   whole point is that this row is not trying to fit inside a header. */
+.sheet {
+  position: relative;
+  background: rgb(var(--color-surface));
+  border-bottom: 1px solid rgb(var(--color-border));
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.label {
+  font-size: 0.8125rem;
+  color: rgb(var(--color-fg-muted));
+}
+
+.close {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+  color: rgb(var(--color-fg-muted));
+}
+
+.close:hover {
+  background: rgb(var(--color-surface-alt));
+  color: rgb(var(--color-fg));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scrim { animation: fade 180ms ease-out; }
+  .sheet { animation: down 220ms cubic-bezier(0.32, 0.72, 0, 1); }
+}
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes down { from { transform: translateY(-100%); } to { transform: none; } }

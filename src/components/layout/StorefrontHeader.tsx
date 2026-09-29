@@ -3,20 +3,28 @@
 /**
  * The shop's header.
  *
- * Four things the merchant sets separately, resolved here and then drawn by
- * parts that each know about one of them:
+ * This file builds the PARTS and owns the chrome around them; a header STYLE
+ * (../header/layouts) decides only where each part goes.
  *
- *   · `menu`     — how the departments are presented (../header/registry)
- *   · `mobileMenu` — how they are presented on a phone (../header/MobileNav)
- *   · `scroll`   — what the bar does as the page moves under it
- *   · `surface`  — what it is made of
+ * The split is the point. A style is a placement, so a new one is a single
+ * file that arranges things which already exist, and it cannot ship a cart
+ * button that behaves unlike everybody else's or a search box with its own
+ * ideas. Colour and typeface never reach a style at all — they are in the
+ * theme tokens the parts carry, so changing header does not change the shop's
+ * colours and changing colours does not need the header touched.
  *
- * plus the search axes and the visibility switches, which predate them.
+ * What stays here:
  *
- * The departments are resolved once, here, and handed to whichever style is
- * drawing them. A style that filtered its own list would drift from the others
- * the first time a merchant hid one — which is the same reason the API serves
- * the list of style names rather than each app keeping a copy.
+ *   · the parts — brand, search, each utility, the menu
+ *   · `scroll`  — what the bar does as the page moves under it
+ *   · `surface` — what it is made of
+ *   · `mobileMenu` — the phone, which no desktop style has a say in
+ *   · the search axes and the visibility switches
+ *
+ * The departments are resolved once, here. A style that filtered its own list
+ * would drift from the others the first time a merchant hid one — the same
+ * reason the API serves the list of style names rather than each app keeping
+ * a copy of it.
  */
 import Link from 'next/link';
 import { storeName } from '@/lib/store-name';
@@ -31,13 +39,14 @@ import { HeaderSearchSlot } from './HeaderSearchSlot';
 import { MobileTabBar } from './MobileTabBar';
 import { StoreLogo } from './StoreLogo';
 import { menuStyle } from '../header/registry';
+import { headerStyle } from '../header/layouts/registry';
 import { MobileNav, asMobileMenu } from '../header/MobileNav';
 import {
-  asLinkCase, asLogoPosition, asScroll, asSurface, useOverBanner,
-  OVER_BANNER_SURFACES,
+  asLinkCase, asScroll, asSurface, useOverBanner, OVER_BANNER_SURFACES,
 } from '../header/chrome';
-import type { LogoPosition, Scroll } from '../header/chrome';
+import type { Scroll } from '../header/chrome';
 import type { MenuEntry, MenuLink } from '../header/types';
+import type { MenuSlice } from '../header/layout-types';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useScrollDirection } from '@/lib/use-scroll-direction';
 import { useCartStore } from '@/stores/cartStore';
@@ -62,25 +71,6 @@ const SCROLL_POSITION: Record<Scroll, string> = {
   'condense': 'sticky top-0',
   'hide':     'sticky top-0',
   'static':   'relative',
-};
-
-/**
- * Which row the menu is drawn in, once the mark has had its say.
- *
- * A style declares where it wants to be, but a centred or stacked mark takes
- * the bar for itself — there is no room beside a mark in the middle of the
- * row, and putting one there is what "centred" means the shop does not want.
- * `'style'` means the style's own choice stands.
- *
- * Every position named, including the two that share an answer: `stacked`
- * used to be drawn by not being one of the others, which is correct and
- * unreadable, and is the same shape as the `fixed` scroll value below.
- */
-const MENU_ROW: Record<LogoPosition, 'style' | 'below' | 'split'> = {
-  'left':    'style',
-  'stacked': 'below',
-  'centred': 'below',
-  'split':   'split',
 };
 
 interface Props {
@@ -125,7 +115,7 @@ export function StorefrontHeader({
   const scroll = asScroll(header?.scroll);
   const surface = asSurface(header?.surface);
   const linkCase = asLinkCase(header?.linkCase);
-  const { placement, elastic, Component: Menu } = menuStyle(header?.menu);
+  const wanted = menuStyle(header?.menu);
 
   const params = useSearchParams();
   const pathname = usePathname();
@@ -218,22 +208,34 @@ export function StorefrontHeader({
    * where half a menu should be. The back office says so beside the name, so
    * a merchant is not left to discover it.
    */
-  const asked = asLogoPosition(header?.logoPosition);
-  const logoAt = asked === 'split' && !elastic ? 'centred' : asked;
-  const markCentred = logoAt === 'centred' || logoAt === 'split';
+  const asked = headerStyle(header?.style);
+  // A style that cuts the departments in half needs a menu that puts them in
+  // the bar AND stops when it runs out of room — the inline one, and only
+  // that one. A mega or drawer menu is a single trigger with nothing to
+  // split, and a rail is a row under the bar: split in half around a mark
+  // above it, that is two scrolling strips with two sets of arrows, which is
+  // what it looked like. So it falls back to the nearest style that exists
+  // rather than to a header with a gap where half a menu should be. The back
+  // office says so beside the name.
+  const chosen = asked.menuRow === 'own' && !wanted.elastic ? headerStyle('centred') : asked;
+  const { Component: Layout, centred: markCentred } = chosen;
+
+  // A style with one row has nowhere to put a rail, which is a full-width
+  // row that brings its own page gutter — drawn inside a column a third of
+  // the page wide it is not a rail, it is a mess. Swap it for the in-bar
+  // list, which is the same departments in the space that exists.
+  const needsInBar = chosen.menuRow === 'bar' || chosen.menuRow === 'own';
+  const { placement, elastic, Component: Menu } =
+    needsInBar && wanted.placement === 'below' ? menuStyle('inline') : wanted;
 
   const menuHasNothingToShow = railStyle === 'off' || (entries.length === 0 && links.length === 0);
 
-  /**
-   * Which row the menu is drawn in, once the mark has had its say.
-   *
-   * A style declares where it wants to be, but a centred or stacked mark
-   * takes the bar for itself — there is no room beside a mark in the middle
-   * of the row, and putting one there is what "centred" means the shop does
-   * not want.
-   */
-  const row = MENU_ROW[logoAt];
-  const menuRow: 'bar' | 'below' | 'split' = row === 'style' ? placement : row;
+  /** Which row the departments end up in, once the style has had its say. */
+  const menuRow: 'bar' | 'below' | 'split' =
+    chosen.menuRow === 'own' ? 'split'
+    : chosen.menuRow === 'below' ? 'below'
+    : chosen.menuRow === 'bar' ? 'bar'
+    : placement;
 
   /**
    * "Fills the bar" needs a bar to fill.
@@ -264,22 +266,49 @@ export function StorefrontHeader({
   );
 
   /** One menu, or one half of a split one. */
-  const drawMenu = (slice: MenuEntry[], links_: MenuLink[], showAll = true) => (
-    <Menu
-      entries={slice}
-      allHref={catalogHref(null)}
-      allLabel={t('nav.allProducts')}
-      links={links_}
-      collapsed={condensed}
-      menuLabel={t('nav.menu')}
-      linkCase={linkCase}
-      onDark={onDark}
-      align={logoAt === 'centred' ? 'centre' : 'start'}
-      showAll={showAll}
-    />
+  /**
+   * The departments, or a slice of them.
+   *
+   * Every style draws the same menu through this — one place where the menu's
+   * props are decided, so a new style cannot pass `showAll` twice or forget
+   * the link case.
+   */
+  const drawMenu = useCallback(
+    ({ from = 0, to, showAll = true, align }: MenuSlice = {}) => (
+      <Menu
+        entries={entries.slice(from, to)}
+        allHref={catalogHref(null)}
+        allLabel={t('nav.allProducts')}
+        // The shop's own links go with the last slice, where the eye finishes.
+        links={to === undefined ? links : []}
+        collapsed={condensed}
+        menuLabel={t('nav.menu')}
+        linkCase={linkCase}
+        onDark={onDark}
+        align={align ?? (markCentred ? 'centre' : 'start')}
+        showAll={showAll}
+      />
+    ),
+    [Menu, entries, links, catalogHref, t, condensed, linkCase, onDark, markCentred],
   );
 
-  const menuNode = menuHasNothingToShow ? null : drawMenu(entries, links);
+  const menuNode = menuHasNothingToShow ? null : drawMenu();
+
+  /** The page gutter every row shares, so rows line up with the page. */
+  const container = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8';
+  const rule = onDark ? 'border-t border-white/15' : 'border-t border-line';
+
+  const brand = (
+    <Link
+      href={`/${storeSlug}`}
+      className={clsx(
+        'flex flex-shrink-0 items-center gap-2 text-lg font-bold',
+        onDark && 'text-white',
+      )}
+    >
+      <StoreLogo logoUrl={storefrontConfig?.logoUrl} name={storeName(storeConfig)} />
+    </Link>
+  );
 
   /* Where it sits, how wide it is and whether it is a field or an icon are
      three separate choices this shop has made. */
@@ -294,11 +323,106 @@ export function StorefrontHeader({
       behaviour={menuRow === 'split' ? 'tap' : header?.searchBehaviour ?? 'open'}
       spacers={!crowded}
       iconClassName={iconButton}
+      brand={brand}
+      container={container}
     />
   ) : null;
-  // The departments, cut down the middle. The shop's own links go with the
-  // second half, where the eye finishes.
-  const half = Math.ceil(entries.length / 2);
+
+  const utilities = {
+    currency: header?.showCurrency === true ? (
+      // The store's currency, stated. NOT a switcher: there is no exchange
+      // rate behind this shop, and a price relabelled into another currency
+      // would be a lie about what gets charged.
+      <span
+        key="currency"
+        className={clsx(
+          'hidden px-2 text-sm font-medium sm:inline',
+          onDark ? 'text-white/90' : 'text-fg-muted',
+        )}
+      >
+        {storeConfig.currencyCode}
+      </span>
+    ) : null,
+    location: header?.showLocation !== false ? (
+      <StorePicker
+        key="location"
+        stores={stores}
+        activeId={activeLocationId}
+        storeSlug={storeSlug}
+        className="hidden lg:flex"
+      />
+    ) : null,
+    language: header?.showLanguage !== false ? (
+      <LanguageSwitcher key="language" locales={locales} active={locale} className="hidden sm:block" />
+    ) : null,
+    account: header?.showAccount === false ? null : (
+      <Link
+        key="account"
+        href={customer ? `/${storeSlug}/account` : `/${storeSlug}/login`}
+        className={iconButton}
+        aria-label={customer ? t('nav.account') : t('nav.signIn')}
+      >
+        <User size={20} />
+      </Link>
+    ),
+    wishlist: header?.showWishlist !== false ? (
+      <Link
+        key="wishlist"
+        href={`/${storeSlug}/account/wishlist`}
+        className={clsx(iconButton, 'hidden sm:flex')}
+        aria-label={t('nav.wishlist')}
+      >
+        <Heart size={20} />
+      </Link>
+    ) : null,
+    // The cart is the one action worth an accent — it is where the shopper is
+    // heading. A shop that does not sell online — a showroom, a repair shop
+    // taking bookings only — has nowhere for a cart to go.
+    cart: header?.showCart !== false ? (
+      <Link
+        key="cart"
+        href={`/${storeSlug}/cart`}
+        aria-label={t('nav.cart')}
+        className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-solid text-primary-foreground transition-opacity hover:opacity-90"
+      >
+        <ShoppingCart size={18} />
+        {hydrated && itemCount > 0 && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-bold text-bg">
+            {itemCount > 9 ? '9+' : itemCount}
+          </span>
+        )}
+      </Link>
+    ) : null,
+  };
+
+  const utilityRow = (
+    <>
+      {utilities.currency}
+      {utilities.location}
+      {utilities.language}
+      {utilities.account}
+      {utilities.wishlist}
+      {utilities.cart}
+    </>
+  );
+
+  /**
+   * The menu ready to sit under the bar, whichever kind it is.
+   *
+   * A rail brings its own gutter and rule. A trigger does not — it was
+   * getting them from the bar — so a style that moves one under the bar has
+   * to be handed it already wrapped, or it comes out flush against the
+   * window edge while the mark sits at the gutter.
+   */
+  const menuBelow = menuHasNothingToShow || menuRow !== 'below' ? null
+    : placement === 'below' ? menuNode
+    : (
+      <div className={clsx('hidden lg:block', header?.showBorder !== false && rule)}>
+        <div className={clsx(container, 'flex py-1.5', markCentred ? 'justify-center' : 'justify-start')}>
+          {menuNode}
+        </div>
+      </div>
+    );
 
   return (
     <>
@@ -336,150 +460,25 @@ export function StorefrontHeader({
             surface === 'floating' && header?.showBorder !== false && 'border border-line',
           )}
         >
-          {/* Row 1 — brand · menu · search · utilities */}
-          <div
-            className={clsx(
-              'mx-auto max-w-7xl px-4 transition-[height] duration-300 sm:px-6 lg:px-8',
-              condensed ? 'h-14' : 'h-16',
-              // A centred mark needs equal side columns, or it is centred on
-              // the space left over rather than on the page — which is what
-              // `justify-between` gives and why it always looks slightly off.
-              markCentred
-                ? 'grid grid-cols-[1fr_auto_1fr] items-center gap-3 lg:gap-4'
-                : 'flex items-center gap-3 lg:gap-4',
-            )}
-          >
-            {markCentred && (
-              <div className="flex min-w-0 items-center gap-3">
-                {menuRow === 'split' ? drawMenu(entries.slice(0, half), []) : searchSlot}
-              </div>
-            )}
-
-            <Link
-              href={`/${storeSlug}`}
-              className={clsx(
-                'flex flex-shrink-0 items-center gap-2 text-lg font-bold',
-                onDark && 'text-white',
-              )}
-            >
-              <StoreLogo logoUrl={storefrontConfig?.logoUrl} name={storeName(storeConfig)} />
-            </Link>
-
-            {!markCentred && menuRow === 'bar' && menuNode}
-            {!markCentred && searchSlot}
-
-            <div
-              className={clsx(
-                'flex items-center gap-0.5 md:gap-1',
-                markCentred ? 'min-w-0 justify-end' : 'ml-auto',
-              )}
-            >
-              {/* The way out sits on the half the eye reaches first. */}
-              {menuRow === 'split' && drawMenu(entries.slice(half), links, false)}
-              {markCentred && menuRow === 'split' && searchSlot}
-
-              {header?.showCurrency === true && (
-                // The store's currency, stated. NOT a switcher: there is no
-                // exchange rate behind this shop, and a price relabelled into
-                // another currency would be a lie about what gets charged.
-                <span
-                  className={clsx(
-                    'hidden px-2 text-sm font-medium sm:inline',
-                    onDark ? 'text-white/90' : 'text-fg-muted',
-                  )}
-                >
-                  {storeConfig.currencyCode}
-                </span>
-              )}
-
-              {header?.showLocation !== false && (
-                <StorePicker
-                  stores={stores}
-                  activeId={activeLocationId}
-                  storeSlug={storeSlug}
-                  className="hidden lg:flex"
-                />
-              )}
-
-              {header?.showLanguage !== false && (
-                <LanguageSwitcher locales={locales} active={locale} className="hidden sm:block" />
-              )}
-
-              {header?.showAccount === false ? null : (
-                <Link
-                  href={customer ? `/${storeSlug}/account` : `/${storeSlug}/login`}
-                  className={iconButton}
-                  aria-label={customer ? t('nav.account') : t('nav.signIn')}
-                >
-                  <User size={20} />
-                </Link>
-              )}
-
-              {header?.showWishlist !== false && (
-                <Link
-                  href={`/${storeSlug}/account/wishlist`}
-                  className={clsx(iconButton, 'hidden sm:flex')}
-                  aria-label={t('nav.wishlist')}
-                >
-                  <Heart size={20} />
-                </Link>
-              )}
-
-              {/* The cart is the one action worth an accent — it is where the
-                  shopper is heading. A shop that does not sell online — a
-                  showroom, a repair shop taking bookings only — has nowhere
-                  for a cart to go. */}
-              {header?.showCart !== false && (
-                <Link
-                  href={`/${storeSlug}/cart`}
-                  aria-label={t('nav.cart')}
-                  className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-solid text-primary-foreground transition-opacity hover:opacity-90"
-                >
-                  <ShoppingCart size={18} />
-                  {hydrated && itemCount > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-bold text-bg">
-                      {itemCount > 9 ? '9+' : itemCount}
-                    </span>
-                  )}
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Row 1b — search on a phone, where it cannot share the top row.
-              A phone has no room for an icon that opens sideways, so it gets
-              the field whatever the shop chose for a wide screen. */}
-          {searchOn && (
-            <div className="border-t border-line px-4 py-2 md:hidden">
-              <HeaderSearch storeSlug={storeSlug} />
-            </div>
-          )}
-
-          {/* A style that asked for the bar and was moved under it by the
-              mark's position brings no page gutter of its own — the bar was
-              providing it. Without this the trigger sits flush against the
-              window edge while the mark sits at the gutter, which is what
-              `stacked` looked like. The rail already has its own container,
-              so it is not given a second one. */}
-          {menuRow === 'below' && placement === 'bar' && menuNode && (
-            <div
-              className={clsx(
-                'hidden lg:block',
-                header?.showBorder !== false &&
-                  (onDark ? 'border-t border-white/15' : 'border-t border-line'),
-              )}
-            >
-              <div
-                className={clsx(
-                  'mx-auto flex max-w-7xl px-4 py-1.5 sm:px-6 lg:px-8',
-                  logoAt === 'centred' ? 'justify-center' : 'justify-start',
-                )}
-              >
-                {menuNode}
-              </div>
-            </div>
-          )}
-          {menuRow === 'below' && placement === 'below' && menuNode}
+          {/* Everything above is the chrome; where the parts go is the
+              style's business and nothing else's. */}
+          <Layout
+            brand={brand}
+            search={searchSlot}
+            menu={drawMenu}
+            menuPlacement={placement}
+            menuInBar={menuRow === 'bar' ? menuNode : null}
+            menuBelow={menuBelow}
+            menuEmpty={menuHasNothingToShow}
+            departments={entries.length}
+            utilities={utilities}
+            utilityRow={utilityRow}
+            onDark={onDark}
+            condensed={condensed}
+            container={container}
+            barHeight={clsx('transition-[height] duration-300', condensed ? 'h-14' : 'h-16')}
+            rule={rule}
+          />
         </div>
       </header>
 
