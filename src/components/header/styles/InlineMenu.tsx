@@ -25,7 +25,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useDismiss } from '../chrome';
+import { useCloseOnScroll, useDismiss } from '../chrome';
 import { AnchoredPanel } from '../AnchoredPanel';
 import { NodeLink } from '../NodeLink';
 import type { MenuNode } from '@/lib/navigation';
@@ -60,6 +60,9 @@ export default function InlineMenu({
     setAnchor(null);
   }, []);
   const dismissRef = useDismiss(open !== null, close);
+  // The departments row folds away as the page moves; a panel hanging off a
+  // trigger in it would be left pointing at nothing.
+  useCloseOnScroll(open !== null, close);
 
   const show = useCallback((id: string, el: HTMLElement) => {
     setOpen(id);

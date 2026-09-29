@@ -87,6 +87,40 @@ export function useDismiss(open: boolean, close: () => void) {
 }
 
 /**
+ * Shuts an open panel once the page moves under it.
+ *
+ * Not a nicety: the header is allowed to condense or hide as a shopper
+ * scrolls, and both take the control the panel is hanging from with them. A
+ * panel that stayed would be pointing at a trigger that had folded away — or
+ * worse, floating over the page attached to nothing.
+ *
+ * [SLACK] px of tolerance so a trackpad twitch or the browser's own scroll
+ * correction — the header changing height IS a scroll — does not count as
+ * the shopper moving on.
+ */
+const SLACK = 24;
+
+export function useCloseOnScroll(open: boolean, close: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const from = window.scrollY;
+    let frame = 0;
+    const read = () => {
+      frame = 0;
+      if (Math.abs(window.scrollY - from) > SLACK) close();
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(read);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [open, close]);
+}
+
+/**
  * Whether a panel may be transparent right now.
  *
  * `transparent` only means anything over a picture. A shop that chose it and

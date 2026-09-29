@@ -20,7 +20,7 @@ import { useCallback, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import { clsx } from 'clsx';
-import { useDismiss } from '../chrome';
+import { useCloseOnScroll, useDismiss } from '../chrome';
 import { NodeLink } from '../NodeLink';
 import type { MenuNode } from '@/lib/navigation';
 import type { MenuStyleProps } from '../types';
@@ -44,6 +44,7 @@ export default function MegaMenu({
   const [open, setOpen] = useState<string | null>(null);
   const close = useCallback(() => setOpen(null), []);
   const ref = useDismiss(open !== null, close);
+  useCloseOnScroll(open !== null, close);
 
   if (nodes.length === 0) return null;
 

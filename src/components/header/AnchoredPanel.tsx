@@ -14,9 +14,11 @@
  * computes the visible axis to `auto` the moment the other is hidden. So the
  * panel goes to the body and carries its own position.
  *
- * It follows its anchor rather than closing on scroll: this header is sticky,
- * so a shopper scrolling with a menu open is reading the page behind it, not
- * finishing with the menu.
+ * It tracks its anchor while the page is still — the header can change height
+ * under it for reasons that are not scrolling, a font arriving or the bar
+ * condensing — but the panel is closed by `useCloseOnScroll` the moment the
+ * shopper actually moves the page. Following a trigger that is folding away
+ * is not the same as staying useful.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Portal } from './Portal';
