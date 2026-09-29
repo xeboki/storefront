@@ -1,0 +1,33 @@
+/* Deeper than a bar: it is carrying a lockup and a row of named controls.
+   `height: auto` overrides the shared bar height, which is a single-row
+   measurement and would crop both. */
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 5.5rem;
+  height: auto !important;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.side {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+/* The search sits in the middle column, and because the two side columns are
+   equal fractions that column is centred on the page. */
+.middle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.end {
+  justify-content: flex-end;
+  gap: 1.25rem;
+}

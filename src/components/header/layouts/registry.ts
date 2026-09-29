@@ -87,6 +87,13 @@ export const HEADER_STYLES: Record<string, Style> = {
     centreMenu: false, menuRow: 'below', spare: false,
     Component: dynamic(() => import('./LockupHeader')),
   },
+  // The same two rows with the weight moved: the mark anchors the left edge
+  // and the middle goes to search. `centreMenu` is true here because the
+  // departments centre under it — the only style so far that uses it.
+  centred_search: {
+    centreMenu: true, menuRow: 'below', spare: false,
+    Component: dynamic(() => import('./CentredSearchHeader')),
+  },
 };
 
 /**
