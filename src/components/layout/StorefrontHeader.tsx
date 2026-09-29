@@ -47,7 +47,7 @@ import {
   asLinkCase, asScroll, asSurface, useOverBanner, OVER_BANNER_SURFACES,
 } from '../header/chrome';
 import type { Scroll } from '../header/chrome';
-import { resolveMenu } from '@/lib/navigation';
+import { resolveMenu, targetHref } from '@/lib/navigation';
 import type { MenuNode } from '@/lib/navigation';
 import type { MenuOptions } from '../header/layout-types';
 import { useHydrated } from '@/lib/use-hydrated';
@@ -378,6 +378,46 @@ export function StorefrontHeader({
     </span>
   );
 
+  /**
+   * The shop's one important button.
+   *
+   * A service business has a click worth more than every other click on the
+   * page — book, enquire, get a quote — and it had nowhere to be but a menu
+   * entry beside the departments. It sits at the front of the utilities, so
+   * every layout gets it without knowing about it, and it reads as an action
+   * rather than as another icon.
+   *
+   * The API blanks the label when the target names nothing, so a button that
+   * would go nowhere never reaches here.
+   */
+  const actionLabel = (header?.actionLabel ?? '').trim();
+  const action = (() => {
+    if (!actionLabel) return null;
+    const { href, external } = targetHref(
+      header?.actionTarget ?? 'catalog', header?.actionValue ?? '',
+      { storeSlug, catalogHref },
+    );
+    if (!href) return null;
+    const className = clsx(
+      'hidden whitespace-nowrap rounded-brand px-3.5 py-2 text-sm font-semibold',
+      'transition-opacity hover:opacity-90 sm:inline-flex',
+      // Outlined on a dark or photographic bar, where a filled button in the
+      // brand colour competes with the cart for the same job.
+      onDark
+        ? 'border border-white/40 text-white'
+        : 'bg-primary-solid text-primary-foreground',
+    );
+    return external ? (
+      <a key="action" href={href} className={className} target="_blank" rel="noreferrer">
+        {actionLabel}
+      </a>
+    ) : (
+      <Link key="action" href={href} className={className}>
+        {actionLabel}
+      </Link>
+    );
+  })();
+
   const utilities = {
     currency: header?.showCurrency === true ? (
       // The store's currency, stated. NOT a switcher: there is no exchange
@@ -479,6 +519,7 @@ export function StorefrontHeader({
 
   const utilityRowLabelled = (
     <>
+      {action}
       {labelled(utilities.account, customer ? t('nav.account') : t('nav.signIn'))}
       {labelled(utilities.wishlist, t('nav.wishlist'))}
       {labelled(utilities.cart, t('nav.cart'))}
@@ -487,6 +528,7 @@ export function StorefrontHeader({
 
   const utilityRow = (
     <>
+      {action}
       {!chosen.spare && !strip && utilities.currency}
       {!chosen.spare && !strip && utilities.location}
       {!chosen.spare && !strip && utilities.language}

@@ -42,14 +42,24 @@ interface Context {
   labels: { allProducts: string; book: string; repairs: string; account: string };
 }
 
-/** Where each kind of entry goes. `null` means it is a label and nothing more. */
-function addressOf(item: MenuItem, ctx: Context): { href: string | null; external: boolean } {
+/**
+ * Where a target goes.
+ *
+ * Exported because the header's one button asks the same question a menu
+ * entry does, and answering it twice is how the two drift apart — a target
+ * added here would work in the menu and quietly do nothing on the button.
+ */
+export function targetHref(
+  target: string,
+  value: string,
+  ctx: Pick<Context, 'storeSlug' | 'catalogHref'>,
+): { href: string | null; external: boolean } {
   const shop = `/${ctx.storeSlug}`;
-  switch (item.target) {
+  switch (target) {
     case 'catalog':  return { href: ctx.catalogHref(null), external: false };
-    case 'category': return { href: ctx.catalogHref(item.value), external: false };
-    case 'product':  return { href: `${shop}/product/${item.value}`, external: false };
-    case 'page':     return { href: `${shop}/page/${item.value}`, external: false };
+    case 'category': return { href: ctx.catalogHref(value), external: false };
+    case 'product':  return { href: `${shop}/product/${value}`, external: false };
+    case 'page':     return { href: `${shop}/page/${value}`, external: false };
     case 'blog':     return { href: `${shop}/blog`, external: false };
     case 'book':     return { href: `${shop}/book`, external: false };
     case 'repairs':  return { href: `${shop}/repairs`, external: false };
@@ -57,9 +67,14 @@ function addressOf(item: MenuItem, ctx: Context): { href: string | null; externa
     case 'url':
       // A shop's own address written out in full is still its own address;
       // sending it through <a> would drop the router and reload the page.
-      return { href: item.value, external: /^https?:\/\//i.test(item.value) };
+      return { href: value, external: /^https?:\/\//i.test(value) };
     default:         return { href: null, external: false };
   }
+}
+
+/** Where each kind of entry goes. `null` means it is a label and nothing more. */
+function addressOf(item: MenuItem, ctx: Context) {
+  return targetHref(item.target, item.value, ctx);
 }
 
 function toNode(item: MenuItem, ctx: Context, depth: number): MenuNode[] {
