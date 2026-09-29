@@ -337,6 +337,31 @@ export function StorefrontHeader({
 
   const menuNode = menuHasNothingToShow ? null : drawMenu();
 
+  /**
+   * The mark with the shop's tagline under it.
+   *
+   * Identical to the mark when there is no tagline, so a layout can reach for
+   * this without checking and never gets a gap where a line should be.
+   */
+  const tagline = (storefrontConfig?.wordmarkTagline ?? '').trim();
+  const brandLockup = !tagline ? brand : (
+    <span className="flex min-w-0 flex-col items-center gap-1">
+      {brand}
+      {/* Rules either side, which is what makes a line of small caps read as
+          part of the mark rather than as a sentence under it. */}
+      <span
+        className={clsx(
+          'flex w-full items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em]',
+          onDark ? 'text-white/70' : 'text-fg-subtle',
+        )}
+      >
+        <span className={clsx('h-px flex-1', onDark ? 'bg-white/25' : 'bg-line')} />
+        <span className="whitespace-nowrap">{tagline}</span>
+        <span className={clsx('h-px flex-1', onDark ? 'bg-white/25' : 'bg-line')} />
+      </span>
+    </span>
+  );
+
   const utilities = {
     currency: header?.showCurrency === true ? (
       // The store's currency, stated. NOT a switcher: there is no exchange
@@ -411,6 +436,30 @@ export function StorefrontHeader({
    * short version: a store picker with a town name in it is what stops
    * anything being centred, and it is not what a shopper opens a menu for.
    */
+  /**
+   * The same controls, named.
+   *
+   * Built from the same parts rather than a second set: a caption under an
+   * icon must not be a second chance to get the icon wrong.
+   */
+  const labelled = (node: React.ReactNode, caption: string) =>
+    node == null ? null : (
+      <span className="flex flex-col items-center gap-1">
+        {node}
+        <span className={clsx('text-[0.6875rem]', onDark ? 'text-white/80' : 'text-fg-muted')}>
+          {caption}
+        </span>
+      </span>
+    );
+
+  const utilityRowLabelled = (
+    <>
+      {labelled(utilities.account, customer ? t('nav.account') : t('nav.signIn'))}
+      {labelled(utilities.wishlist, t('nav.wishlist'))}
+      {labelled(utilities.cart, t('nav.cart'))}
+    </>
+  );
+
   const utilityRow = (
     <>
       {!chosen.spare && utilities.currency}
@@ -506,6 +555,7 @@ export function StorefrontHeader({
               style's business and nothing else's. */}
           <Layout
             brand={brand}
+            brandLockup={brandLockup}
             search={searchSlot}
             menu={drawMenu}
             menuPlacement={placement}
@@ -514,6 +564,7 @@ export function StorefrontHeader({
             menuEmpty={menuHasNothingToShow}
             utilities={utilities}
             utilityRow={utilityRow}
+            utilityRowLabelled={utilityRowLabelled}
             onDark={onDark}
             condensed={condensed}
             container={container}

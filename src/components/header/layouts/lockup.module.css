@@ -1,0 +1,24 @@
+/* Deeper than a bar, because it is carrying a lockup and a row of named
+   controls. `barHeight` sets a minimum rather than a height here — the row
+   grows to whatever the tagline and the captions need. */
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 5.5rem;
+  height: auto !important;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.side {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.end {
+  justify-content: flex-end;
+  gap: 1.25rem;
+}

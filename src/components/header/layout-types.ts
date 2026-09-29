@@ -28,6 +28,14 @@ export interface MenuOptions {
 export interface HeaderParts {
   /** The shop's mark, linked home. Its logo, or its name as a wordmark. */
   brand: ReactNode;
+  /**
+   * The mark with the shop's tagline under it, as one lockup.
+   *
+   * Only for a layout with a row deep enough to carry it. Identical to
+   * `brand` when the shop has not set a tagline, so a layout can use this
+   * without checking — it is never a gap.
+   */
+  brandLockup: ReactNode;
   /** The search box or its icon, as this shop has configured it. Null if off. */
   search: ReactNode | null;
   /** The departments, drawn by whichever menu style the shop chose. */
@@ -62,6 +70,14 @@ export interface HeaderParts {
   };
   /** All of them in the conventional order — the common case. */
   utilityRow: ReactNode;
+  /**
+   * The same controls with their names under them.
+   *
+   * For a layout with the height to spend on it. An icon a shopper has to
+   * recognise is a small tax on every visit, and a two-row header has the
+   * room to stop charging it.
+   */
+  utilityRowLabelled: ReactNode;
   /** White type: the bar is dark, or it is sitting on a picture. */
   onDark: boolean;
   /** The bar has been asked to tighten, because the page is moving. */

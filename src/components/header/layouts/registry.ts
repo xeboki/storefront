@@ -80,6 +80,13 @@ export const HEADER_STYLES: Record<string, Style> = {
     centreMenu: false, menuRow: 'bar', spare: false,
     Component: dynamic(() => import('./CentredMarkHeader')),
   },
+  // Two rows: the lockup centred above, the departments below. The deepest
+  // header there is, and the only one with the height to carry a tagline and
+  // to name its icons rather than expecting them to be recognised.
+  lockup: {
+    centreMenu: false, menuRow: 'below', spare: false,
+    Component: dynamic(() => import('./LockupHeader')),
+  },
 };
 
 /**
