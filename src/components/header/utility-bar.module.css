@@ -1,0 +1,37 @@
+/* Its own ground, a shade off the page, so the bar below reads as the
+   header and this reads as something above it. */
+.band {
+  background: rgb(var(--color-surface-alt) / 0.7);
+  border-bottom: 1px solid rgb(var(--color-border));
+  font-size: 0.75rem;
+}
+
+.inner {
+  display: flex;
+  min-height: 2.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.message {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgb(var(--color-fg-muted));
+}
+
+.controls {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Nothing here is load-bearing, so on a phone it is a line of screen spent
+   on what the shop is rather than on what the shopper came for. */
+@media (max-width: 767px) {
+  .band { display: none; }
+}

@@ -42,6 +42,7 @@ import { menuStyle } from '../header/registry';
 import { headerStyle } from '../header/layouts/registry';
 import { MobileNav, asMobileMenu } from '../header/MobileNav';
 import { MenuIndex } from '../header/MenuIndex';
+import { UtilityBar } from '../header/UtilityBar';
 import {
   asLinkCase, asScroll, asSurface, useOverBanner, OVER_BANNER_SURFACES,
 } from '../header/chrome';
@@ -445,6 +446,15 @@ export function StorefrontHeader({
   };
 
   /**
+   * Whether the three shop-describing controls live above the bar.
+   *
+   * With a strip they do, and the bar keeps only what a shopper reaches for
+   * — which is what lets a `spare` layout offer them at all, rather than
+   * dropping them to stay centred.
+   */
+  const strip = header?.utilityBar === 'on';
+
+  /**
    * The three a shopper reaches for, and the three that describe the shop.
    *
    * A `spare` layout keeps only the first three — see the registry. The
@@ -477,9 +487,9 @@ export function StorefrontHeader({
 
   const utilityRow = (
     <>
-      {!chosen.spare && utilities.currency}
-      {!chosen.spare && utilities.location}
-      {!chosen.spare && utilities.language}
+      {!chosen.spare && !strip && utilities.currency}
+      {!chosen.spare && !strip && utilities.location}
+      {!chosen.spare && !strip && utilities.language}
       {utilities.account}
       {utilities.wishlist}
       {utilities.cart}
@@ -534,6 +544,19 @@ export function StorefrontHeader({
 
   return (
     <>
+      {strip && (
+        <UtilityBar
+          message={(header?.utilityMessage ?? '').trim()}
+          controls={
+            <>
+              {utilities.currency}
+              {utilities.location}
+              {utilities.language}
+            </>
+          }
+          container={container}
+        />
+      )}
       <header
         // `relative` on every variant: the mega panel is positioned against
         // this element so it can span the full width of the header rather
