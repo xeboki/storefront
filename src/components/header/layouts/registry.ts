@@ -35,13 +35,12 @@ interface Style {
    *             else to put them, so a menu that wanted a row of its own is
    *             swapped for the in-bar one rather than drawn full width
    *             inside a column a third of the page wide.
-   *   'own'   — the style places the departments itself. Needs a menu that
-   *             puts them in the bar AND can stop when it runs out of room;
-   *             anything else falls back to the centred style, because a
-   *             single trigger stranded beside a centred mark is worse than
-   *             the nearest arrangement that exists.
+   *
+   * `below` and `bar` are both in the vocabulary because a style that has a
+   * second row and one that does not are the two shapes every header takes;
+   * only `bar` is in use today.
    */
-  menuRow: 'menu' | 'below' | 'bar' | 'own';
+  menuRow: 'menu' | 'below' | 'bar';
   /**
    * Whether the bar carries only the three controls a shopper reaches for.
    *
@@ -57,12 +56,12 @@ interface Style {
 }
 
 export const HEADER_STYLES: Record<string, Style> = {
-  classic: { centred: false, menuRow: 'menu',  spare: false, Component: dynamic(() => import('./ClassicHeader')) },
-  centred: { centred: true,  menuRow: 'below', spare: false, Component: dynamic(() => import('./CentredHeader')) },
-  stacked: { centred: false, menuRow: 'below', spare: false, Component: dynamic(() => import('./StackedHeader')) },
-  split:   { centred: true,  menuRow: 'own',   spare: true,  Component: dynamic(() => import('./SplitHeader')) },
+  // What the storefront drew before styles existed, and what every shop that
+  // has never chosen one still gets. Not a design anybody picked — it is the
+  // floor, and it stays whatever else is added above it.
+  classic: { centred: false, menuRow: 'menu', spare: false, Component: dynamic(() => import('./ClassicHeader')) },
   // The departments are centred here, but the MARK is not — `centred` is
-  // about the mark, and it is what tells the menu to centre its own row when
+  // about the mark, and it is what tells a menu to centre its own row when
   // it has one. This style has no second row, so it says false and centres
   // the menu itself.
   centred_menu: { centred: false, menuRow: 'bar', spare: true, Component: dynamic(() => import('./CentredMenuHeader')) },

@@ -13,11 +13,14 @@
  */
 import type { ReactNode } from 'react';
 
-/** A slice of the departments, for a style that splits them around a mark. */
-export interface MenuSlice {
-  from?: number;
-  to?: number;
-  /** One escape hatch per header, so the second half of a split asks for none. */
+/** What a style may vary about how its menu is drawn. */
+export interface MenuOptions {
+  /**
+   * Whether the way-out to the catalogue is drawn.
+   *
+   * Only ever added to the GENERATED menu, where it is the single route to
+   * everything. A menu the merchant built gets exactly what they put in it.
+   */
   showAll?: boolean;
   align?: 'start' | 'centre';
 }
@@ -27,12 +30,8 @@ export interface HeaderParts {
   brand: ReactNode;
   /** The search box or its icon, as this shop has configured it. Null if off. */
   search: ReactNode | null;
-  /**
-   * The departments, drawn by whichever menu style the shop chose.
-   * Call with a slice to draw part of them — for a style that cuts the list
-   * in half around a centred mark.
-   */
-  menu: (slice?: MenuSlice) => ReactNode;
+  /** The departments, drawn by whichever menu style the shop chose. */
+  menu: (options?: MenuOptions) => ReactNode;
   /**
    * Where the chosen menu wants to be: a rail is a row under the bar, an
    * inline list and the two triggers are elements inside it.
@@ -52,8 +51,6 @@ export interface HeaderParts {
   menuBelow: ReactNode | null;
   /** True when there is nothing for a menu to draw — no menu row should exist. */
   menuEmpty: boolean;
-  /** How many departments there are, for a style that cuts them in half. */
-  departments: number;
   /** Each utility on its own, for a style that separates them. */
   utilities: {
     currency: ReactNode | null;

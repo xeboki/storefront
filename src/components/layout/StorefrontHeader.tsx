@@ -47,7 +47,7 @@ import {
 import type { Scroll } from '../header/chrome';
 import { resolveMenu } from '@/lib/navigation';
 import type { MenuNode } from '@/lib/navigation';
-import type { MenuSlice } from '../header/layout-types';
+import type { MenuOptions } from '../header/layout-types';
 import { useHydrated } from '@/lib/use-hydrated';
 import { useScrollDirection } from '@/lib/use-scroll-direction';
 import { useCartStore } from '@/stores/cartStore';
@@ -226,32 +226,22 @@ export function StorefrontHeader({
    * where half a menu should be. The back office says so beside the name, so
    * a merchant is not left to discover it.
    */
-  const asked = headerStyle(header?.style);
-  // A style that cuts the departments in half needs a menu that puts them in
-  // the bar AND stops when it runs out of room — the inline one, and only
-  // that one. A mega or drawer menu is a single trigger with nothing to
-  // split, and a rail is a row under the bar: split in half around a mark
-  // above it, that is two scrolling strips with two sets of arrows, which is
-  // what it looked like. So it falls back to the nearest style that exists
-  // rather than to a header with a gap where half a menu should be. The back
-  // office says so beside the name.
-  const chosen = asked.menuRow === 'own' && !wanted.elastic ? headerStyle('centred') : asked;
+  const chosen = headerStyle(header?.style);
   const { Component: Layout, centred: markCentred } = chosen;
 
   // A style with one row has nowhere to put a rail, which is a full-width
   // row that brings its own page gutter — drawn inside a column a third of
   // the page wide it is not a rail, it is a mess. Swap it for the in-bar
   // list, which is the same departments in the space that exists.
-  const needsInBar = chosen.menuRow === 'bar' || chosen.menuRow === 'own';
+  const needsInBar = chosen.menuRow === 'bar';
   const { placement, elastic, Component: Menu } =
     needsInBar && wanted.placement === 'below' ? menuStyle('inline') : wanted;
 
   const menuHasNothingToShow = railStyle === 'off' || nodes.length === 0;
 
   /** Which row the departments end up in, once the style has had its say. */
-  const menuRow: 'bar' | 'below' | 'split' =
-    chosen.menuRow === 'own' ? 'split'
-    : chosen.menuRow === 'below' ? 'below'
+  const menuRow: 'bar' | 'below' =
+    chosen.menuRow === 'below' ? 'below'
     : chosen.menuRow === 'bar' ? 'bar'
     : placement;
 
@@ -285,16 +275,16 @@ export function StorefrontHeader({
 
   /** One menu, or one half of a split one. */
   /**
-   * The departments, or a slice of them.
+   * The departments.
    *
    * Every style draws the same menu through this — one place where the menu's
-   * props are decided, so a new style cannot pass `showAll` twice or forget
-   * the link case.
+   * props are decided, so a new style cannot forget the link case or pass a
+   * way-out the merchant never asked for.
    */
   const drawMenu = useCallback(
-    ({ from = 0, to, showAll = true, align }: MenuSlice = {}) => (
+    ({ showAll = true, align }: MenuOptions = {}) => (
       <Menu
-        nodes={nodes.slice(from, to)}
+        nodes={nodes}
         allHref={catalogHref(null)}
         allLabel={t('nav.allProducts')}
         collapsed={condensed}
@@ -420,10 +410,7 @@ export function StorefrontHeader({
       storeSlug={storeSlug}
       placement={header?.searchPlacement ?? 'centre'}
       width={searchWidth}
-      // A split bar is departments, mark, departments, icons. There is no
-      // room left for a field, so the search is its icon — the same demotion
-      // `crowded` makes to the width, one step further along.
-      behaviour={menuRow === 'split' ? 'tap' : header?.searchBehaviour ?? 'open'}
+      behaviour={header?.searchBehaviour ?? 'open'}
       spacers={!crowded}
       iconClassName={iconButton}
       brand={brand}
@@ -506,7 +493,6 @@ export function StorefrontHeader({
             menuInBar={menuRow === 'bar' ? menuNode : null}
             menuBelow={menuBelow}
             menuEmpty={menuHasNothingToShow}
-            departments={nodes.length}
             utilities={utilities}
             utilityRow={utilityRow}
             onDark={onDark}
