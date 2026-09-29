@@ -104,13 +104,10 @@
   transform: rotate(180deg);
 }
 
-/* Hangs off the trigger rather than the header, so it stays under the word
-   that opened it however far along the bar that word has ended up. */
+/* Positioned by AnchoredPanel, which puts it in the body — the row of
+   departments clips, and a panel inside it is present, the right size, and
+   painted nowhere. */
 .panel {
-  position: absolute;
-  top: calc(100% + 0.5rem);
-  left: 0;
-  z-index: 50;
   min-width: 13rem;
   max-height: 70vh;
   overflow-y: auto;

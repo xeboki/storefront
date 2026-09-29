@@ -26,6 +26,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useDismiss } from '../chrome';
+import { AnchoredPanel } from '../AnchoredPanel';
 import { NodeLink } from '../NodeLink';
 import type { MenuNode } from '@/lib/navigation';
 import type { MenuStyleProps } from '../types';
@@ -46,8 +47,24 @@ export default function InlineMenu({
   nodes, allHref, allLabel, menuLabel, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   const [open, setOpen] = useState<string | null>(null);
-  const close = useCallback(() => setOpen(null), []);
+  /**
+   * The control the open panel hangs from.
+   *
+   * Kept rather than positioning against the trigger in place: the row of
+   * departments clips, so a panel inside it is drawn nowhere — see
+   * AnchoredPanel.
+   */
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const close = useCallback(() => {
+    setOpen(null);
+    setAnchor(null);
+  }, []);
   const dismissRef = useDismiss(open !== null, close);
+
+  const show = useCallback((id: string, el: HTMLElement) => {
+    setOpen(id);
+    setAnchor(el);
+  }, []);
 
   const navRef = useRef<HTMLElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
@@ -119,9 +136,9 @@ export default function InlineMenu({
         <button
           type="button"
           aria-expanded={open === node.id}
-          onClick={() => setOpen(node.id)}
-          onMouseEnter={() => setOpen(node.id)}
-          onFocus={() => setOpen(node.id)}
+          onClick={(e) => show(node.id, e.currentTarget)}
+          onMouseEnter={(e) => show(node.id, e.currentTarget)}
+          onFocus={(e) => show(node.id, e.currentTarget)}
           className={clsx(styles.item, styles.trigger)}
         >
           {node.label}
@@ -131,20 +148,22 @@ export default function InlineMenu({
           />
         </button>
         {open === node.id && (
-          <div className={styles.panel} onMouseLeave={close}>
-            {node.children.flatMap((child) =>
-              // Two levels flattened into one list: a submenu inside a
-              // dropdown is a panel, and a panel is the mega menu's job.
-              child.children.length > 0
-                ? [
-                    <p key={child.id} className={styles.panelHeading}>{child.label}</p>,
-                    ...child.children.map((leaf) => (
-                      <NodeLink key={leaf.id} node={leaf} className={styles.panelItem} onNavigate={close} />
-                    )),
-                  ]
-                : [<NodeLink key={child.id} node={child} className={styles.panelItem} onNavigate={close} />],
-            )}
-          </div>
+          <AnchoredPanel anchor={anchor}>
+            <div className={styles.panel} onMouseLeave={close}>
+              {node.children.flatMap((child) =>
+                // Two levels flattened into one list: a submenu inside a
+                // dropdown is a panel, and a panel is the mega menu's job.
+                child.children.length > 0
+                  ? [
+                      <p key={child.id} className={styles.panelHeading}>{child.label}</p>,
+                      ...child.children.map((leaf) => (
+                        <NodeLink key={leaf.id} node={leaf} className={styles.panelItem} onNavigate={close} />
+                      )),
+                    ]
+                  : [<NodeLink key={child.id} node={child} className={styles.panelItem} onNavigate={close} />],
+              )}
+            </div>
+          </AnchoredPanel>
         )}
       </div>
     );
@@ -196,7 +215,8 @@ export default function InlineMenu({
             <button
               type="button"
               aria-expanded={open === '__more'}
-              onClick={() => setOpen((v) => (v === '__more' ? null : '__more'))}
+              onClick={(e) =>
+                open === '__more' ? close() : show('__more', e.currentTarget)}
               className={clsx(styles.item, styles.trigger)}
             >
               {menuLabel}
@@ -206,11 +226,13 @@ export default function InlineMenu({
               />
             </button>
             {open === '__more' && (
-              <div className={styles.panel}>
-                {overflow.map((node) => (
-                  <NodeLink key={node.id} node={node} className={styles.panelItem} onNavigate={close} />
-                ))}
-              </div>
+              <AnchoredPanel anchor={anchor}>
+                <div className={styles.panel}>
+                  {overflow.map((node) => (
+                    <NodeLink key={node.id} node={node} className={styles.panelItem} onNavigate={close} />
+                  ))}
+                </div>
+              </AnchoredPanel>
             )}
           </div>
         )}
