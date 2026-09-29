@@ -2,9 +2,12 @@
   min-width: 0;
 }
 
-/* Beside the label, never under it: a menu row has one line of height and a
-   badge that wraps pushes every row below it down. */
+/* Inline, so it follows the last WORD of the label rather than the label's
+   box. As a flex sibling it was pushed to the far edge of the column the
+   moment a long label wrapped, and read as belonging to nothing. */
 .badge {
+  display: inline-block;
+  vertical-align: middle;
   flex-shrink: 0;
   margin-left: 0.4rem;
   border-radius: 999px;

@@ -1,5 +1,4 @@
 import { ProductImage } from '@/components/product/ProductImage';
-import { monogram } from '@/lib/monogram';
 
 interface Props {
   logoUrl?: string | null;
@@ -10,29 +9,30 @@ interface Props {
 }
 
 /**
- * The shop's mark: its logo, or a monogram built from its name.
+ * The shop's mark on the page: its logo, or its name set as a wordmark.
  *
- * The monogram is not a placeholder square with a letter dropped in it. It is
- * set in the shop's OWN display face — the serif or grotesk the merchant
- * picked for their headings — so two shops using this never get the same mark.
- * A squircle rather than a rounded rectangle, a diagonal sheen so the tile
- * reads as an object rather than a swatch, and a hairline inset so it keeps an
- * edge against both a white header and a dark one.
+ * No monogram tile. A letter in a coloured square is what a product does when
+ * it has nothing to show — an avatar for a person who never uploaded one — and
+ * on a shop's own header it reads as a missing image rather than as a brand.
+ * A shop with no logo has a name, and a name set well IS a wordmark.
  *
- * The wordmark beside it is set in the same face, tracked in a little. A serif
- * monogram next to a bold sans name looked like two brands standing together;
- * one face makes it a lockup.
+ * It is set in the shop's own display face, the serif or grotesk the merchant
+ * picked for their headings, so two shops using this never look the same. That
+ * was the good half of the monogram and it survives here.
  *
- * The letter comes from the DISPLAY name, so a shop whose signup name was
- * mistyped does not get the wrong one.
+ * The name is NOT hidden on a phone. It used to be — it sat beside a tile that
+ * carried the mark on small screens — and with the tile gone that would leave
+ * the header with no mark at all.
+ *
+ * The monogram itself is still how the FAVICON is drawn, and that is the right
+ * place for it: sixteen pixels square has room for a letter and none for a
+ * name.
  */
 export function StoreLogo({ logoUrl, name, className = '', size = 'sm' }: Props) {
-  const initial = monogram(name);
-  const tile = size === 'md' ? 'h-11 w-11 text-xl' : 'h-9 w-9 text-lg';
-  const word = size === 'md' ? 'text-lg' : 'text-base';
+  const word = size === 'md' ? 'text-2xl' : 'text-xl';
 
   return (
-    <span className={`flex items-center gap-2.5 ${className}`}>
+    <span className={`flex min-w-0 items-center gap-2.5 ${className}`}>
       <ProductImage
         src={logoUrl}
         alt={name}
@@ -41,31 +41,12 @@ export function StoreLogo({ logoUrl, name, className = '', size = 'sm' }: Props)
         className="h-9 w-auto object-contain"
         fallback={
           <span
-            aria-hidden
-            className={`relative grid flex-shrink-0 place-items-center overflow-hidden
-              rounded-[35%] bg-primary-solid text-primary-foreground shadow-sm
-              ring-1 ring-inset ring-white/20 ${tile}`}
+            className={`truncate font-display font-semibold leading-none tracking-tight ${word}`}
           >
-            {/* Light falling across it from the top left. Flat colour is what
-                made the tile read as a missing image rather than a mark. */}
-            <span
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/25"
-            />
-            <span className="relative font-display leading-none">{initial}</span>
+            {name}
           </span>
         }
       />
-      {/* The name sits beside the monogram, because one letter on its own says
-          nothing to a first-time visitor. With a real logo it would compete,
-          so it only appears alongside the fallback. */}
-      {!logoUrl && (
-        <span
-          className={`hidden truncate font-display font-semibold tracking-tight text-fg sm:inline ${word}`}
-        >
-          {name}
-        </span>
-      )}
     </span>
   );
 }

@@ -11,7 +11,11 @@ import { embeddedFont } from '@/lib/embedded-font';
  * `faviconUrl` has been in the config, the API response and the SDK type since
  * the CMS shipped, and nothing read it — a merchant uploaded a favicon and the
  * tab went on showing the framework's default. Now it is used when it is set,
- * and when it is not the tab gets the same monogram the header and footer
+ * and when it is not the tab gets a monogram. The header and footer show the
+ * shop's NAME instead — a wordmark needs room and a favicon has none, which is
+ * the one place a letter in a square is the right answer rather than the sign
+ * of a missing image.
+ * Was: the same monogram the header and footer
  * carry rather than nothing at all.
  *
  * SVG rather than a rendered PNG: it is a letter on a coloured square, it

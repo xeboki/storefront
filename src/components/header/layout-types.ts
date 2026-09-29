@@ -23,7 +23,7 @@ export interface MenuSlice {
 }
 
 export interface HeaderParts {
-  /** The shop's mark, linked home. Logo if uploaded, monogram otherwise. */
+  /** The shop's mark, linked home. Its logo, or its name as a wordmark. */
   brand: ReactNode;
   /** The search box or its icon, as this shop has configured it. Null if off. */
   search: ReactNode | null;

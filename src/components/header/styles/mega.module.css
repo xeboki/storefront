@@ -55,23 +55,31 @@
   box-shadow: 0 24px 48px -24px rgb(0 0 0 / 0.35);
 }
 
+/* Capped at the screen, and scrolls past it. A merchant can build a menu
+   longer than the window, and a panel that simply runs off the bottom takes
+   its own way out with it. */
 .inner {
   margin: 0 auto;
   display: flex;
   max-width: 80rem;
-  gap: 2.5rem;
+  max-height: calc(100vh - 9rem);
+  overflow-y: auto;
+  gap: 2rem;
   padding: 2rem 1rem 1.5rem;
 }
 
 /* Capped, not stretched. `1fr` spread the columns across the whole panel, so
    the eye had to travel the width of the page between one entry and the one
    beside it. A column is a list to read down. */
+/* Sized so the most columns a panel may carry still fit BESIDE a promo tile.
+   At 15rem they did not: the fourth wrapped onto a second row, which doubled
+   the panel's height and pushed the way out off the bottom of the screen. */
 .columns {
   display: grid;
   flex: 1;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 15rem));
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 13rem));
   justify-content: start;
-  gap: 1.5rem 2.5rem;
+  gap: 1.5rem 2rem;
 }
 
 .column {
@@ -97,8 +105,7 @@
 }
 
 .entry {
-  display: flex;
-  align-items: center;
+  display: block;
   border-radius: var(--radius);
   padding: 0.3rem 0;
   font-size: 0.875rem;
@@ -114,7 +121,7 @@
    picture cannot stretch the panel taller than the columns beside it. */
 .promo {
   display: block;
-  width: 13rem;
+  width: 12rem;
   flex: none;
   overflow: hidden;
   border-radius: calc(var(--radius) * 1.75);
