@@ -117,6 +117,56 @@
   color: rgb(var(--color-primary));
 }
 
+/* A group drawn as its pictures, beside the columns rather than under them:
+   it is a peer of a column, not a footnote to one. */
+.tiles {
+  flex: none;
+  min-width: 0;
+}
+
+.tileGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 9rem);
+  gap: 0.75rem;
+}
+
+.tile {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: rgb(var(--color-surface-alt));
+}
+
+.tileImage {
+  display: block;
+  width: 100%;
+  /* A fixed ratio, so four pictures of four different shapes still read as a
+     grid. The merchant's file decides what is in the frame, not the frame. */
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+}
+
+/* Along the foot of the panel, under everything. Wraps rather than scrolls:
+   this is a list of small things, and a shopper should see how many there
+   are without dragging. */
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  border-top: 1px solid rgb(var(--color-border));
+  padding: 0.85rem 1rem;
+  margin: 0 auto;
+  max-width: 80rem;
+}
+
+.stripItem {
+  font-size: 0.8125rem;
+  color: rgb(var(--color-fg-muted));
+  transition: color 150ms ease;
+}
+
+.stripItem:hover { color: rgb(var(--color-primary)); }
+
 /* The merchant's own tile, at the end of the row. Fixed width so a tall
    picture cannot stretch the panel taller than the columns beside it. */
 .promo {

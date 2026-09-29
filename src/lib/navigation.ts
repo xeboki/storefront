@@ -25,6 +25,8 @@ export interface MenuNode {
   external: boolean;
   badge: string;
   imageUrl: string;
+  /** How this node's children are laid out in a panel. See the SDK. */
+  display: string;
   children: MenuNode[];
 }
 
@@ -74,6 +76,7 @@ function toNode(item: MenuItem, ctx: Context, depth: number): MenuNode[] {
       external: false,
       badge: '',
       imageUrl: '',
+      display: 'auto',
       children: [],
     }));
   }
@@ -86,6 +89,7 @@ function toNode(item: MenuItem, ctx: Context, depth: number): MenuNode[] {
     external,
     badge: item.badge,
     imageUrl: item.imageUrl,
+    display: item.display,
     children: depth >= 3 ? [] : item.children.flatMap((c) => toNode(c, ctx, depth + 1)),
   }];
 }
@@ -101,26 +105,27 @@ function toNode(item: MenuItem, ctx: Context, depth: number): MenuNode[] {
 function generated(ctx: Context, navLinks: { label: string; url: string }[]): MenuNode[] {
   const nodes: MenuNode[] = [{
     id: 'all', label: ctx.labels.allProducts, href: ctx.catalogHref(null),
-    external: false, badge: '', imageUrl: '', children: [],
+    external: false, badge: '', imageUrl: '', display: 'auto', children: [],
   }];
   for (const c of ctx.categories) {
     nodes.push({
       id: `cat-${c.id}`, label: c.name, href: ctx.catalogHref(c.id),
-      external: false, badge: '', imageUrl: '', children: [],
+      external: false, badge: '', imageUrl: '', display: 'auto', children: [],
     });
   }
   if (ctx.hasBooking) {
     nodes.push({ id: 'book', label: ctx.labels.book, href: `/${ctx.storeSlug}/book`,
-                 external: false, badge: '', imageUrl: '', children: [] });
+                 external: false, badge: '', imageUrl: '', display: 'auto', children: [] });
   }
   if (ctx.hasRepairs) {
     nodes.push({ id: 'repairs', label: ctx.labels.repairs, href: `/${ctx.storeSlug}/repairs`,
-                 external: false, badge: '', imageUrl: '', children: [] });
+                 external: false, badge: '', imageUrl: '', display: 'auto', children: [] });
   }
   for (const link of navLinks) {
     nodes.push({
       id: link.url, label: link.label, href: link.url,
-      external: /^https?:\/\//i.test(link.url), badge: '', imageUrl: '', children: [],
+      external: /^https?:\/\//i.test(link.url), badge: '', imageUrl: '',
+      display: 'auto', children: [],
     });
   }
   return nodes;

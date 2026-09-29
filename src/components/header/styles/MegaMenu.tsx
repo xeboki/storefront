@@ -49,24 +49,42 @@ export default function MegaMenu({
   if (nodes.length === 0) return null;
 
   const panelFor = (node: MenuNode) => {
-    // A column is a child with children. A child WITHOUT children is a link
-    // in its own right, so the flat ones are gathered into one column rather
-    // than each taking a column of its own and leaving four one-line stacks.
-    const promos = node.children.filter((c) => c.imageUrl);
-    const grouped = node.children.filter((c) => !c.imageUrl && c.children.length > 0);
-    const loose = node.children.filter((c) => !c.imageUrl && c.children.length === 0);
-    const columns: MenuNode[][] = grouped.slice(0, MAX_COLUMNS).map((c) => c.children.slice(0, PER_COLUMN));
-    const headings = grouped.slice(0, MAX_COLUMNS);
+    // Each child says how it wants to be laid out. `auto` keeps the old
+    // inference — a column when it holds links, a picture when it holds a
+    // picture — so a menu built before this is drawn exactly as it was.
+    const shapeOf = (child: MenuNode) => {
+      if (child.display !== 'auto') return child.display;
+      if (child.imageUrl) return 'tile';
+      return child.children.length > 0 ? 'column' : 'loose';
+    };
+
+    const columns: MenuNode[] = [];
+    const tileGroups: MenuNode[] = [];
+    const strips: MenuNode[] = [];
+    const loose: MenuNode[] = [];
+    const promos: MenuNode[] = [];
+
+    for (const child of node.children) {
+      switch (shapeOf(child)) {
+        case 'column': columns.push(child); break;
+        case 'tiles':  tileGroups.push(child); break;
+        case 'strip':  strips.push(child); break;
+        case 'tile':   promos.push(child); break;
+        default:       loose.push(child);
+      }
+    }
+
+    const shown = columns.slice(0, MAX_COLUMNS);
 
     return (
       <div className={styles.panel} onMouseLeave={close} role="navigation" aria-label={node.label}>
         <div className={styles.inner}>
           <div className={styles.columns}>
-            {headings.map((heading, i) => (
+            {shown.map((heading) => (
               <div key={heading.id} className={styles.column}>
                 <p className={styles.heading}>{heading.label}</p>
                 <ul className={styles.list}>
-                  {columns[i].map((leaf) => (
+                  {heading.children.slice(0, PER_COLUMN).map((leaf) => (
                     <li key={leaf.id}>
                       <NodeLink node={leaf} className={styles.entry} onNavigate={close} />
                     </li>
@@ -75,6 +93,8 @@ export default function MegaMenu({
               </div>
             ))}
 
+            {/* Children with no group of their own, gathered rather than each
+                taking a column and leaving a row of one-line stacks. */}
             {loose.length > 0 && (
               <div className={styles.column}>
                 <ul className={styles.list}>
@@ -88,6 +108,22 @@ export default function MegaMenu({
             )}
           </div>
 
+          {/* A group drawn as its pictures. An entry with no picture is left
+              out: a tile with nothing in it is worse than a gap. */}
+          {tileGroups.map((group) => (
+            <div key={group.id} className={styles.tiles}>
+              {group.label && <p className={styles.heading}>{group.label}</p>}
+              <div className={styles.tileGrid}>
+                {group.children.filter((c) => c.imageUrl).slice(0, 6).map((tile) => (
+                  <NodeLink key={tile.id} node={tile} className={styles.tile} onNavigate={close}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={tile.imageUrl} alt="" className={styles.tileImage} />
+                  </NodeLink>
+                ))}
+              </div>
+            </div>
+          ))}
+
           {promos.slice(0, 2).map((promo) => (
             <NodeLink key={promo.id} node={promo} className={styles.promo} onNavigate={close}>
               {/* The merchant's own picture. Unoptimised on purpose: it is
@@ -98,6 +134,16 @@ export default function MegaMenu({
             </NodeLink>
           ))}
         </div>
+
+        {/* Along the foot, under the columns: the things that belong to the
+            whole menu rather than to one part of it. */}
+        {strips.map((strip) => (
+          <div key={strip.id} className={styles.strip}>
+            {strip.children.map((leaf) => (
+              <NodeLink key={leaf.id} node={leaf} className={styles.stripItem} onNavigate={close} />
+            ))}
+          </div>
+        ))}
 
         {showAll && (
           <Link href={allHref} onClick={close} className={styles.escape}>
