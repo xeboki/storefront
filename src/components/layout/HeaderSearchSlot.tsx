@@ -28,6 +28,8 @@ interface Props {
   behaviour: string;
   /** The mark, which the overlay keeps so the open bar is still the shop's. */
   brand?: React.ReactNode;
+  /** The account, saved and cart controls, which the overlay also keeps. */
+  utilities?: React.ReactNode;
   container?: string;
   /**
    * Whether the box may push itself around with elastic spacers.
@@ -52,7 +54,8 @@ const WIDTHS: Record<string, string> = {
 
 export function HeaderSearchSlot({
   storeSlug, placement, width, behaviour, spacers = true, iconClassName,
-  brand = null, container = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
+  brand = null, utilities = null,
+  container = 'mx-auto max-w-7xl px-4 sm:px-6 lg:px-8',
 }: Props) {
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -98,6 +101,7 @@ export function HeaderSearchSlot({
         storeSlug={storeSlug}
         iconClassName={iconClassName}
         brand={brand}
+        utilities={utilities}
         container={container}
       />
     );

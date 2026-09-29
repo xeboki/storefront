@@ -30,10 +30,21 @@ interface Props {
   iconClassName: string;
   /** The mark, so the open bar is still recognisably this shop's header. */
   brand: React.ReactNode;
+  /**
+   * The account, saved and cart controls.
+   *
+   * They stay. The bar is borrowed, not replaced — a shopper who opens search
+   * and then decides to check their basket should not have to close anything
+   * first, and a header whose right-hand side empties out reads as having
+   * navigated somewhere.
+   */
+  utilities: React.ReactNode;
   container: string;
 }
 
-export function SearchOverlay({ storeSlug, iconClassName, brand, container }: Props) {
+export function SearchOverlay({
+  storeSlug, iconClassName, brand, utilities, container,
+}: Props) {
   const [open, setOpen] = useState(false);
   const field = useRef<HTMLDivElement>(null);
   const t = useT();
@@ -81,17 +92,22 @@ export function SearchOverlay({ storeSlug, iconClassName, brand, container }: Pr
                 <div className={styles.brand}>{brand}</div>
                 <div className={styles.field} ref={field}>
                   <span className={styles.label}>{t('search.label')}</span>
-                  <HeaderSearch storeSlug={storeSlug} />
+                  <HeaderSearch storeSlug={storeSlug} labelled />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label="Close"
-                  className={styles.close}
-                >
-                  <X size={22} />
-                </button>
+                <div className={styles.end}>{utilities}</div>
               </div>
+
+              {/* In the corner of the sheet rather than in the row: it closes
+                  the whole bar, not anything in it, and a control that undoes
+                  a thing belongs at the edge of the thing it undoes. */}
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Close"
+                className={styles.close}
+              >
+                <X size={22} />
+              </button>
             </div>
           </div>
         </Portal>

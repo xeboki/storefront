@@ -42,9 +42,20 @@ const DEBOUNCE_MS = 180;
 export function HeaderSearch({
   storeSlug,
   className = '',
+  labelled = false,
 }: {
   storeSlug: string;
   className?: string;
+  /**
+   * The field already has a visible label beside it.
+   *
+   * Then the magnifier inside it and the placeholder repeating its name are
+   * both saying a third time what the label says once — and a placeholder is
+   * the weakest of the three anyway, since it disappears the moment somebody
+   * types. The only place this is true is the search overlay, which gives the
+   * field a row and a heading of its own.
+   */
+  labelled?: boolean;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -177,11 +188,13 @@ export function HeaderSearch({
     <div ref={boxRef} className={`relative ${className}`}>
       <form onSubmit={submit} role="search">
         <div className="relative">
-          <Search
-            size={16}
-            aria-hidden
-            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle"
-          />
+          {!labelled && (
+            <Search
+              size={16}
+              aria-hidden
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle"
+            />
+          )}
           <input
             ref={inputRef}
             value={query}
@@ -192,7 +205,7 @@ export function HeaderSearch({
             }}
             onFocus={() => setOpen(true)}
             onKeyDown={onKeyDown}
-            placeholder={t('search.placeholder')}
+            placeholder={labelled ? undefined : t('search.placeholder')}
             aria-label={t('search.placeholder')}
             role="combobox"
             aria-expanded={showPanel}
@@ -200,7 +213,14 @@ export function HeaderSearch({
             aria-autocomplete="list"
             aria-activedescendant={cursor >= 0 ? `${listId}-${cursor}` : undefined}
             autoComplete="off"
-            className="h-11 w-full rounded-full border border-line bg-surface-alt pl-11 pr-10 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:bg-surface focus:outline-none"
+            className={
+              labelled
+                // A plain field: it is the only thing in its row, so it needs
+                // no pill to separate it from anything, and the shop's own
+                // corner radius rather than a hardcoded one.
+                ? 'h-10 w-full rounded-brand border border-line bg-surface px-3.5 text-sm text-fg focus:border-primary focus:outline-none'
+                : 'h-11 w-full rounded-full border border-line bg-surface-alt pl-11 pr-10 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:bg-surface focus:outline-none'
+            }
           />
           {loading && (
             <Loader2

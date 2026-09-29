@@ -325,24 +325,6 @@ export function StorefrontHeader({
     </Link>
   );
 
-  /* Where it sits, how wide it is and whether it is a field or an icon are
-     three separate choices this shop has made. */
-  const searchSlot = searchOn ? (
-    <HeaderSearchSlot
-      storeSlug={storeSlug}
-      placement={header?.searchPlacement ?? 'centre'}
-      width={searchWidth}
-      // A split bar is departments, mark, departments, icons. There is no
-      // room left for a field, so the search is its icon — the same demotion
-      // `crowded` makes to the width, one step further along.
-      behaviour={menuRow === 'split' ? 'tap' : header?.searchBehaviour ?? 'open'}
-      spacers={!crowded}
-      iconClassName={iconButton}
-      brand={brand}
-      container={container}
-    />
-  ) : null;
-
   const utilities = {
     currency: header?.showCurrency === true ? (
       // The store's currency, stated. NOT a switcher: there is no exchange
@@ -420,6 +402,27 @@ export function StorefrontHeader({
       {utilities.cart}
     </>
   );
+
+  /* Where it sits, how wide it is and whether it is a field or an icon are
+     three separate choices this shop has made. */
+  const searchSlot = searchOn ? (
+    <HeaderSearchSlot
+      storeSlug={storeSlug}
+      placement={header?.searchPlacement ?? 'centre'}
+      width={searchWidth}
+      // A split bar is departments, mark, departments, icons. There is no
+      // room left for a field, so the search is its icon — the same demotion
+      // `crowded` makes to the width, one step further along.
+      behaviour={menuRow === 'split' ? 'tap' : header?.searchBehaviour ?? 'open'}
+      spacers={!crowded}
+      iconClassName={iconButton}
+      brand={brand}
+      // The overlay keeps them: a shopper who opens search and then decides
+      // to check their basket should not have to close anything first.
+      utilities={utilityRow}
+      container={container}
+    />
+  ) : null;
 
   /**
    * The menu ready to sit under the bar, whichever kind it is.
