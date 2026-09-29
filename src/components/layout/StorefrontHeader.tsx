@@ -344,20 +344,31 @@ export function StorefrontHeader({
    * this without checking and never gets a gap where a line should be.
    */
   const tagline = (storefrontConfig?.wordmarkTagline ?? '').trim();
+  const taglineRule = clsx('h-px flex-1', onDark ? 'bg-white/25' : 'bg-line');
   const brandLockup = !tagline ? brand : (
-    <span className="flex min-w-0 flex-col items-center gap-1">
+    <span
+      className={clsx(
+        'flex min-w-0 flex-col gap-1',
+        chosen.markStart ? 'items-start' : 'items-center',
+      )}
+    >
       {brand}
-      {/* Rules either side, which is what makes a line of small caps read as
-          part of the mark rather than as a sentence under it. */}
       <span
         className={clsx(
-          'flex w-full items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em]',
+          'flex w-full min-w-0 items-center gap-2 text-[0.6875rem] uppercase tracking-[0.18em]',
           onDark ? 'text-white/70' : 'text-fg-subtle',
         )}
       >
-        <span className={clsx('h-px flex-1', onDark ? 'bg-white/25' : 'bg-line')} />
-        <span className="whitespace-nowrap">{tagline}</span>
-        <span className={clsx('h-px flex-1', onDark ? 'bg-white/25' : 'bg-line')} />
+        {/* A rule either side is what makes a line of small caps read as part
+            of the mark rather than as a sentence under it — but only under a
+            CENTRED mark. Beside a left-aligned one the leading rule has
+            nothing to balance and runs back to the page edge. */}
+        {!chosen.markStart && <span className={taglineRule} />}
+        {/* Truncates rather than `nowrap`: a long tagline in a column narrower
+            than itself does not overflow the gutter, it ends with an
+            ellipsis. */}
+        <span className="min-w-0 truncate">{tagline}</span>
+        <span className={taglineRule} />
       </span>
     </span>
   );
@@ -476,7 +487,9 @@ export function StorefrontHeader({
   const searchSlot = searchOn ? (
     <HeaderSearchSlot
       storeSlug={storeSlug}
-      placement={header?.searchPlacement ?? 'centre'}
+      // A layout that gives search a column of its own has already placed
+      // it; the shop's setting is for arrangements where it shares a row.
+      placement={chosen.centreSearch ? 'centre' : header?.searchPlacement ?? 'centre'}
       width={searchWidth}
       behaviour={header?.searchBehaviour ?? 'open'}
       spacers={!crowded}

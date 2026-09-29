@@ -59,6 +59,25 @@ interface Style {
    * menus here would be three that cannot be honoured.
    */
   forceMenu?: string;
+  /**
+   * Whether the layout puts the search in the middle itself.
+   *
+   * The shop's "search position" places the box within the room left over
+   * beside everything else. A layout that gives search a column of its own
+   * has already answered that question, and honouring both means a header
+   * called "search centred" drawing it hard left because of a setting made
+   * for a different arrangement. Same call as `fill` making placement moot.
+   */
+  centreSearch?: boolean;
+  /**
+   * Whether the mark sits at the START of its row rather than in the middle.
+   *
+   * It changes how the tagline is drawn with it. Centred, the tagline gets a
+   * rule either side, which is what makes a line of small caps read as part
+   * of the mark. Left-aligned, those rules have nothing to centre and the
+   * leading one runs back to the page edge.
+   */
+  markStart?: boolean;
 }
 
 export const HEADER_STYLES: Record<string, Style> = {
@@ -92,6 +111,7 @@ export const HEADER_STYLES: Record<string, Style> = {
   // departments centre under it — the only style so far that uses it.
   centred_search: {
     centreMenu: true, menuRow: 'below', spare: false,
+    centreSearch: true, markStart: true,
     Component: dynamic(() => import('./CentredSearchHeader')),
   },
 };
