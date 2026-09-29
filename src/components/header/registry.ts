@@ -5,8 +5,8 @@
  * does not have is a merchant choosing something and watching nothing change,
  * which is what `test_header_styles_are_implemented.py` fails on.
  *
- * Each is a dynamic import so a shop ships the one it uses. Four menus is
- * four panels' worth of markup and CSS, and a shop running the plain rail has
+ * Each is a dynamic import so a shop ships the one it uses. Five menus is
+ * five panels' worth of markup and CSS, and a shop running the plain rail has
  * no reason to download a mega panel it will never open.
  */
 import dynamic from 'next/dynamic';
@@ -36,6 +36,7 @@ export const MENU_STYLES: Record<string, Style> = {
   inline: { placement: 'bar',   elastic: true,  Component: dynamic(() => import('./styles/InlineMenu')) },
   mega:   { placement: 'bar',   elastic: false, Component: dynamic(() => import('./styles/MegaMenu')) },
   drawer: { placement: 'bar',   elastic: false, Component: dynamic(() => import('./styles/DrawerMenu')) },
+  tiles:  { placement: 'below', elastic: false, Component: dynamic(() => import('./styles/TileMenu')) },
 };
 
 /** What the API falls back to, and so must this. */

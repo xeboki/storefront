@@ -235,13 +235,17 @@ export function StorefrontHeader({
   const { Component: Layout, centreMenu: markCentred } = chosen;
 
   // A style whose bar is a single button names its own menu: there is
-  // nowhere to draw a rail or a row of departments, so three of the four
+  // nowhere to draw a rail or a row of departments, so four of the five
   // choices could not be honoured.
   //
   // Otherwise: a style with one row has nowhere to put a rail, which is a
   // full-width row that brings its own page gutter — drawn inside a column a
   // third of the page wide it is not a rail, it is a mess. Swap it for the
   // in-bar list, which is the same departments in the space that exists.
+  //
+  // `tiles` pays the most for this: the swap keeps the departments and
+  // drops the pictures, which were the whole reason for choosing it. The
+  // back office says so on the option rather than the shop finding out.
   const needsInBar = chosen.menuRow === 'bar';
   const { placement, elastic, Component: Menu } =
     chosen.forceMenu ? menuStyle(chosen.forceMenu)

@@ -1,0 +1,89 @@
+/* The same fold as the rail: a grid track, because `height: auto` cannot be
+   animated and a max-height either clips a wrapped label or leaves a gap
+   under a short one. */
+.rail {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.folded {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rail {
+    transition: grid-template-rows 300ms ease-out, opacity 300ms ease-out;
+  }
+}
+
+/* Aligned to the top, so pictures line up across the row however many lines
+   each label runs to. Aligning centres would stagger them. */
+.track {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding: 0.75rem 0;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Fixed width and no shrinking: this is a rail, and a tile squeezed to fit
+     is a picture nobody can make out. It scrolls instead. */
+  flex: 0 0 5rem;
+  gap: 0.45rem;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.1rem;
+  color: rgb(var(--color-fg-muted));
+  transition: color 150ms ease-out;
+}
+
+.tile:hover {
+  color: rgb(var(--color-primary));
+}
+
+.onDark {
+  color: rgb(255 255 255 / 0.8);
+}
+
+.onDark:hover {
+  color: rgb(255 255 255);
+}
+
+/* NodeLink emits the label first and the picture last, so the picture is
+   lifted above rather than the markup reordered — the label has to stay
+   first in the DOM for a screen reader, and for this selector. */
+.picture {
+  order: -1;
+  width: 3.5rem;
+  height: 3.5rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius);
+  object-fit: cover;
+  background: rgb(var(--color-surface-alt));
+}
+
+/* No picture set. Not a placeholder icon and not a letter in a box — an empty
+   frame that holds the row's rhythm and lets the label say what it is. */
+.blank {
+  border: 1px solid rgb(var(--color-border));
+}
+
+.onDark .blank {
+  border-color: rgb(255 255 255 / 0.25);
+  background: rgb(255 255 255 / 0.1);
+}
+
+/* Two lines, then an ellipsis. A department called "Consoles, handhelds and
+   accessories" would otherwise set the height of the whole row. */
+.tile > :first-child {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
