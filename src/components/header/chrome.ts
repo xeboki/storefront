@@ -62,6 +62,17 @@ export const OVER_BANNER_SURFACES: readonly Surface[] = ['transparent', 'gradien
  * followed the link under it, so the panel would shut on a page that has
  * gone. Capture phase for the same reason.
  */
+/**
+ * Marks a panel that belongs to the control which opened it.
+ *
+ * A panel drawn through a portal is a child of <body>, not of its trigger, so
+ * "did this click land inside?" cannot be answered by walking up from the
+ * target to the trigger's ref — every click in the panel looked like a click
+ * outside. That shut the menu instead of drilling into it, and on a panel of
+ * links it unmounted them before the click could land at all.
+ */
+export const PANEL_ATTR = 'data-header-panel';
+
 export function useDismiss(open: boolean, close: () => void) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -72,7 +83,11 @@ export function useDismiss(open: boolean, close: () => void) {
       if (event.key === 'Escape') close();
     }
     function onPointer(event: PointerEvent) {
-      if (!ref.current?.contains(event.target as Node)) close();
+      const target = event.target as Element | null;
+      if (ref.current?.contains(target as Node)) return;
+      // …or inside a panel this control put on the body.
+      if (target?.closest?.(`[${PANEL_ATTR}]`)) return;
+      close();
     }
 
     document.addEventListener('keydown', onKey);

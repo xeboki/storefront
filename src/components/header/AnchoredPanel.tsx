@@ -22,6 +22,7 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Portal } from './Portal';
+import { PANEL_ATTR } from './chrome';
 
 interface Props {
   anchor: HTMLElement | null;
@@ -60,7 +61,12 @@ export function AnchoredPanel({ anchor, children, minWidth = 208 }: Props) {
 
   return (
     <Portal>
-      <div style={{ position: 'fixed', top: box.top, left: box.left, zIndex: 50 }}>
+      {/* Marked so the control that opened it does not read a click in here
+          as a click outside itself — it is on the body, not in the header. */}
+      <div
+        {...{ [PANEL_ATTR]: '' }}
+        style={{ position: 'fixed', top: box.top, left: box.left, zIndex: 50 }}
+      >
         {children}
       </div>
     </Portal>
