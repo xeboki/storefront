@@ -1,0 +1,104 @@
+/* Reads as a control rather than as another department: it is the one thing
+   in this row that opens something instead of going somewhere. */
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  white-space: nowrap;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--color-fg));
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.trigger:hover,
+.triggerOpen {
+  background: rgb(var(--color-surface-alt));
+}
+
+[data-dark] .trigger { color: rgb(255 255 255); }
+[data-dark] .trigger:hover,
+[data-dark] .triggerOpen { background: rgb(255 255 255 / 0.14); }
+
+.panel {
+  max-height: min(32rem, calc(100vh - 10rem));
+  overflow-y: auto;
+  border: 1px solid rgb(var(--color-border));
+  border-radius: calc(var(--radius) * 1.75);
+  background: rgb(var(--color-surface));
+  padding: 0.5rem;
+  box-shadow: 0 20px 44px -16px rgb(0 0 0 / 0.32);
+}
+
+.back {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.3rem;
+  border: 0;
+  border-bottom: 1px solid rgb(var(--color-border));
+  background: none;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+  padding: 0.4rem 0.625rem 0.6rem;
+  font: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgb(var(--color-fg-subtle));
+}
+
+.back:hover { color: rgb(var(--color-fg)); }
+
+.row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.625rem;
+  font: inherit;
+  font-size: 0.875rem;
+  text-align: left;
+  color: rgb(var(--color-fg));
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.row:hover {
+  background: rgb(var(--color-surface-alt));
+  color: rgb(var(--color-primary));
+}
+
+.label { min-width: 0; }
+
+/* Sideways, because it goes sideways. Down would promise an accordion. */
+.chevron {
+  flex-shrink: 0;
+  color: rgb(var(--color-fg-subtle));
+}
+
+.branch:hover .chevron { color: rgb(var(--color-primary)); }
+
+.all { color: rgb(var(--color-fg-muted)); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel { animation: drop 160ms ease-out; }
+}
+
+@keyframes drop {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}

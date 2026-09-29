@@ -52,6 +52,16 @@ export interface HeaderParts {
   /** The menu ready to sit IN the bar, or null when it belongs under it. */
   menuInBar: ReactNode | null;
   /**
+   * A button opening the WHOLE menu as a list, for a layout that wants an
+   * index beside its departments.
+   *
+   * Not a replacement for the row: the row shows what a shop wants seen and
+   * has only as much space as the bar allows, while this holds everything in
+   * the order the merchant built it. A shopper who cannot find a department
+   * in the row has somewhere to look that is not the search box.
+   */
+  menuIndex: ReactNode;
+  /**
    * The menu ready to sit UNDER the bar, gutter and rule already applied
    * whichever kind it is. A style that wants a menu row drops this in and
    * does not wrap it.

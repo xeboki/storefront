@@ -41,6 +41,7 @@ import { StoreLogo } from './StoreLogo';
 import { menuStyle } from '../header/registry';
 import { headerStyle } from '../header/layouts/registry';
 import { MobileNav, asMobileMenu } from '../header/MobileNav';
+import { MenuIndex } from '../header/MenuIndex';
 import {
   asLinkCase, asScroll, asSurface, useOverBanner, OVER_BANNER_SURFACES,
 } from '../header/chrome';
@@ -336,6 +337,9 @@ export function StorefrontHeader({
   );
 
   const menuNode = menuHasNothingToShow ? null : drawMenu();
+  const menuIndex = menuHasNothingToShow ? null : (
+    <MenuIndex nodes={nodes} label={t('nav.menu')} onDark={onDark} />
+  );
 
   /**
    * The mark with the shop's tagline under it.
@@ -573,6 +577,7 @@ export function StorefrontHeader({
             menu={drawMenu}
             menuPlacement={placement}
             menuInBar={menuRow === 'bar' ? menuNode : null}
+            menuIndex={menuIndex}
             menuBelow={menuBelow}
             menuEmpty={menuHasNothingToShow}
             utilities={utilities}

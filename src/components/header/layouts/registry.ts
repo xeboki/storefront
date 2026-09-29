@@ -114,6 +114,13 @@ export const HEADER_STYLES: Record<string, Style> = {
     centreSearch: true, markStart: true,
     Component: dynamic(() => import('./CentredSearchHeader')),
   },
+  // Mark left, search centred, and a department bar led by a button that
+  // opens the whole menu as a list.
+  indexed: {
+    centreMenu: false, menuRow: 'below', spare: false,
+    centreSearch: true, markStart: true,
+    Component: dynamic(() => import('./IndexedHeader')),
+  },
 };
 
 /**

@@ -1,0 +1,55 @@
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 1.5rem;
+  min-height: 5rem;
+  height: auto !important;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.side {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.middle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.end {
+  justify-content: flex-end;
+  gap: 1.25rem;
+}
+
+/* Its own ground, not a continuation of the row above. Without it the two
+   read as one tall header rather than a bar under a header. */
+.band {
+  background: rgb(var(--color-surface-alt) / 0.6);
+}
+
+.bandInner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The departments take what is left after the index button, and the menu
+   inside measures against that rather than against the whole row. */
+.departments {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0%;
+  align-items: center;
+}
+
+@media (max-width: 1023px) {
+  /* The departments are in the phone menu below this width, so the band
+     would be a button on an empty bar. */
+  .band { display: none; }
+}
