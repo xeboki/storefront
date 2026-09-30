@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { loadStore, loadCatalog, loadCategories, loadProduct } from '@/lib/sdk/store';
 import { HomeSections } from '@/components/home/HomeSections';
-import { showSection } from '@/lib/sections';
 import type { SectionContext } from '@/components/home/types';
 
 interface Props {
@@ -71,14 +70,13 @@ export default async function StorePage({ params }: Props) {
     apiKey,
   };
 
-  // `sections` — the old on/off map — still has the last word.
+  // One control for whether a band shows: the band's own `visible`.
   //
-  // A merchant who switched a band off before the editor existed did so
-  // deliberately, and arriving at a rearrangeable page must not quietly turn
-  // it back on. The instance's own `visible` is checked by the renderer;
-  // this is the older switch, honoured by the name the band carries.
-  const arranged = (storefrontConfig?.homeSections ?? [])
-    .filter((s) => showSection(storefrontConfig, s.type as never));
-
-  return <HomeSections sections={arranged} ctx={ctx} />;
+  // The old `sections` on/off map is NOT consulted here. It is carried into
+  // the band's `visible` the first time a shop opens the editor, so a band
+  // switched off years ago stays off — and after that there is one answer
+  // rather than two that can disagree. Honouring both would have meant a
+  // band a merchant had just switched ON staying hidden by a map they can no
+  // longer see.
+  return <HomeSections sections={storefrontConfig?.homeSections ?? []} ctx={ctx} />;
 }
