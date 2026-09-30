@@ -191,6 +191,7 @@ export function FeaturedBand({ section, ctx, nested }: SectionProps) {
       {tabNames.length > 1 ? (
         <ProductTabs
           storeSlug={ctx.storeSlug}
+          inset={nested}
           tabs={tabNames.map((label, i) => ({
             label,
             // The first tab is the merchant's own selection; the rest are
@@ -201,7 +202,7 @@ export function FeaturedBand({ section, ctx, nested }: SectionProps) {
           })).filter((t) => t.products.length > 0)}
         />
       ) : (
-        <FeaturedProducts products={shown} storeSlug={ctx.storeSlug} />
+        <FeaturedProducts products={shown} storeSlug={ctx.storeSlug} inset={nested} />
       )}
     </Band>
   );

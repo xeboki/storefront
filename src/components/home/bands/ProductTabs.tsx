@@ -17,9 +17,10 @@ import type { OrderingProduct } from '@xeboki/sdk';
  * trip to save nothing — and a tab that spins is worse than one that does not
  * exist.
  */
-export function ProductTabs({ tabs, storeSlug }: {
+export function ProductTabs({ tabs, storeSlug, inset }: {
   tabs: { label: string; products: OrderingProduct[] }[];
   storeSlug: string;
+  inset?: boolean;
 }) {
   const [active, setActive] = useState(0);
   const shown = tabs[active];
@@ -43,7 +44,7 @@ export function ProductTabs({ tabs, storeSlug }: {
           </button>
         ))}
       </div>
-      <FeaturedProducts products={shown.products} storeSlug={storeSlug} />
+      <FeaturedProducts products={shown.products} storeSlug={storeSlug} inset={inset} />
     </>
   );
 }

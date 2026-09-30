@@ -20,9 +20,18 @@ import { productIsSellable } from '@/lib/availability';
 interface Props {
   products: OrderingProduct[];
   storeSlug: string;
+  /**
+   * Inside a column rather than across the page.
+   *
+   * The row bleeds to the page edge by negative margin, which is right for a
+   * full-width band and wrong in a column — it pulls the cards out of the
+   * column they were given. The card width comes down too: 24rem is a third
+   * of the page and the whole of a narrow column.
+   */
+  inset?: boolean;
 }
 
-export function FeaturedProducts({ products, storeSlug }: Props) {
+export function FeaturedProducts({ products, storeSlug, inset = false }: Props) {
   const money = useMoney();
   const track = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
@@ -63,7 +72,8 @@ export function FeaturedProducts({ products, storeSlug }: Props) {
     <div>
       <div
         ref={track}
-        className="-mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-2 scrollbar-hide sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+        className={`flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2 scrollbar-hide ${
+          inset ? '' : '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8'}`}
       >
         {products.map((product, index) => {
           const sellable = productIsSellable(product);
@@ -71,7 +81,9 @@ export function FeaturedProducts({ products, storeSlug }: Props) {
             <Link
               key={product.id}
               href={`/${storeSlug}/product/${product.id}`}
-              className="group w-[72vw] flex-shrink-0 snap-start sm:w-[44vw] lg:w-[24rem]"
+              className={`group flex-shrink-0 snap-start ${
+                inset ? 'w-[68vw] sm:w-[38vw] lg:w-[15rem]'
+                      : 'w-[72vw] sm:w-[44vw] lg:w-[24rem]'}`}
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-brand bg-surface-alt">
                 <ProductImage
