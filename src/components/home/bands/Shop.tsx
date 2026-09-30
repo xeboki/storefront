@@ -69,6 +69,18 @@ export function CategoriesBand({ section, ctx }: SectionProps) {
   const list = limit > 0 ? pool.slice(0, limit) : pool;
   if (list.length === 0) return null;
 
+  // How many things are actually in a department.
+  //
+  // NOT `category.productCount`: that is a denormalised counter on the
+  // category document which nothing maintains, so it reads 0 for every
+  // department on every shop — and "0 items" under each tile makes a stocked
+  // shop look empty. Counted from the catalogue this page already loaded,
+  // and shown only when there is something to say, because a fabricated zero
+  // is worse than no number at all.
+  const countIn = (categoryId: string) =>
+    ctx.products.filter((p) => p.categoryId === categoryId).length;
+  const items = (n: number) => `${n} item${n === 1 ? '' : 's'}`;
+
   const words = bandWords(section, {
     eyebrow: 'Browse',
     title: booking ? 'Our Services' : 'Shop by category',
@@ -90,9 +102,11 @@ export function CategoriesBand({ section, ctx }: SectionProps) {
               className="flex-none w-44 rounded-brand border border-line bg-surface p-5 text-center transition-colors hover:border-primary"
             >
               <span className="text-sm font-semibold text-fg">{c.name}</span>
-              <span className="mt-1 block text-xs text-fg-muted">
-                {c.productCount} items
-              </span>
+              {countIn(c.id) > 0 && (
+                <span className="mt-1 block text-xs text-fg-muted">
+                  {items(countIn(c.id))}
+                </span>
+              )}
             </Link>
           ))}
         </ScrollRail>
@@ -105,7 +119,9 @@ export function CategoriesBand({ section, ctx }: SectionProps) {
                 className="flex items-center justify-between py-4 text-fg transition-colors hover:text-primary"
               >
                 <span className="font-medium">{c.name}</span>
-                <span className="text-sm text-fg-muted">{c.productCount}</span>
+                {countIn(c.id) > 0 && (
+                  <span className="text-sm text-fg-muted">{countIn(c.id)}</span>
+                )}
               </Link>
             </li>
           ))}
@@ -128,9 +144,11 @@ export function CategoriesBand({ section, ctx }: SectionProps) {
                 c.color ? 'text-white' : 'border border-line bg-surface-alt text-fg'}`}
             >
               <span className="text-lg font-bold leading-tight">{c.name}</span>
-              <span className={`mt-1 text-sm ${c.color ? 'text-white/80' : 'text-fg-muted'}`}>
-                {c.productCount} items
-              </span>
+              {countIn(c.id) > 0 && (
+                <span className={`mt-1 text-sm ${c.color ? 'text-white/80' : 'text-fg-muted'}`}>
+                  {items(countIn(c.id))}
+                </span>
+              )}
             </Link>
           ))}
         </div>
