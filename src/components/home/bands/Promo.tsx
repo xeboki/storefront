@@ -16,7 +16,7 @@ import { bandWords, setting } from '@/lib/band-words';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
 
-export function AnnouncementBand({ section }: SectionProps) {
+export function AnnouncementBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   if (!w.title) return null;
   const deep = section.variant === 'band';
@@ -30,7 +30,7 @@ export function AnnouncementBand({ section }: SectionProps) {
   );
 }
 
-export function PromoBand({ section }: SectionProps) {
+export function PromoBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
@@ -70,7 +70,7 @@ export function PromoBand({ section }: SectionProps) {
 
   if (section.variant === 'card') {
     return (
-      <Band>
+      <Band nested={nested}>
         <div className="overflow-hidden rounded-brand bg-primary-solid px-8 py-14 text-center text-primary-foreground">
           {inner}
         </div>
@@ -106,7 +106,7 @@ export function PromoBand({ section }: SectionProps) {
  * Past the end it renders nothing rather than a row of zeroes: the sale is
  * over, and a dead clock on a live page is how a shop looks abandoned.
  */
-export function CountdownBand({ section }: SectionProps) {
+export function CountdownBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const endsAt = setting<string>(section, 'endsAt', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
@@ -172,7 +172,7 @@ export function CountdownBand({ section }: SectionProps) {
   );
 }
 
-export function NewsletterBand({ section }: SectionProps) {
+export function NewsletterBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {
     title: 'Hear about it first',
     lede: 'New arrivals and offers, now and then. No more than that.',
@@ -208,7 +208,7 @@ export function NewsletterBand({ section }: SectionProps) {
 
   if (section.variant === 'split') {
     return (
-      <Band>
+      <Band nested={nested}>
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
           <div>
             <h2 className="text-3xl font-bold text-fg">{w.title}</h2>
@@ -221,7 +221,7 @@ export function NewsletterBand({ section }: SectionProps) {
   }
 
   return (
-    <Band>
+    <Band nested={nested}>
       <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 rounded-brand border border-line bg-surface-alt p-10 text-center">
         <h2 className="text-2xl font-bold text-fg">{w.title}</h2>
         {w.lede && <p className="text-fg-muted">{w.lede}</p>}
@@ -231,12 +231,12 @@ export function NewsletterBand({ section }: SectionProps) {
   );
 }
 
-export function LogosBand({ section }: SectionProps) {
+export function LogosBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const images = setting<string[]>(section, 'images', []).filter(Boolean);
   if (images.length === 0) return null;
   return (
-    <Band tight>
+    <Band nested={nested} tight>
       {w.title && <SectionHeader {...w} />}
       <div className={section.variant === 'grid'
         ? 'grid grid-cols-3 items-center gap-8 sm:grid-cols-5'
@@ -257,7 +257,7 @@ export function LogosBand({ section }: SectionProps) {
  * left alone and rendered nothing — an arbitrary URL in an iframe on a
  * merchant's shop is somebody else's page inside theirs.
  */
-export function VideoBand({ section }: SectionProps) {
+export function VideoBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const url = setting<string>(section, 'videoUrl', '');
   const embed = embedUrl(url);
@@ -277,7 +277,7 @@ export function VideoBand({ section }: SectionProps) {
 
   if (section.variant === 'split') {
     return (
-      <Band>
+      <Band nested={nested}>
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div>
             {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
@@ -289,7 +289,7 @@ export function VideoBand({ section }: SectionProps) {
     );
   }
   return (
-    <Band>
+    <Band nested={nested}>
       {w.title && <SectionHeader {...w} />}
       {frame}
     </Band>

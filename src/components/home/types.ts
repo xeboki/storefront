@@ -28,6 +28,14 @@ export interface SectionContext {
 export interface SectionProps {
   section: HomeSection;
   ctx: SectionContext;
+  /**
+   * This block is inside a column.
+   *
+   * Passed down rather than inferred, because a band cannot tell: the same
+   * component draws a full-width featured grid and a four-item carousel in a
+   * third of the page, and the difference is entirely in who is asking.
+   */
+  nested?: boolean;
 }
 
 /** Words for a band: the merchant's, falling back to the band's own. */

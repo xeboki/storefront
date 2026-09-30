@@ -7,11 +7,22 @@
  * fails the build, and it failed it here: a layout primitive has no business
  * living next to server code.
  */
-export function Band({ children, bordered = true, tight = false }: {
+export function Band({ children, bordered = true, tight = false, nested = false }: {
   children: React.ReactNode;
   bordered?: boolean;
   tight?: boolean;
+  /**
+   * Inside a column.
+   *
+   * A band in a column must NOT bring the page gutter or the full-width
+   * padding with it — the row already supplied both, and applying them again
+   * is how a block ends up inset from an inset and half the width it was
+   * given. It also drops the rule above it: a hairline across a third of the
+   * page reads as a mistake rather than a division.
+   */
+  nested?: boolean;
 }) {
+  if (nested) return <div>{children}</div>;
   return (
     <section className={bordered ? 'border-t border-line' : undefined}>
       <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${

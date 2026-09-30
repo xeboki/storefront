@@ -21,14 +21,14 @@ import { bandWords, setting } from '@/lib/band-words';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
 
-export function RichTextBand({ section }: SectionProps) {
+export function RichTextBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const body = setting<string>(section, 'body', '');
   if (!w.title && !body) return null;
   const width = section.variant === 'narrow' ? 'max-w-2xl'
     : section.variant === 'wide' ? 'max-w-none' : 'max-w-3xl';
   return (
-    <Band>
+    <Band nested={nested}>
       <div className={`${width} ${section.variant === 'centred' ? 'mx-auto text-center' : ''}`}>
         {w.eyebrow && (
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fg-subtle">
@@ -46,7 +46,7 @@ export function RichTextBand({ section }: SectionProps) {
   );
 }
 
-export function ImageTextBand({ section }: SectionProps) {
+export function ImageTextBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const body = setting<string>(section, 'body', '');
   const imageUrl = setting<string>(section, 'imageUrl', '');
@@ -91,7 +91,7 @@ export function ImageTextBand({ section }: SectionProps) {
   }
 
   return (
-    <Band>
+    <Band nested={nested}>
       <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-2">
         {/* Words first in the DOM whichever side the picture sits, so a phone
             and a screen reader both get the heading before the photograph. */}
@@ -110,14 +110,14 @@ export function ImageTextBand({ section }: SectionProps) {
   );
 }
 
-export function GalleryBand({ section }: SectionProps) {
+export function GalleryBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const images = setting<string[]>(section, 'images', []).filter(Boolean);
   if (images.length === 0) return null;
 
   if (section.variant === 'carousel') {
     return (
-      <Band>
+      <Band nested={nested}>
         {w.title && <SectionHeader {...w} />}
         <ScrollRail trackClassName="flex gap-4 pb-2">
           {images.map((src, i) => (
@@ -144,7 +144,7 @@ export function GalleryBand({ section }: SectionProps) {
 
   const masonry = section.variant === 'masonry';
   return (
-    <Band>
+    <Band nested={nested}>
       {w.title && <SectionHeader {...w} />}
       <div className={masonry
         ? 'columns-2 gap-4 sm:columns-3 [&>img]:mb-4'
@@ -163,7 +163,7 @@ export function GalleryBand({ section }: SectionProps) {
 
 interface Quote { body?: string; name?: string; detail?: string }
 
-export function TestimonialsBand({ section }: SectionProps) {
+export function TestimonialsBand({ section, nested }: SectionProps) {
   const w = bandWords(section, { eyebrow: 'Reviews', title: 'What people say' });
   const quotes = setting<Quote[]>(section, 'quotes', [])
     .filter((q) => (q?.body ?? '').trim());
@@ -182,7 +182,7 @@ export function TestimonialsBand({ section }: SectionProps) {
   );
 
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...w} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-4 pb-2">
@@ -203,7 +203,7 @@ export function TestimonialsBand({ section }: SectionProps) {
 
 interface QA { q?: string; a?: string }
 
-export function FaqBand({ section }: SectionProps) {
+export function FaqBand({ section, nested }: SectionProps) {
   const w = bandWords(section, { title: 'Questions' });
   const items = setting<QA[]>(section, 'items', [])
     .filter((i) => (i?.q ?? '').trim());
@@ -211,7 +211,7 @@ export function FaqBand({ section }: SectionProps) {
 
   if (section.variant === 'twoColumn') {
     return (
-      <Band>
+      <Band nested={nested}>
         <SectionHeader {...w} />
         <dl className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           {items.map((item, i) => (
@@ -226,7 +226,7 @@ export function FaqBand({ section }: SectionProps) {
   }
 
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...w} />
       <div className="mx-auto max-w-3xl divide-y divide-line border-y border-line">
         {items.map((item, i) => <FaqRow key={i} item={item} />)}
@@ -257,13 +257,13 @@ function FaqRow({ item }: { item: QA }) {
 
 interface Stat { value?: string; label?: string }
 
-export function StatsBand({ section }: SectionProps) {
+export function StatsBand({ section, nested }: SectionProps) {
   const w = bandWords(section, {});
   const items = setting<Stat[]>(section, 'items', [])
     .filter((s) => (s?.value ?? '').trim());
   if (items.length === 0) return null;
   return (
-    <Band tight>
+    <Band nested={nested} tight>
       {w.title && <SectionHeader {...w} />}
       <dl className={`grid gap-8 ${section.variant === 'grid'
         ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-4'}`}>
@@ -280,7 +280,7 @@ export function StatsBand({ section }: SectionProps) {
 
 interface Member { name?: string; role?: string; imageUrl?: string }
 
-export function TeamBand({ section }: SectionProps) {
+export function TeamBand({ section, nested }: SectionProps) {
   const w = bandWords(section, { eyebrow: 'The people', title: 'Who you will meet' });
   const members = setting<Member[]>(section, 'members', [])
     .filter((m) => (m?.name ?? '').trim());
@@ -300,7 +300,7 @@ export function TeamBand({ section }: SectionProps) {
   );
 
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...w} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-8 pb-2">

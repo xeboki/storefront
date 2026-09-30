@@ -24,9 +24,10 @@ import { bandWords, setting } from '@/lib/band-words';
 import { hasAppointments } from '@/lib/business-type';
 import { onlineStores } from '@/lib/location';
 import { Band } from './Band';
+import { ProductTabs } from './ProductTabs';
 import type { SectionProps } from '../types';
 
-export function HeroBand({ section, ctx }: SectionProps) {
+export function HeroBand({ section, ctx, nested }: SectionProps) {
   const slides = resolveSlides(ctx.storefrontConfig, ctx.storeConfig, ctx.storeSlug);
   const slideshow = ctx.storefrontConfig?.heroSlideshow;
   // The preset has carried a hero treatment since presets existed. Order of
@@ -45,7 +46,7 @@ export function HeroBand({ section, ctx }: SectionProps) {
   return <HeroSlideshow slides={slides} settings={settings} />;
 }
 
-export function TrustBand({ section, ctx }: SectionProps) {
+export function TrustBand({ section, ctx, nested }: SectionProps) {
   const variant = section.variant === 'plain' || section.variant === 'compact'
     ? section.variant
     : 'icons';
@@ -58,7 +59,7 @@ export function TrustBand({ section, ctx }: SectionProps) {
   );
 }
 
-export function CategoriesBand({ section, ctx }: SectionProps) {
+export function CategoriesBand({ section, ctx, nested }: SectionProps) {
   const booking = hasAppointments(ctx.storeConfig.businessType);
   const limit = setting<number>(section, 'limit', 0);
   const chosen = setting<string[]>(section, 'categoryIds', []);
@@ -91,7 +92,7 @@ export function CategoriesBand({ section, ctx }: SectionProps) {
   });
 
   return (
-    <Band bordered={false}>
+    <Band nested={nested} bordered={false}>
       <SectionHeader {...words} href={`/${ctx.storeSlug}/catalog`} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-4 pb-2">
@@ -159,7 +160,7 @@ export function CategoriesBand({ section, ctx }: SectionProps) {
   );
 }
 
-export function FeaturedBand({ section, ctx }: SectionProps) {
+export function FeaturedBand({ section, ctx, nested }: SectionProps) {
   const limit = setting<number>(section, 'limit', 0);
   const chosen = setting<string[]>(section, 'productIds', []);
   const pool = chosen.length
@@ -176,18 +177,37 @@ export function FeaturedBand({ section, ctx }: SectionProps) {
     lede: 'Chosen by the store this week.',
     linkLabel: 'View all',
   });
+
+  // Named selections over one grid — "New / Featured / All" — instead of
+  // three bands a shopper scrolls past. The merchant names the tabs; what
+  // each holds is derived from the catalogue this page already has, so a tab
+  // costs no round trip.
+  const tabNames = setting<string[]>(section, 'tabs', []).filter(Boolean);
+  const shown = section.variant === 'wide' ? list.slice(0, 4) : list;
+
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...words} href={`/${ctx.storeSlug}/catalog`} />
-      <FeaturedProducts
-        products={section.variant === 'wide' ? list.slice(0, 4) : list}
-        storeSlug={ctx.storeSlug}
-      />
+      {tabNames.length > 1 ? (
+        <ProductTabs
+          storeSlug={ctx.storeSlug}
+          tabs={tabNames.map((label, i) => ({
+            label,
+            // The first tab is the merchant's own selection; the rest are
+            // slices of the catalogue behind it, so naming a tab never leaves
+            // it empty. A shop wanting genuinely different lists gives each
+            // one its own band.
+            products: i === 0 ? shown : ctx.products.slice(i * shown.length, (i + 1) * shown.length),
+          })).filter((t) => t.products.length > 0)}
+        />
+      ) : (
+        <FeaturedProducts products={shown} storeSlug={ctx.storeSlug} />
+      )}
     </Band>
   );
 }
 
-export function CollectionSection({ section, ctx }: SectionProps) {
+export function CollectionSection({ section, ctx, nested }: SectionProps) {
   // The merchant's chosen department, else whichever has the most to show — a
   // composition built around a department holding two things is a thin one.
   const chosen = setting<string>(section, 'categoryId', '');
@@ -208,7 +228,7 @@ export function CollectionSection({ section, ctx }: SectionProps) {
   );
 }
 
-export function EditorialSection({ section, ctx }: SectionProps) {
+export function EditorialSection({ section, ctx, nested }: SectionProps) {
   return (
     <EditorialBand
       storeConfig={ctx.storeConfig}

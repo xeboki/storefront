@@ -23,7 +23,7 @@ import type { SectionProps } from '../types';
  * categories. So this is not a second place to maintain the menu; it is the
  * same list, read.
  */
-export function MenuBand({ section, ctx }: SectionProps) {
+export function MenuBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, { eyebrow: 'The menu', title: 'What we serve' });
   const chosen = setting<string[]>(section, 'categoryIds', []);
   const courses = (chosen.length
@@ -36,7 +36,7 @@ export function MenuBand({ section, ctx }: SectionProps) {
 
   if (section.variant === 'grid') {
     return (
-      <Band>
+      <Band nested={nested}>
         <SectionHeader {...w} href={`/${ctx.storeSlug}/catalog`} />
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map(({ course, items }) => (
@@ -59,7 +59,7 @@ export function MenuBand({ section, ctx }: SectionProps) {
 
   const flat = section.variant === 'list';
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...w} href={`/${ctx.storeSlug}/catalog`} />
       <div className={flat ? 'mx-auto max-w-3xl' : 'mx-auto max-w-4xl space-y-12'}>
         {courses.map(({ course, items }) => (
@@ -99,7 +99,7 @@ export function MenuBand({ section, ctx }: SectionProps) {
  * the way somebody chooses a treatment rather than the way they buy a thing:
  * price beside name, and a booking link on every row.
  */
-export function ServicesBand({ section, ctx }: SectionProps) {
+export function ServicesBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {
     eyebrow: 'What we do', title: 'Services', linkLabel: 'Book',
   });
@@ -113,7 +113,7 @@ export function ServicesBand({ section, ctx }: SectionProps) {
 
   if (section.variant === 'list') {
     return (
-      <Band>
+      <Band nested={nested}>
         <SectionHeader {...w} href={`/${ctx.storeSlug}/book`} />
         <ul className="mx-auto max-w-3xl divide-y divide-line border-y border-line">
           {list.map((item) => (
@@ -140,7 +140,7 @@ export function ServicesBand({ section, ctx }: SectionProps) {
 
   const cards = section.variant === 'cards';
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...w} href={`/${ctx.storeSlug}/book`} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((item) => (
@@ -178,7 +178,7 @@ export function ServicesBand({ section, ctx }: SectionProps) {
  * up for a class that was cancelled. So the band says what a shopper needs to
  * decide to look, and the live list lives where it is live.
  */
-export function TimetableBand({ section, ctx }: SectionProps) {
+export function TimetableBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {
     eyebrow: 'This week',
     title: 'Classes',
@@ -186,7 +186,7 @@ export function TimetableBand({ section, ctx }: SectionProps) {
     linkLabel: 'View the timetable',
   });
   return (
-    <Band>
+    <Band nested={nested}>
       <div className="mx-auto max-w-2xl text-center">
         {w.eyebrow && (
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fg-subtle">
@@ -205,14 +205,14 @@ export function TimetableBand({ section, ctx }: SectionProps) {
 }
 
 /** The branches somebody can walk into. */
-export function LocationsBand({ section, ctx }: SectionProps) {
+export function LocationsBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, { eyebrow: 'Find us', title: 'Where to find us' });
   const branches = ctx.storefrontConfig?.fulfillmentLocations ?? [];
   if (branches.length === 0) return null;
   const list = section.variant === 'single' ? branches.slice(0, 1) : branches;
 
   return (
-    <Band>
+    <Band nested={nested}>
       <SectionHeader {...w} href={`/${ctx.storeSlug}/locations`} />
       <div className={`grid gap-6 ${list.length > 1
         ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 max-w-xl'}`}>
@@ -245,7 +245,7 @@ export function LocationsBand({ section, ctx }: SectionProps) {
 }
 
 /** How to reach the shop without buying anything. */
-export function ContactBand({ section, ctx }: SectionProps) {
+export function ContactBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {
     title: 'Get in touch',
     lede: 'Questions about an order, a booking, or anything else.',
@@ -273,7 +273,7 @@ export function ContactBand({ section, ctx }: SectionProps) {
 
   if (section.variant === 'card') {
     return (
-      <Band>
+      <Band nested={nested}>
         <div className="mx-auto max-w-xl rounded-brand border border-line bg-surface-alt p-8 text-center">
           <h2 className="text-2xl font-bold text-fg">{w.title}</h2>
           {w.lede && <p className="mt-2 text-fg-muted">{w.lede}</p>}
@@ -284,7 +284,7 @@ export function ContactBand({ section, ctx }: SectionProps) {
   }
 
   return (
-    <Band>
+    <Band nested={nested}>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
           <h2 className="text-3xl font-bold text-fg">{w.title}</h2>

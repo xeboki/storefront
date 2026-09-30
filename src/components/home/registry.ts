@@ -33,8 +33,14 @@ import {
 import {
   MenuBand, ServicesBand, TimetableBand, LocationsBand, ContactBand,
 } from './bands/Trade';
+import { RowBand } from './bands/Row';
+import {
+  TextCardBlock, TileBlock, MosaicBlock, ProductListBlock, MapBlock,
+} from './bands/Blocks';
 
 export const BANDS: Record<string, ComponentType<SectionProps>> = {
+  // Structure
+  row: RowBand,
   // The page's own furniture
   hero: HeroBand,
   announcement: AnnouncementBand,
@@ -44,6 +50,11 @@ export const BANDS: Record<string, ComponentType<SectionProps>> = {
   featured: FeaturedBand,
   collection: CollectionSection,
   logos: LogosBand,
+  productList: ProductListBlock,
+  textCard: TextCardBlock,
+  tile: TileBlock,
+  mosaic: MosaicBlock,
+  map: MapBlock,
   // Words and pictures
   richText: RichTextBand,
   imageText: ImageTextBand,
