@@ -8,6 +8,15 @@ import { formatCurrency } from '@/lib/utils';
 interface Props {
   storefrontConfig: StorefrontConfig | null;
   currency: string;
+  /**
+   * How much room the band takes.
+   *
+   * `icons` is what it has always drawn. `plain` drops the icon discs for a
+   * shop whose page is already busy, and `compact` puts the four promises on
+   * one line — a strip rather than a band, for a page that wants the stock
+   * higher up.
+   */
+  variant?: 'icons' | 'plain' | 'compact';
 }
 
 /**
@@ -36,7 +45,7 @@ const ICONS: Record<string, LucideIcon> = {
   clock: Clock, fast: Clock, package: Package, quality: Sparkles,
 };
 
-export function TrustBar({ storefrontConfig, currency }: Props) {
+export function TrustBar({ storefrontConfig, currency, variant = 'icons' }: Props) {
   const threshold = storefrontConfig?.freeShippingThreshold ?? null;
   const shippingCopy =
     threshold != null
@@ -63,14 +72,34 @@ export function TrustBar({ storefrontConfig, currency }: Props) {
         { Icon: Headphones, title: 'Real people', body: 'Talk to the shop directly' },
       ];
 
+  if (variant === 'compact') {
+    // One line, titles only. The body text is what makes this a band rather
+    // than a strip, so a compact bar drops it instead of shrinking it to
+    // something nobody reads.
+    return (
+      <section className="border-y border-line bg-surface-alt/60">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-3 sm:px-6 lg:px-8">
+          {items.map(({ Icon, title }, i) => (
+            <span key={`${title}-${i}`} className="flex items-center gap-2 text-sm text-fg-muted">
+              <Icon size={15} aria-hidden className="text-primary" />
+              {title}
+            </span>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="border-y border-line bg-surface-alt/60">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-8 px-4 py-8 sm:px-6 sm:py-10 lg:grid-cols-4 lg:px-8">
         {items.map(({ Icon, title, body }, i) => (
           <div key={`${title}-${i}`} className="flex items-start gap-3">
-            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <Icon size={18} aria-hidden />
-            </span>
+            {variant !== 'plain' && (
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Icon size={18} aria-hidden />
+              </span>
+            )}
             <div className="min-w-0">
               <p className="text-sm font-semibold text-fg">{title}</p>
               <p className="mt-0.5 text-sm text-fg-muted">{body}</p>

@@ -13,6 +13,14 @@ interface Props {
   stores: FulfillmentLocation[];
   /** The merchant's wording. A blank field falls back to the copy below. */
   words: SectionWords;
+  /**
+   * Picture on the left instead of the right.
+   *
+   * `order` rather than reordering the markup: the words stay first in the
+   * DOM, so a screen reader and a phone — where the two stack — both get the
+   * heading before the photograph, whichever side it is on for everyone else.
+   */
+  flip?: boolean;
 }
 
 /**
@@ -26,7 +34,7 @@ interface Props {
  * founding year or a story: a storefront that writes copy on a merchant's
  * behalf will eventually say something untrue about them.
  */
-export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores, words }: Props) {
+export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores, words, flip = false }: Props) {
   const cities = [...new Set(stores.map((s) => s.city).filter(Boolean))];
   const count = stores.length;
 
@@ -34,7 +42,7 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores, words 
     <section className="border-t border-line">
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-stretch lg:grid-cols-2">
         {/* Image column. Falls back to a tonal panel rather than a hole. */}
-        <div className="relative min-h-[18rem] overflow-hidden bg-surface-alt lg:min-h-[32rem]">
+        <div className={`relative min-h-[18rem] overflow-hidden bg-surface-alt lg:min-h-[32rem] ${flip ? 'lg:order-first' : ''}`}>
           <ProductImage
             src={imageUrl}
             alt=""
