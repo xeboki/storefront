@@ -79,7 +79,14 @@ export function RowBand({ section, ctx }: SectionProps) {
           stacks on a phone for exactly that reason. */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
         {columns.map((column, i) => (
-          <div key={i} className={`${SPAN[widths[i]] ?? 'lg:col-span-6'} flex flex-col gap-8`}>
+          <div
+            key={i}
+            className={`${SPAN[widths[i]] ?? 'lg:col-span-6'} flex flex-col gap-8 ${
+              // One block that wants the height gets it; several stacked
+              // share what they need. `min-h-0` so a tall child cannot push
+              // the column past the row.
+              column.blocks.length === 1 ? '[&>*]:min-h-0' : ''}`}
+          >
             {column.blocks.map((block) => {
               if (!block.visible) return null;
               const Block = bandFor(block.type);

@@ -11,6 +11,7 @@
  */
 import Link from 'next/link';
 import { SectionHeader } from '@/components/layout/SectionHeader';
+import { useMoney } from '@/lib/currency';
 import { bandWords, setting } from '@/lib/band-words';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
@@ -45,7 +46,7 @@ export function TextCardBlock({ section, nested }: SectionProps) {
     : undefined;
 
   return (
-    <Band nested={nested} bordered={false} tight>
+    <Band nested={nested} bordered={false} tight fill>
       <div
         style={style}
         className={`flex h-full flex-col justify-center rounded-brand p-8 ${
@@ -91,8 +92,16 @@ export function TileBlock({ section, nested }: SectionProps) {
   const height = setting<string>(section, 'height', 'medium');
   if (!imageUrl && !w.title) return null;
 
-  const tall = { short: 'min-h-[12rem]', medium: 'min-h-[18rem]', tall: 'min-h-[26rem]' }[height]
+  // Two forms of the same named height, because the two arrangements need
+  // different things from it. Words OVER a picture need a floor — the panel
+  // must be at least this tall, and may grow if the words are long. A picture
+  // ABOVE words needs a ceiling: `min-h` there is only a floor, so the image
+  // rendered at its natural aspect and a "medium" tile came out 784px tall
+  // beside a "medium" tile that was 288.
+  const floor = { short: 'min-h-[12rem]', medium: 'min-h-[18rem]', tall: 'min-h-[26rem]' }[height]
     ?? 'min-h-[18rem]';
+  const exact = { short: 'h-[12rem]', medium: 'h-[18rem]', tall: 'h-[26rem]' }[height]
+    ?? 'h-[18rem]';
 
   const words = (
     <>
@@ -110,15 +119,19 @@ export function TileBlock({ section, nested }: SectionProps) {
   );
 
   const inner = section.variant === 'below' ? (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-col">
       {imageUrl && (
+        // The named height, NOT `flex-1`. Inside a column the grid stretches
+        // every column to the tallest, and a picture told to take the
+        // remaining space then takes all of it — two tiles both set to
+        // "medium" came out 288px and 933px.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt="" className={`w-full flex-1 rounded-brand object-cover ${tall}`} />
+        <img src={imageUrl} alt="" className={`w-full rounded-brand object-cover ${exact}`} />
       )}
       <div className="pt-4 text-fg">{words}</div>
     </div>
   ) : (
-    <div className={`relative isolate flex overflow-hidden rounded-brand ${tall} ${
+    <div className={`relative isolate flex overflow-hidden rounded-brand ${floor} ${
       section.variant === 'corner' ? 'items-end' : 'items-center'}`}>
       {imageUrl && (
         <>
@@ -138,7 +151,7 @@ export function TileBlock({ section, nested }: SectionProps) {
     ? <Link href={ctaUrl} className="block h-full">{inner}</Link>
     : inner;
 
-  return <Band nested={nested} bordered={false} tight>{content}</Band>;
+  return <Band nested={nested} bordered={false} tight fill>{content}</Band>;
 }
 
 /**
@@ -204,6 +217,10 @@ export function MosaicBlock({ section, nested }: SectionProps) {
  * of the page is three unreadable cards, and this is a list.
  */
 export function ProductListBlock({ section, ctx, nested }: SectionProps) {
+  // The shop's own currency. This rendered a bare `39.99` beside cards that
+  // said `€39.99` — money without its symbol is a number, and which number
+  // depends on where the reader lives.
+  const money = useMoney();
   const w = bandWords(section, {});
   const limit = setting<number>(section, 'limit', 4);
   const chosen = setting<string[]>(section, 'productIds', []);
@@ -234,7 +251,9 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-fg">{product.name}</p>
                 {section.variant === 'detailed' && (
-                  <p className="mt-0.5 text-sm text-fg-muted">{product.price}</p>
+                  <p className="mt-0.5 text-sm text-fg-muted">
+                    {money(product.price ?? 0)}
+                  </p>
                 )}
               </div>
             </Link>

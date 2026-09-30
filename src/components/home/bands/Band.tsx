@@ -7,10 +7,22 @@
  * fails the build, and it failed it here: a layout primitive has no business
  * living next to server code.
  */
-export function Band({ children, bordered = true, tight = false, nested = false }: {
+export function Band({
+  children, bordered = true, tight = false, nested = false, fill = false,
+}: {
   children: React.ReactNode;
   bordered?: boolean;
   tight?: boolean;
+  /**
+   * Take the whole column's height.
+   *
+   * For a block that reads as a panel — a coloured card, a picture tile.
+   * The grid stretches every column to the tallest, so a short panel beside
+   * a long carousel floated at the top with a hole under it. A list or a
+   * heading does NOT want this: stretching a list of three products to 600px
+   * just moves the hole inside the list.
+   */
+  fill?: boolean;
   /**
    * Inside a column.
    *
@@ -22,7 +34,7 @@ export function Band({ children, bordered = true, tight = false, nested = false 
    */
   nested?: boolean;
 }) {
-  if (nested) return <div>{children}</div>;
+  if (nested) return <div className={fill ? 'h-full' : undefined}>{children}</div>;
   return (
     <section className={bordered ? 'border-t border-line' : undefined}>
       <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${

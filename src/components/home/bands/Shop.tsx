@@ -103,11 +103,9 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
               className="flex-none w-44 rounded-brand border border-line bg-surface p-5 text-center transition-colors hover:border-primary"
             >
               <span className="text-sm font-semibold text-fg">{c.name}</span>
-              {countIn(c.id) > 0 && (
-                <span className="mt-1 block text-xs text-fg-muted">
-                  {items(countIn(c.id))}
-                </span>
-              )}
+              <span className="mt-1 block min-h-[1rem] text-xs text-fg-muted">
+                {countIn(c.id) > 0 ? items(countIn(c.id)) : '\u00a0'}
+              </span>
             </Link>
           ))}
         </ScrollRail>
@@ -145,11 +143,14 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
                 c.color ? 'text-white' : 'border border-line bg-surface-alt text-fg'}`}
             >
               <span className="text-lg font-bold leading-tight">{c.name}</span>
-              {countIn(c.id) > 0 && (
-                <span className={`mt-1 text-sm ${c.color ? 'text-white/80' : 'text-fg-muted'}`}>
-                  {items(countIn(c.id))}
-                </span>
-              )}
+              {/* The line is kept whether or not there is a count to put in
+                  it. Without it, a department with nothing filed under it
+                  sat a line lower than the one beside it, so a row of tiles
+                  had its names at two different heights. */}
+              <span className={`mt-1 min-h-[1.25rem] text-sm ${
+                c.color ? 'text-white/80' : 'text-fg-muted'}`}>
+                {countIn(c.id) > 0 ? items(countIn(c.id)) : '\u00a0'}
+              </span>
             </Link>
           ))}
         </div>

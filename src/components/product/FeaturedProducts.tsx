@@ -119,9 +119,15 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
 
               <div className="flex items-baseline justify-between gap-4 pt-4">
                 <div className="min-w-0">
-                  {product.categoryName && (
-                    <p className="eyebrow text-[9px]">{product.categoryName}</p>
-                  )}
+                  {/* The line is kept even when the product has no
+                      category. Dropping it moved that card's NAME up to
+                      where its neighbours' category sits, so a row of cards
+                      had its names on two different baselines — and which
+                      ones depended on whether somebody had filed the product
+                      anywhere. */}
+                  <p className="eyebrow text-[9px]">
+                    {product.categoryName || '\u00a0'}
+                  </p>
                   <h3 className="mt-1 truncate text-base font-medium text-fg transition-colors group-hover:text-primary">
                     {product.name}
                   </h3>

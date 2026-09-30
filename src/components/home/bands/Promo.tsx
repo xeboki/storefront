@@ -221,8 +221,13 @@ export function NewsletterBand({ section, nested }: SectionProps) {
   }
 
   return (
-    <Band nested={nested}>
-      <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 rounded-brand border border-line bg-surface-alt p-10 text-center">
+    // `fill`, so a sign-up card beside a map or a picture matches its height
+    // instead of floating at the top of the column with a hole beneath it.
+    <Band nested={nested} fill>
+      {/* `p-6` on a phone, not `p-10`. Forty pixels of padding each side of a
+          390px screen left the email field too narrow for the placeholder it
+          carries, which came out as "you@example.cor". */}
+      <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center gap-5 rounded-brand border border-line bg-surface-alt p-6 text-center sm:p-10">
         <h2 className="text-2xl font-bold text-fg">{w.title}</h2>
         {w.lede && <p className="text-fg-muted">{w.lede}</p>}
         {form}
