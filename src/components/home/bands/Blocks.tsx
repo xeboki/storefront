@@ -24,7 +24,7 @@ import type { SectionProps } from '../types';
  * with the products taking the rest.
  */
 export function TextCardBlock({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const body = setting<string>(section, 'body', '');
   const colour = setting<string>(section, 'backgroundColor', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
@@ -49,9 +49,18 @@ export function TextCardBlock({ section, nested }: SectionProps) {
     <Band nested={nested} bordered={false} tight fill>
       <div
         style={style}
+        // `ring-fg/10` on the merchant's own colour, so the card keeps an
+        // edge when the colour lands near the page behind it. A deep brown
+        // card chosen to look rich on a bone ground came out at **1.32:1**
+        // against the dark theme's near-black page — the panel was still
+        // there, and nobody could see where it started. The ring is drawn in
+        // the page's foreground colour, which means it is espresso-on-
+        // espresso and invisible in the theme where the contrast was already
+        // fine, and a pale hairline in the one where it was not. Same fault
+        // as `surface-alt` reading 1.09:1 on the light theme.
         className={`flex h-full flex-col justify-center rounded-brand p-8 ${
           outline ? 'border border-line'
-            : colour ? ''
+            : colour ? 'ring-1 ring-inset ring-fg/10'
               : tint ? 'bg-surface-alt text-fg'
                 : 'bg-primary-solid text-primary-foreground'}`}
       >
@@ -84,7 +93,7 @@ export function TextCardBlock({ section, nested }: SectionProps) {
  * breaks the row it is in the moment somebody changes the column beside it.
  */
 export function TileBlock({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const body = setting<string>(section, 'body', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
@@ -169,7 +178,7 @@ export function TileBlock({ section, nested }: SectionProps) {
  * than measures.
  */
 export function MosaicBlock({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   interface Tile { imageUrl?: string; title?: string; body?: string; url?: string }
   const tiles = setting<Tile[]>(section, 'tiles', [])
     .filter((t) => (t?.title ?? '').trim() || (t?.imageUrl ?? '').trim());
@@ -196,7 +205,7 @@ export function MosaicBlock({ section, nested }: SectionProps) {
 
   return (
     <Band nested={nested}>
-      {w.title && <SectionHeader {...w} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${shape.cols}`}>
         {tiles.map((tile, i) => {
           const wide = i === 0 && shape.first !== '';
@@ -244,7 +253,7 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
   // boundary, so it compiled and then threw at render. The currency is
   // already in the context every band is handed.
   const money = moneyFor(ctx.storeConfig.currencyCode);
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const limit = setting<number>(section, 'limit', 4);
   const chosen = setting<string[]>(section, 'productIds', []);
   const pool = chosen.length
@@ -256,7 +265,7 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
 
   return (
     <Band nested={nested} bordered={!nested}>
-      {w.title && <SectionHeader {...w} href={`/${ctx.storeSlug}/catalog`} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />}
       <ul className="divide-y divide-line border-y border-line">
         {list.map((product) => (
           <li key={product.id}>
@@ -297,7 +306,7 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
  * nothing that breaks the day a billing account lapses.
  */
 export function MapBlock({ section, ctx, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const branch = (ctx.storefrontConfig?.fulfillmentLocations ?? [])[0];
   const address = setting<string>(section, 'address', '')
     || branch?.pickupAddress || branch?.city || '';
@@ -306,7 +315,7 @@ export function MapBlock({ section, ctx, nested }: SectionProps) {
 
   return (
     <Band nested={nested} tight={nested} bordered={section.variant === 'framed'}>
-      {w.title && <SectionHeader {...w} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       {/* `wide` runs the map edge to edge; `framed` keeps it inside the page
           margin with the rest of the content. Nested, it is always framed —
           a column has no edge to run to. */}

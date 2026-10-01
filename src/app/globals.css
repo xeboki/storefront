@@ -128,33 +128,37 @@
   }
 }
 
-/* ── Price range slider thumbs ─────────────────────────────────────────────── */
-input[type="range"].slider-thumb {
-  pointer-events: none;
+/* Layered, so a utility in the markup still wins — see
+   `test_storefront_css_layers.py`. */
+@layer components {
+  /* ── Price range slider thumbs ─────────────────────────────────────────────── */
+  input[type="range"].slider-thumb {
+    pointer-events: none;
+  }
+  input[type="range"].slider-thumb::-webkit-slider-thumb {
+    pointer-events: all;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgb(var(--color-primary));
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  input[type="range"].slider-thumb::-moz-range-thumb {
+    pointer-events: all;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: rgb(var(--color-primary));
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
-input[type="range"].slider-thumb::-webkit-slider-thumb {
-  pointer-events: all;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgb(var(--color-primary));
-  border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  cursor: pointer;
-}
-input[type="range"].slider-thumb::-moz-range-thumb {
-  pointer-events: all;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: rgb(var(--color-primary));
-  border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-  cursor: pointer;
-}
-.scrollbar-hide::-webkit-scrollbar { display: none; }
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 @layer utilities {
   .line-clamp-2 {
@@ -220,6 +224,16 @@ input[type="range"].slider-thumb::-moz-range-thumb {
    14/500 — all in one face — which is why every section looked the same
    weight as the one above it. */
 
+/* `@layer components`, not bare rules. Unlayered CSS beats everything
+   Tailwind emits, so `.eyebrow` was winning against the utility beside it
+   and SIX separate overrides in this app had never once applied:
+   `text-primary` on every section heading's eyebrow (the accent colour the
+   whole palette is built around), `text-white/70` on a hero's eyebrow over
+   a photograph — which was the one that showed, because dark grey on a
+   picture is not legible — and four `text-[9px]`/`text-[10px]` sizes.
+   Nothing looked broken; the page just quietly ignored what it was told. */
+@layer components {
+
 /* Small, letterspaced label above a heading. Does the work a second heading
    size would otherwise be asked to do. */
 .eyebrow {
@@ -277,6 +291,8 @@ input[type="range"].slider-thumb::-moz-range-thumb {
   margin-left: 0.75rem;
 }
 
+}
+
 /* ── Surface texture ─────────────────────────────────────────────────────────
    A fine grain over the whole page. Flat digital colour is the thing that
    makes a dark UI read as a dashboard; a little noise gives it the tooth of
@@ -299,17 +315,20 @@ body::before {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
-.marquee-track {
-  display: flex;
-  width: max-content;
-}
-@media (prefers-reduced-motion: no-preference) {
+/* Layered: see the note on the type scale. */
+@layer components {
   .marquee-track {
-    animation: marquee 32s linear infinite;
+    display: flex;
+    width: max-content;
   }
-  /* Stop on hover so the text can actually be read. */
-  .marquee:hover .marquee-track {
-    animation-play-state: paused;
+  @media (prefers-reduced-motion: no-preference) {
+    .marquee-track {
+      animation: marquee 32s linear infinite;
+    }
+    /* Stop on hover so the text can actually be read. */
+    .marquee:hover .marquee-track {
+      animation-play-state: paused;
+    }
   }
 }
 
@@ -330,23 +349,26 @@ body::before {
    A word set large enough to stop being a label and start being the picture.
    Clamped hard: the whole effect depends on it filling the measure, so it has
    to scale with the viewport rather than sit at one size and look stranded. */
-.display-hero {
-  font-size: clamp(calc(3rem * var(--type-scale, 1)), calc(13vw * var(--type-scale, 1)), calc(11rem * var(--type-scale, 1)));
-  line-height: 0.88;
-  font-weight: 600;
-  letter-spacing: -0.035em;
-}
+/* Layered: see the note on the type scale. */
+@layer components {
+  .display-hero {
+    font-size: clamp(calc(3rem * var(--type-scale, 1)), calc(13vw * var(--type-scale, 1)), calc(11rem * var(--type-scale, 1)));
+    line-height: 0.88;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
 
-/* Outlined type, for the second half of a two-tone headline. -webkit-text-stroke
-   has no standard equivalent with this support, and the fallback — a solid
-   fill — is perfectly readable, so it degrades to "less interesting" rather
-   than "broken". */
-.text-outline {
-  color: transparent;
-  -webkit-text-stroke: 1px rgb(var(--color-fg) / 0.45);
-}
-@supports not (-webkit-text-stroke: 1px black) {
+  /* Outlined type, for the second half of a two-tone headline. -webkit-text-stroke
+     has no standard equivalent with this support, and the fallback — a solid
+     fill — is perfectly readable, so it degrades to "less interesting" rather
+     than "broken". */
   .text-outline {
-    color: rgb(var(--color-fg) / 0.45);
+    color: transparent;
+    -webkit-text-stroke: 1px rgb(var(--color-fg) / 0.45);
+  }
+  @supports not (-webkit-text-stroke: 1px black) {
+    .text-outline {
+      color: rgb(var(--color-fg) / 0.45);
+    }
   }
 }

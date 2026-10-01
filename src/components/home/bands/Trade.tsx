@@ -32,7 +32,7 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
   // boundary, so it compiled and then threw at render. The currency is
   // already in the context every band is handed.
   const money = moneyFor(ctx.storeConfig.currencyCode);
-  const w = bandWords(section, { eyebrow: 'The menu', title: 'What we serve' });
+  const w = bandWords(section, { eyebrow: 'The menu', title: 'What we serve' }, nested);
   const chosen = setting<string[]>(section, 'categoryIds', []);
   const courses = (chosen.length
     ? chosen.map((id) => ctx.categories.find((c) => c.id === id))
@@ -45,7 +45,7 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
   if (section.variant === 'grid') {
     return (
       <Band nested={nested}>
-        <SectionHeader {...w} href={`/${ctx.storeSlug}/catalog`} />
+        <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map(({ course, items }) => (
             <div key={course.id}>
@@ -68,7 +68,7 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
   const flat = section.variant === 'list';
   return (
     <Band nested={nested}>
-      <SectionHeader {...w} href={`/${ctx.storeSlug}/catalog`} />
+      <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />
       <div className={flat ? 'mx-auto max-w-3xl' : 'mx-auto max-w-4xl space-y-12'}>
         {courses.map(({ course, items }) => (
           <div key={course.id}>
@@ -115,7 +115,7 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
   const money = moneyFor(ctx.storeConfig.currencyCode);
   const w = bandWords(section, {
     eyebrow: 'What we do', title: 'Services', linkLabel: 'Book',
-  });
+  }, nested);
   const limit = setting<number>(section, 'limit', 0);
   const chosen = setting<string[]>(section, 'categoryIds', []);
   const pool = chosen.length
@@ -127,7 +127,7 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
   if (section.variant === 'list') {
     return (
       <Band nested={nested}>
-        <SectionHeader {...w} href={`/${ctx.storeSlug}/book`} />
+        <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/book`} />
         <ul className="mx-auto max-w-3xl divide-y divide-line border-y border-line">
           {list.map((item) => (
             <li key={item.id} className="flex items-center justify-between gap-6 py-4">
@@ -154,7 +154,7 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
   const cards = section.variant === 'cards';
   return (
     <Band nested={nested}>
-      <SectionHeader {...w} href={`/${ctx.storeSlug}/book`} />
+      <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/book`} />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((item) => (
           <div key={item.id}
@@ -198,12 +198,17 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
  * decide to look, and the live list lives where it is live.
  */
 export function TimetableBand({ section, ctx, nested }: SectionProps) {
+  // `false`, not `nested`. A band in a column is normally not offered its own
+  // heading, because the card beside it is usually doing the titling. This
+  // band has nothing else in it: strip its words and a link to the timetable
+  // is all that is left, which is not a section, it is a stray button. The
+  // rule is for bands whose content comes from the catalogue.
   const w = bandWords(section, {
     eyebrow: 'This week',
     title: 'Classes',
     lede: 'See what is on and book your place.',
     linkLabel: 'View the timetable',
-  });
+  }, false);
   return (
     <Band nested={nested}>
       <div className="mx-auto max-w-2xl text-center">
@@ -212,7 +217,7 @@ export function TimetableBand({ section, ctx, nested }: SectionProps) {
             {w.eyebrow}
           </p>
         )}
-        <h2 className="mt-3 text-3xl font-bold text-fg">{w.title}</h2>
+        {w.title && <h2 className="mt-3 text-3xl font-bold text-fg">{w.title}</h2>}
         {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
         <Link href={`/${ctx.storeSlug}/classes`}
           className="mt-7 inline-block rounded-brand bg-primary-solid px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
@@ -225,14 +230,14 @@ export function TimetableBand({ section, ctx, nested }: SectionProps) {
 
 /** The branches somebody can walk into. */
 export function LocationsBand({ section, ctx, nested }: SectionProps) {
-  const w = bandWords(section, { eyebrow: 'Find us', title: 'Where to find us' });
+  const w = bandWords(section, { eyebrow: 'Find us', title: 'Where to find us' }, nested);
   const branches = ctx.storefrontConfig?.fulfillmentLocations ?? [];
   if (branches.length === 0) return null;
   const list = section.variant === 'single' ? branches.slice(0, 1) : branches;
 
   return (
     <Band nested={nested}>
-      <SectionHeader {...w} href={`/${ctx.storeSlug}/locations`} />
+      <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/locations`} />
       <div className={`grid gap-6 ${list.length > 1
         ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 max-w-xl'}`}>
         {list.map((branch) => {
@@ -265,10 +270,13 @@ export function LocationsBand({ section, ctx, nested }: SectionProps) {
 
 /** How to reach the shop without buying anything. */
 export function ContactBand({ section, ctx, nested }: SectionProps) {
+  // `false` for the same reason as the timetable above: a bare phone number
+  // and an email address with no heading over them read as an orphan rather
+  // than a section.
   const w = bandWords(section, {
     title: 'Get in touch',
     lede: 'Questions about an order, a booking, or anything else.',
-  });
+  }, false);
   const email = ctx.storeConfig.supportEmail || '';
   const phone = ctx.storeConfig.supportPhone || '';
   if (!email && !phone) return null;
@@ -294,7 +302,7 @@ export function ContactBand({ section, ctx, nested }: SectionProps) {
     return (
       <Band nested={nested}>
         <div className="mx-auto max-w-xl rounded-brand border border-line bg-surface-alt p-8 text-center">
-          <h2 className="text-2xl font-bold text-fg">{w.title}</h2>
+          {w.title && <h2 className="text-2xl font-bold text-fg">{w.title}</h2>}
           {w.lede && <p className="mt-2 text-fg-muted">{w.lede}</p>}
           <div className="mt-6 flex justify-center">{details}</div>
         </div>
@@ -306,7 +314,7 @@ export function ContactBand({ section, ctx, nested }: SectionProps) {
     <Band nested={nested}>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
-          <h2 className="text-3xl font-bold text-fg">{w.title}</h2>
+          {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
           {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
         </div>
         <div className="lg:justify-self-end">{details}</div>

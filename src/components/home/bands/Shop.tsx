@@ -89,11 +89,11 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
       ? 'Book any of the services this store offers.'
       : 'Every department in the store, in one place.',
     linkLabel: 'All products',
-  });
+  }, nested);
 
   return (
     <Band nested={nested} bordered={false}>
-      <SectionHeader {...words} href={`/${ctx.storeSlug}/catalog`} />
+      <SectionHeader {...words} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-4 pb-2">
           {list.map((c) => (
@@ -177,7 +177,7 @@ export function FeaturedBand({ section, ctx, nested }: SectionProps) {
     title: booking ? 'Featured services' : 'Featured products',
     lede: 'Chosen by the store this week.',
     linkLabel: 'View all',
-  });
+  }, nested);
 
   // Named selections over one grid — "New / Featured / All" — instead of
   // three bands a shopper scrolls past. The merchant names the tabs; what
@@ -188,7 +188,7 @@ export function FeaturedBand({ section, ctx, nested }: SectionProps) {
 
   return (
     <Band nested={nested}>
-      <SectionHeader {...words} href={`/${ctx.storeSlug}/catalog`} />
+      <SectionHeader {...words} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />
       {tabNames.length > 1 ? (
         <ProductTabs
           storeSlug={ctx.storeSlug}
@@ -225,7 +225,7 @@ export function CollectionSection({ section, ctx, nested }: SectionProps) {
       category={spotlight.category}
       products={spotlight.items}
       storeSlug={ctx.storeSlug}
-      words={bandWords(section, { eyebrow: 'Collection' })}
+      words={bandWords(section, { eyebrow: 'Collection' }, nested)}
     />
   );
 }
@@ -238,7 +238,7 @@ export function EditorialSection({ section, ctx, nested }: SectionProps) {
       imageUrl={setting<string>(section, 'imageUrl', '')
         || ctx.storefrontConfig?.heroImageUrl || ''}
       stores={onlineStores(ctx.storefrontConfig)}
-      words={bandWords(section, { eyebrow: 'The store', linkLabel: 'Find a store' })}
+      words={bandWords(section, { eyebrow: 'The store', linkLabel: 'Find a store' }, nested)}
       flip={section.variant === 'imageLeft'}
     />
   );

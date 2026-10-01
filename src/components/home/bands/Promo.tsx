@@ -17,7 +17,7 @@ import { Band } from './Band';
 import type { SectionProps } from '../types';
 
 export function AnnouncementBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   if (!w.title) return null;
   const deep = section.variant === 'band';
   return (
@@ -31,7 +31,7 @@ export function AnnouncementBand({ section, nested }: SectionProps) {
 }
 
 export function PromoBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
   const ctaUrl = setting<string>(section, 'ctaUrl', '');
@@ -125,7 +125,7 @@ export function PromoBand({ section, nested }: SectionProps) {
  * over, and a dead clock on a live page is how a shop looks abandoned.
  */
 export function CountdownBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const endsAt = setting<string>(section, 'endsAt', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
   const ctaUrl = setting<string>(section, 'ctaUrl', '');
@@ -195,7 +195,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
     title: 'Hear about it first',
     lede: 'New arrivals and offers, now and then. No more than that.',
     linkLabel: 'Sign up',
-  });
+  }, nested);
   // Posts to the same place the footer's sign-up does, so there is one list.
   const form = (
     <form className="flex w-full max-w-md gap-2" action={`/api/subscribe`} method="post">
@@ -217,7 +217,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
     return (
       <section className="border-y border-line bg-surface-alt py-6">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
-          <p className="font-semibold text-fg">{w.title}</p>
+          {w.title && <p className="font-semibold text-fg">{w.title}</p>}
           {form}
         </div>
       </section>
@@ -229,7 +229,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
       <Band nested={nested}>
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
           <div>
-            <h2 className="text-3xl font-bold text-fg">{w.title}</h2>
+            {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
             {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
           </div>
           <div className="lg:justify-self-end">{form}</div>
@@ -246,7 +246,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
           390px screen left the email field too narrow for the placeholder it
           carries, which came out as "you@example.cor". */}
       <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center gap-5 rounded-brand border border-line bg-surface-alt p-6 text-center sm:p-10">
-        <h2 className="text-2xl font-bold text-fg">{w.title}</h2>
+        {w.title && <h2 className="text-2xl font-bold text-fg">{w.title}</h2>}
         {w.lede && <p className="text-fg-muted">{w.lede}</p>}
         {form}
       </div>
@@ -255,12 +255,12 @@ export function NewsletterBand({ section, nested }: SectionProps) {
 }
 
 export function LogosBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const images = setting<string[]>(section, 'images', []).filter(Boolean);
   if (images.length === 0) return null;
   return (
     <Band nested={nested} tight>
-      {w.title && <SectionHeader {...w} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       {/* Centred only when the band has no heading.
           A centred strip under a left-aligned section heading reads as a
           mistake: every other band on the page starts its content at the
@@ -285,7 +285,7 @@ export function LogosBand({ section, nested }: SectionProps) {
  * merchant's shop is somebody else's page inside theirs.
  */
 export function VideoBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const url = setting<string>(section, 'videoUrl', '');
   const embed = embedUrl(url);
   if (!embed) return null;
@@ -317,7 +317,7 @@ export function VideoBand({ section, nested }: SectionProps) {
   }
   return (
     <Band nested={nested}>
-      {w.title && <SectionHeader {...w} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       {frame}
     </Band>
   );

@@ -10,6 +10,20 @@ interface Props {
   linkLabel?: string;
   /** Centre for full-width editorial bands; left for grids. */
   align?: 'left' | 'center';
+  /**
+   * Hold the eyebrow's line even when there is no eyebrow.
+   *
+   * For a band inside a row, where the column beside it is a different band
+   * with its own heading. "Back in stock" had no eyebrow and "THE COLLECTION
+   * / All eight" did, so the two titles sat **17px apart** across a row that
+   * is read as one thing — the optional-line fault this codebase keeps
+   * finding, this time between columns rather than inside one.
+   *
+   * Only in a column. A full-width band has nothing to line up with, and
+   * reserving the line there would push every heading on the page down for
+   * nothing.
+   */
+  reserveEyebrow?: boolean;
 }
 
 /**
@@ -21,8 +35,33 @@ interface Props {
  */
 export function SectionHeader({
   eyebrow, title, lede, href, linkLabel = 'View all', align = 'left',
+  reserveEyebrow = false,
 }: Props) {
   const centered = align === 'center';
+
+  // Nothing to say. A band in a column is not offered its own default
+  // heading (see `bandWords`), so an empty header here is ordinary rather
+  // than a mistake — and drawing it anyway left an empty `display-lg` line
+  // plus `mb-10` of margin, which is the invisible-hole fault this file has
+  // been fixed for before. The link is still worth keeping on its own.
+  if (!title && !eyebrow && !lede) {
+    if (!href || centered) return null;
+    return (
+      <div className="mb-10 flex justify-end">
+        <Link
+          href={href}
+          className="group inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-primary hover:opacity-80"
+        >
+          {linkLabel}
+          <ArrowRight
+            size={15}
+            className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
+          />
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div
       className={
@@ -32,10 +71,16 @@ export function SectionHeader({
       }
     >
       <div className={centered ? 'mx-auto max-w-2xl' : 'max-w-2xl'}>
-        {eyebrow && (
+        {eyebrow ? (
           <p className={`eyebrow ${centered ? '' : 'eyebrow-rule'} text-primary`}>{eyebrow}</p>
-        )}
-        <h2 className="display-lg mt-3 text-fg">{title}</h2>
+        ) : reserveEyebrow ? (
+          // The line, kept empty. `aria-hidden` because there is nothing to
+          // read — this is spacing that happens to be made of text, so that
+          // it scales with the eyebrow it is standing in for rather than
+          // being a hard-coded margin that drifts the moment the type does.
+          <p className="eyebrow" aria-hidden="true">&nbsp;</p>
+        ) : null}
+        {title && <h2 className="display-lg mt-3 text-fg">{title}</h2>}
         {lede && <p className="mt-3 text-fg-muted">{lede}</p>}
       </div>
 

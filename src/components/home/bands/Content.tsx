@@ -22,7 +22,7 @@ import { Band } from './Band';
 import type { SectionProps } from '../types';
 
 export function RichTextBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const body = setting<string>(section, 'body', '');
   if (!w.title && !body) return null;
   const width = section.variant === 'narrow' ? 'max-w-2xl'
@@ -47,7 +47,7 @@ export function RichTextBand({ section, nested }: SectionProps) {
 }
 
 export function ImageTextBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const body = setting<string>(section, 'body', '');
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
@@ -116,14 +116,14 @@ export function ImageTextBand({ section, nested }: SectionProps) {
 }
 
 export function GalleryBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const images = setting<string[]>(section, 'images', []).filter(Boolean);
   if (images.length === 0) return null;
 
   if (section.variant === 'carousel') {
     return (
       <Band nested={nested}>
-        {w.title && <SectionHeader {...w} />}
+        {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
         <ScrollRail trackClassName="flex gap-4 pb-2">
           {images.map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element
@@ -150,7 +150,7 @@ export function GalleryBand({ section, nested }: SectionProps) {
   const masonry = section.variant === 'masonry';
   return (
     <Band nested={nested}>
-      {w.title && <SectionHeader {...w} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       <div className={masonry
         ? 'columns-2 gap-4 sm:columns-3 [&>img]:mb-4'
         : 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4'}>
@@ -169,7 +169,7 @@ export function GalleryBand({ section, nested }: SectionProps) {
 interface Quote { body?: string; name?: string; detail?: string }
 
 export function TestimonialsBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, { eyebrow: 'Reviews', title: 'What people say' });
+  const w = bandWords(section, { eyebrow: 'Reviews', title: 'What people say' }, nested);
   const quotes = setting<Quote[]>(section, 'quotes', [])
     .filter((q) => (q?.body ?? '').trim());
   if (quotes.length === 0) return null;
@@ -188,7 +188,7 @@ export function TestimonialsBand({ section, nested }: SectionProps) {
 
   return (
     <Band nested={nested}>
-      <SectionHeader {...w} />
+      <SectionHeader {...w} reserveEyebrow={nested} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-4 pb-2">
           {quotes.map((q, i) => (
@@ -209,7 +209,7 @@ export function TestimonialsBand({ section, nested }: SectionProps) {
 interface QA { q?: string; a?: string }
 
 export function FaqBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, { title: 'Questions' });
+  const w = bandWords(section, { title: 'Questions' }, nested);
   const items = setting<QA[]>(section, 'items', [])
     .filter((i) => (i?.q ?? '').trim());
   if (items.length === 0) return null;
@@ -217,7 +217,7 @@ export function FaqBand({ section, nested }: SectionProps) {
   if (section.variant === 'twoColumn') {
     return (
       <Band nested={nested}>
-        <SectionHeader {...w} />
+        <SectionHeader {...w} reserveEyebrow={nested} />
         <dl className="grid grid-cols-1 gap-8 sm:grid-cols-2">
           {items.map((item, i) => (
             <div key={i}>
@@ -232,7 +232,7 @@ export function FaqBand({ section, nested }: SectionProps) {
 
   return (
     <Band nested={nested}>
-      <SectionHeader {...w} />
+      <SectionHeader {...w} reserveEyebrow={nested} />
       <div className="mx-auto max-w-3xl divide-y divide-line border-y border-line">
         {items.map((item, i) => <FaqRow key={i} item={item} />)}
       </div>
@@ -263,13 +263,13 @@ function FaqRow({ item }: { item: QA }) {
 interface Stat { value?: string; label?: string }
 
 export function StatsBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, {});
+  const w = bandWords(section, {}, nested);
   const items = setting<Stat[]>(section, 'items', [])
     .filter((s) => (s?.value ?? '').trim());
   if (items.length === 0) return null;
   return (
     <Band nested={nested} tight>
-      {w.title && <SectionHeader {...w} />}
+      {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       <dl className={`grid gap-8 ${section.variant === 'grid'
         ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-4'}`}>
         {items.map((s, i) => (
@@ -286,7 +286,7 @@ export function StatsBand({ section, nested }: SectionProps) {
 interface Member { name?: string; role?: string; imageUrl?: string }
 
 export function TeamBand({ section, nested }: SectionProps) {
-  const w = bandWords(section, { eyebrow: 'The people', title: 'Who you will meet' });
+  const w = bandWords(section, { eyebrow: 'The people', title: 'Who you will meet' }, nested);
   const members = setting<Member[]>(section, 'members', [])
     .filter((m) => (m?.name ?? '').trim());
   if (members.length === 0) return null;
@@ -312,7 +312,7 @@ export function TeamBand({ section, nested }: SectionProps) {
 
   return (
     <Band nested={nested}>
-      <SectionHeader {...w} />
+      <SectionHeader {...w} reserveEyebrow={nested} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-8 pb-2">
           {members.map((m, i) => <div key={i} className="w-40 flex-none">{card(m, i)}</div>)}
