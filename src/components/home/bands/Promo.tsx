@@ -14,7 +14,7 @@ import { SectionHeader } from '@/components/layout/SectionHeader';
 import { ScrollRail } from '@/components/layout/ScrollRail';
 import { bandWords, setting } from '@/lib/band-words';
 import { inStore } from '@/lib/hero-slides';
-import { Band } from './Band';
+import { Band, BAND_RHYTHM_TIGHT } from './Band';
 import type { SectionProps } from '../types';
 
 export function AnnouncementBand({ section, nested }: SectionProps) {
@@ -165,7 +165,7 @@ export function CountdownBand({ section, ctx, nested }: SectionProps) {
 
   if (section.variant === 'band') {
     return (
-      <section className="bg-surface-alt py-12">
+      <section className={`bg-surface-alt ${BAND_RHYTHM_TIGHT}`}>
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 text-center sm:px-6 lg:px-8">
           {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
           {w.lede && <p className="text-fg-muted">{w.lede}</p>}
@@ -218,7 +218,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
 
   if (section.variant === 'bar') {
     return (
-      <section className="bg-surface-alt py-6">
+      <section className={`bg-surface-alt ${BAND_RHYTHM_TIGHT}`}>
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
           {w.title && <p className="font-semibold text-fg">{w.title}</p>}
           {form}

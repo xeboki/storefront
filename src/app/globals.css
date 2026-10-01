@@ -293,6 +293,38 @@
 
 }
 
+/* ── The page's vertical rhythm ──────────────────────────────────────────────
+   The gap between two bands is a band's padding TWICE — its floor plus the
+   next one's ceiling — so this is the single number that decides how the
+   whole page breathes.
+
+   Written as a scale rather than three fixed values so a merchant can say
+   "roomier here" per band without every band type losing the density it was
+   designed with: a trust strip stays a strip when it is made roomy, it does
+   not become a section. Same shape as `--type-scale` above, for the same
+   reason.
+
+   `--band-space` is set by `BandShell` from the merchant's choice and
+   defaults to 1, which is exactly the page as it was. */
+@layer components {
+  .band-rhythm {
+    padding-block: calc(3rem * var(--band-space, 1));
+  }
+
+  .band-rhythm-tight {
+    padding-block: calc(2.5rem * var(--band-space, 1));
+  }
+
+  @media (min-width: 640px) {
+    .band-rhythm { padding-block: calc(4rem * var(--band-space, 1)); }
+    .band-rhythm-tight { padding-block: calc(3rem * var(--band-space, 1)); }
+  }
+
+  @media (min-width: 1024px) {
+    .band-rhythm { padding-block: calc(5rem * var(--band-space, 1)); }
+  }
+}
+
 /* ── Surface texture ─────────────────────────────────────────────────────────
    A fine grain over the whole page. Flat digital colour is the thing that
    makes a dark UI read as a dashboard; a little noise gives it the tooth of

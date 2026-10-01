@@ -52,6 +52,22 @@ const CONTRAST_TOKENS = {
   '--color-border': 'var(--color-primary-fg)',
 } as React.CSSProperties;
 
+/**
+ * How much air the band gets, as a SCALE rather than a size.
+ *
+ * A fixed padding per choice would flatten the page: a trust strip and an
+ * editorial section are deliberately different densities, and "roomy" must
+ * not turn the strip into a section. Multiplying what the band already asks
+ * for keeps that difference and still does what the merchant meant.
+ *
+ * Same shape as `--type-scale`, which the display sizes already use.
+ */
+const SPACINGS: Record<string, string> = {
+  normal: '1',
+  tight: '0.6',
+  roomy: '1.5',
+};
+
 const DIVIDERS: Record<string, string> = {
   line: 'border-t border-line',
   none: '',
@@ -77,13 +93,22 @@ export function BandShell({ section, first = false, children }: {
   const settings = (section.settings ?? {}) as Record<string, unknown>;
   const surface = pick(SURFACES, settings.surface, 'page');
   const divider = first ? '' : pick(DIVIDERS, settings.divider, 'line');
+  const spacing = pick(SPACINGS, settings.spacing, 'normal');
 
   const className = [surface, divider].filter(Boolean).join(' ');
   const reversed = settings.surface === 'contrast';
-  if (!className && !reversed) return <>{children}</>;
-  return (
-    <div className={className} style={reversed ? CONTRAST_TOKENS : undefined}>
-      {children}
-    </div>
-  );
+  const scaled = spacing !== SPACINGS.normal;
+
+  if (!className && !reversed && !scaled) return <>{children}</>;
+
+  const style = {
+    ...(reversed ? CONTRAST_TOKENS : null),
+    // Inherited by whatever draws the padding inside, which is `.band-rhythm`
+    // on the band's own container. Set here because this is the only place
+    // that knows the section; read there because that is where the padding
+    // lives and a band may bring its own density.
+    ...(scaled ? { '--band-space': spacing } : null),
+  } as React.CSSProperties;
+
+  return <div className={className} style={style}>{children}</div>;
 }

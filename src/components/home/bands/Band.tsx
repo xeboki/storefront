@@ -23,11 +23,16 @@
  * cannot use `Band` (it bleeds and clips), and the `imageText` overlay,
  * which was a flat `py-24` at every width. A page rhythm with three
  * definitions is three rhythms.
+ *
+ * The sizes live in `globals.css` rather than in Tailwind classes because
+ * they multiply `--band-space`, which `BandShell` sets from the merchant's
+ * choice. A band keeps the density it was designed with and the choice
+ * scales it, so "roomy" does not turn a thin strip into a section.
  */
-export const BAND_RHYTHM = 'py-12 sm:py-16 lg:py-20';
+export const BAND_RHYTHM = 'band-rhythm';
 
 /** For a band that is a strip rather than a section — a trust row, a card. */
-export const BAND_RHYTHM_TIGHT = 'py-10 sm:py-12';
+export const BAND_RHYTHM_TIGHT = 'band-rhythm-tight';
 
 export function Band({
   children, tight = false, nested = false, fill = false,
