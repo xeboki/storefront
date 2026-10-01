@@ -297,7 +297,11 @@ export function TeamBand({ section, nested }: SectionProps) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={m.imageUrl} alt="" className="mx-auto aspect-square w-32 rounded-full object-cover" />
       ) : (
-        <div className="mx-auto aspect-square w-32 rounded-full bg-surface-alt" />
+        // An edge, not just a fill. On a light theme `surface-alt` sits at
+        // 241/245/249 against a white page — about 1.09:1 — so a bare
+        // placeholder is invisible and the name below it reads as a gap in
+        // the layout rather than a person without a photograph.
+        <div className="mx-auto aspect-square w-32 rounded-full border border-line bg-surface-alt" />
       )}
       <p className="mt-4 font-semibold text-fg">{m.name}</p>
       {/* The line is kept whether or not this person has a role, so three

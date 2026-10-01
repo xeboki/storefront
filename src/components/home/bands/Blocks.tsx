@@ -262,7 +262,9 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
                 <img src={product.imageUrl} alt=""
                   className="h-16 w-16 flex-none rounded-brand object-cover" />
               ) : (
-                <div className="h-16 w-16 flex-none rounded-brand bg-surface-alt" />
+                // Same reason as the team placeholder: a fill this close to
+                // the page colour is not visible on a light theme.
+                <div className="h-16 w-16 flex-none rounded-brand border border-line bg-surface-alt" />
               )}
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-fg">{product.name}</p>

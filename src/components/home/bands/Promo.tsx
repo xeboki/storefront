@@ -45,7 +45,11 @@ export function PromoBand({ section, nested }: SectionProps) {
       {w.title && <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{w.title}</h2>}
       {w.lede && <p className="mt-3 opacity-90">{w.lede}</p>}
       {ctaLabel && ctaUrl && (
-        <Link href={ctaUrl} className="mt-6 inline-block rounded-brand bg-white px-7 py-3 text-sm font-semibold text-black">
+        // `self-start` as well as `inline-block`. The split arrangement puts
+        // this inside a flex column, and a flex column stretches its items by
+        // default — which beats `inline-block` and left the button running
+        // the whole width of the panel.
+        <Link href={ctaUrl} className="mt-6 inline-block self-start rounded-brand bg-white px-7 py-3 text-sm font-semibold text-black">
           {ctaLabel}
         </Link>
       )}
@@ -249,9 +253,13 @@ export function LogosBand({ section, nested }: SectionProps) {
   return (
     <Band nested={nested} tight>
       {w.title && <SectionHeader {...w} />}
+      {/* Centred only when the band has no heading.
+          A centred strip under a left-aligned section heading reads as a
+          mistake: every other band on the page starts its content at the
+          page gutter, and this one started it in the middle. */}
       <div className={section.variant === 'grid'
         ? 'grid grid-cols-3 items-center gap-8 sm:grid-cols-5'
-        : 'flex flex-wrap items-center justify-center gap-10'}>
+        : `flex flex-wrap items-center gap-10 ${w.title ? '' : 'justify-center'}`}>
         {images.map((src, i) => (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={i} src={src} alt="" className="h-10 w-auto object-contain opacity-70" />
