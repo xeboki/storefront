@@ -56,8 +56,15 @@ export function CollectionBand({ category, products, storeSlug, words }: Props) 
           </h2>
 
           {/* Pulled up into the type on wide screens only — there is nothing
-              to overlap on a phone. */}
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:-mt-24 lg:mt-0 lg:grid-cols-3">
+              to overlap on a phone.
+
+              `lg:mt-0` used to sit here beside `lg:-mt-24`. Two margin
+              utilities at one breakpoint, and the one that won was whichever
+              Tailwind happened to emit last: `margin-top: 0px`, measured in
+              the browser. So the band's whole move — cards riding up into
+              the outlined word behind them — had never once happened, and
+              the comment above described something nobody had seen. */}
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:-mt-24 lg:grid-cols-3">
             {picks.map((product, i) => (
               <Link
                 key={product.id}
