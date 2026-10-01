@@ -89,7 +89,15 @@ export function PromoBand({ section, nested }: SectionProps) {
   }
 
   return (
-    <section className="relative isolate border-t border-line">
+    // The colour goes on the SECTION, not on the inner column.
+    //
+    // It was on the column, which is `max-w-3xl` — so a "full width"
+    // promotion with no picture rendered as a 768px block of colour floating
+    // in the middle of the page with the background showing either side. It
+    // only looked right because every example had an image, and the image
+    // was already positioned against the section.
+    <section className={`relative isolate border-t border-line ${
+      imageUrl ? '' : 'bg-primary-solid text-primary-foreground'}`}>
       {imageUrl && (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -98,7 +106,7 @@ export function PromoBand({ section, nested }: SectionProps) {
         </>
       )}
       <div className={`mx-auto max-w-3xl px-4 py-20 text-center sm:px-6 lg:px-8 ${
-        imageUrl ? 'text-white' : 'bg-primary-solid text-primary-foreground'}`}>
+        imageUrl ? 'text-white' : ''}`}>
         {inner}
       </div>
     </section>

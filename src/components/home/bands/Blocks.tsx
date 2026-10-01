@@ -131,7 +131,14 @@ export function TileBlock({ section, nested }: SectionProps) {
       <div className="pt-4 text-fg">{words}</div>
     </div>
   ) : (
+    // A tile with no picture still has to look like a tile.
+    //
+    // Without the fill it was words floating on the page background with no
+    // frame and no edge — which is what a template arrives as before the
+    // merchant has added their own pictures, so it is the FIRST thing they
+    // see. The mosaic's tiles already fall back this way.
     <div className={`relative isolate flex overflow-hidden rounded-brand ${floor} ${
+      imageUrl ? '' : 'border border-line bg-surface-alt'} ${
       section.variant === 'corner' ? 'items-end' : 'items-center'}`}>
       {imageUrl && (
         <>
