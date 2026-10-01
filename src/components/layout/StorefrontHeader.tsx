@@ -523,9 +523,18 @@ export function StorefrontHeader({
    * Built from the same parts rather than a second set: a caption under an
    * icon must not be a second chance to get the icon wrong.
    */
-  const labelled = (node: React.ReactNode, caption: string) =>
+  /**
+   * An icon with its name under it.
+   *
+   * `className` exists because a caption has to disappear with the icon it
+   * names. The wishlist icon is `hidden sm:flex`, and the caption was not —
+   * so on a phone "Saved" sat on its own with no icon above it, 17px tall
+   * between two 61px neighbours. The same optional-line fault the bands
+   * keep producing, in the header.
+   */
+  const labelled = (node: React.ReactNode, caption: string, className?: string) =>
     node == null ? null : (
-      <span className="flex flex-col items-center gap-1">
+      <span className={clsx('flex flex-col items-center gap-1', className)}>
         {node}
         <span className={clsx('text-[0.6875rem]', onDark ? 'text-white/80' : 'text-fg-muted')}>
           {caption}
@@ -537,7 +546,7 @@ export function StorefrontHeader({
     <>
       {action}
       {labelled(utilities.account, customer ? t('nav.account') : t('nav.signIn'))}
-      {labelled(utilities.wishlist, t('nav.wishlist'))}
+      {labelled(utilities.wishlist, t('nav.wishlist'), 'hidden sm:flex')}
       {labelled(utilities.cart, t('nav.cart'))}
     </>
   );

@@ -12,6 +12,36 @@
   padding-bottom: 1rem;
 }
 
+.top > * {
+  min-width: 0;
+}
+
+/* On a phone the three tracks do not fit, and they did not fail gracefully:
+   at 390px the grid computed to `0px 310px 0px`, so the search and the whole
+   row of controls overflowed their zero-width tracks and ran straight across
+   the lockup — "Game Bench" ended at 262px while "Sign in" began at 221.
+   A centre track sized `auto` takes what its content asks for and leaves the
+   `1fr` sides nothing, which is the one arrangement that cannot be rescued
+   by letting things shrink.
+
+   So below `sm` it stops being three columns: the controls keep the top row
+   and the lockup takes one of its own, centred, which is what every shop
+   front does at this width anyway. */
+@media (max-width: 639px) {
+  .top {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "search spacer actions"
+      "brand  brand  brand";
+    row-gap: 0.75rem;
+    column-gap: 0.75rem;
+  }
+
+  .top > *:nth-child(1) { grid-area: search; }
+  .top > *:nth-child(2) { grid-area: brand; justify-self: center; }
+  .top > *:nth-child(3) { grid-area: actions; }
+}
+
 .side {
   display: flex;
   min-width: 0;
