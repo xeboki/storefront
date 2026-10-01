@@ -20,7 +20,7 @@ import {
 } from './bands/Shop';
 import {
   BookingBand, WorkOrderBand, RepairEstimateBand, ReservationBand,
-  PrescriptionBand, AgeGateBand,
+  PrescriptionBand,
 } from './bands/Actions';
 import {
   RichTextBand, ImageTextBand, GalleryBand, TestimonialsBand, FaqBand,
@@ -80,7 +80,11 @@ export const BANDS: Record<string, ComponentType<SectionProps>> = {
   workOrderCta: WorkOrderBand,
   repairEstimate: RepairEstimateBand,
   prescription: PrescriptionBand,
-  ageGate: AgeGateBand,
+  // `ageGate` is gone on purpose. A statutory notice is not a section of a
+  // page: it reached a liquor store only through the default layout, no
+  // template a liquor store is offered contained it, and it was on the home
+  // page alone. The shell draws it now, on every page, for every
+  // age-restricted trade — see `AgeNotice`.
 };
 
 export function bandFor(type: string): ComponentType<SectionProps> | null {

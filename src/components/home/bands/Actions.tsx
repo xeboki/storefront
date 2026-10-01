@@ -123,21 +123,3 @@ export function PrescriptionBand({ section, ctx }: SectionProps) {
   return <CallToAction variant={section.variant} title={w.title} lede={w.lede}
     label={w.linkLabel} href={`/${ctx.storeSlug}/account`} tone="quiet" />;
 }
-
-/**
- * The age notice.
- *
- * The wording is the merchant's because the age is: 21 in the United States,
- * 18 across most of Europe. A shop that states the wrong one is making a
- * claim about the law, so the default says neither.
- */
-export function AgeGateBand({ section }: SectionProps) {
-  const w = bandWords(section, {
-    title: 'By shopping here you confirm you are old enough to buy alcohol where you live.',
-  });
-  return (
-    <div className="border-b border-warning-border bg-warning-bg px-4 py-2 text-center text-sm text-warning-fg">
-      {w.title}
-    </div>
-  );
-}

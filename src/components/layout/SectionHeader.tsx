@@ -34,10 +34,17 @@ interface Props {
  * second heading size would otherwise be asked to do.
  */
 export function SectionHeader({
-  eyebrow, title, lede, href, linkLabel = 'View all', align = 'left',
+  eyebrow, title, lede, href, linkLabel, align = 'left',
   reserveEyebrow = false,
 }: Props) {
   const centered = align === 'center';
+  // A default parameter cannot do this job. Every band spreads `{...w}`,
+  // and `bandWords` always returns all four keys — so a band whose own
+  // defaults do not name a `linkLabel` passes an EMPTY STRING, which is a
+  // value, which means the default never applies. On a restaurant the menu
+  // band and the locations band each rendered a bare arrow with no words
+  // next to it and no accessible name at all.
+  const label = linkLabel || 'View all';
 
   // Nothing to say. A band in a column is not offered its own default
   // heading (see `bandWords`), so an empty header here is ordinary rather
@@ -52,7 +59,7 @@ export function SectionHeader({
           href={href}
           className="group inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-primary hover:opacity-80"
         >
-          {linkLabel}
+          {label}
           <ArrowRight
             size={15}
             className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
@@ -89,7 +96,7 @@ export function SectionHeader({
           href={href}
           className="group inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold text-primary hover:opacity-80"
         >
-          {linkLabel}
+          {label}
           <ArrowRight
             size={15}
             className="motion-safe:transition-transform motion-safe:group-hover:translate-x-1"

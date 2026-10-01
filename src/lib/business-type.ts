@@ -19,6 +19,12 @@
  * So the comparison is on a normalised form rather than on one chosen
  * spelling, and everything reads these predicates instead of keeping its own
  * copy of the list.
+ *
+ * These sets are the storefront's half of a pair: the API's catalogue holds
+ * the same six in `services/storefront_sections.py`, because it has to know
+ * which bands a trade can fill without asking the browser. The two are held
+ * identical by `test_trade_sets_agree.py` — they had already drifted twice
+ * over, on classes and on `foodtruck`.
  */
 
 /** `mobile_repair`, `mobileRepair` and `Mobile Repair` all land on the same key. */
@@ -38,7 +44,19 @@ const WORK_ORDERS = new Set(['mobilerepair', 'laundry', 'service', 'optical']);
  */
 const AGE_GATE = new Set(['liquor', 'bar']);
 const TABLES = new Set(['restaurant', 'bar']);
-const FOOD = new Set(['restaurant', 'bar', 'coffeeshop', 'qsr', 'bakery', 'foodtruck']);
+const FOOD = new Set(['restaurant', 'bar', 'coffeeshop', 'qsr', 'bakery']);
+/**
+ * Who runs a timetable of classes.
+ *
+ * A gym, and only a gym — which is what the API's catalogue says, and what
+ * decides whether the `timetable` band is even offered. This used to be an
+ * alias of `hasAppointments` on the grounds that a class is booked the way
+ * an appointment is, which is true of the MECHANISM and not of the
+ * question being asked. The effect was that a salon, an optician, a pet
+ * shop, a laundry and a mobile repair shop each had a live `/classes` page,
+ * titled for the shop and listing nothing, with no way to take it down.
+ */
+const CLASSES = new Set(['gym']);
 
 export function hasAppointments(businessType: string | null | undefined): boolean {
   return APPOINTMENTS.has(key(businessType));
@@ -60,5 +78,6 @@ export function isFoodBusiness(businessType: string | null | undefined): boolean
   return FOOD.has(key(businessType));
 }
 
-/** Classes are booked the same way appointments are. */
-export const hasClasses = hasAppointments;
+export function hasClasses(businessType: string | null | undefined): boolean {
+  return CLASSES.has(key(businessType));
+}

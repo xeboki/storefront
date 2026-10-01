@@ -34,6 +34,13 @@ export const INTERVAL_MS: Record<string, number> = {
  * with '/products' pre-filled while nothing read the field, so every shop that
  * saved it without editing holds a link to a page this storefront does not
  * have.
+ *
+ * **A path that already names this store is left alone.** The obvious way to
+ * fill one of these fields is to copy the address out of the browser, which
+ * is `/gamebench/catalog` and not `/catalog`; prefixing that again gave
+ * `/gamebench/gamebench/catalog`, a 404 with nothing to say it had happened.
+ * A shop cannot have a page whose first segment is its own slug, so there is
+ * nothing to lose by accepting both.
  */
 export function inStore(url: string, storeSlug: string, fallback: string): string {
   const trimmed = (url || '').trim();
@@ -41,7 +48,10 @@ export function inStore(url: string, storeSlug: string, fallback: string): strin
   if (/^(https?:)?\/\//.test(trimmed) || trimmed.startsWith('mailto:') || trimmed.startsWith('tel:')) {
     return trimmed;
   }
-  const path = trimmed.replace(/^\/+/, '');
+  let path = trimmed.replace(/^\/+/, '');
+  if (storeSlug && (path === storeSlug || path.startsWith(`${storeSlug}/`))) {
+    path = path.slice(storeSlug.length).replace(/^\/+/, '');
+  }
   return `/${storeSlug}/${path === 'products' ? 'catalog' : path}`;
 }
 

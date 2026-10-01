@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { ScrollRail } from '@/components/layout/ScrollRail';
 import { bandWords, setting } from '@/lib/band-words';
+import { inStore } from '@/lib/hero-slides';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
 
@@ -30,11 +31,12 @@ export function AnnouncementBand({ section, nested }: SectionProps) {
   );
 }
 
-export function PromoBand({ section, nested }: SectionProps) {
+export function PromoBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {}, nested);
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
-  const ctaUrl = setting<string>(section, 'ctaUrl', '');
+  const ctaUrl = inStore(setting<string>(section, 'ctaUrl', ''),
+                         ctx.storeSlug, '');
   if (!w.title && !imageUrl) return null;
 
   const inner = (
@@ -124,11 +126,12 @@ export function PromoBand({ section, nested }: SectionProps) {
  * Past the end it renders nothing rather than a row of zeroes: the sale is
  * over, and a dead clock on a live page is how a shop looks abandoned.
  */
-export function CountdownBand({ section, nested }: SectionProps) {
+export function CountdownBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {}, nested);
   const endsAt = setting<string>(section, 'endsAt', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
-  const ctaUrl = setting<string>(section, 'ctaUrl', '');
+  const ctaUrl = inStore(setting<string>(section, 'ctaUrl', ''),
+                         ctx.storeSlug, '');
   const [left, setLeft] = useState<number | null>(null);
 
   useEffect(() => {

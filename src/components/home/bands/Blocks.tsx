@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { moneyFor } from '@/lib/format-money';
 import { bandWords, setting } from '@/lib/band-words';
+import { inStore } from '@/lib/hero-slides';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
 
@@ -23,12 +24,13 @@ import type { SectionProps } from '../types';
  * "Furniture / this month's specials" in a pastel card at a quarter width,
  * with the products taking the rest.
  */
-export function TextCardBlock({ section, nested }: SectionProps) {
+export function TextCardBlock({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {}, nested);
   const body = setting<string>(section, 'body', '');
   const colour = setting<string>(section, 'backgroundColor', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
-  const ctaUrl = setting<string>(section, 'ctaUrl', '');
+  const ctaUrl = inStore(setting<string>(section, 'ctaUrl', ''),
+                         ctx.storeSlug, '');
   if (!w.title && !body) return null;
 
   const solid = section.variant === 'solid';
@@ -92,12 +94,13 @@ export function TextCardBlock({ section, nested }: SectionProps) {
  * size rather than a number — a tile told to be 340px tall is a tile that
  * breaks the row it is in the moment somebody changes the column beside it.
  */
-export function TileBlock({ section, nested }: SectionProps) {
+export function TileBlock({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {}, nested);
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const body = setting<string>(section, 'body', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
-  const ctaUrl = setting<string>(section, 'ctaUrl', '');
+  const ctaUrl = inStore(setting<string>(section, 'ctaUrl', ''),
+                         ctx.storeSlug, '');
   const height = setting<string>(section, 'height', 'medium');
   if (!imageUrl && !w.title) return null;
 

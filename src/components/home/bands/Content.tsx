@@ -18,6 +18,7 @@ import { ChevronDown } from 'lucide-react';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { ScrollRail } from '@/components/layout/ScrollRail';
 import { bandWords, setting } from '@/lib/band-words';
+import { inStore } from '@/lib/hero-slides';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
 
@@ -46,12 +47,13 @@ export function RichTextBand({ section, nested }: SectionProps) {
   );
 }
 
-export function ImageTextBand({ section, nested }: SectionProps) {
+export function ImageTextBand({ section, ctx, nested }: SectionProps) {
   const w = bandWords(section, {}, nested);
   const body = setting<string>(section, 'body', '');
   const imageUrl = setting<string>(section, 'imageUrl', '');
   const ctaLabel = setting<string>(section, 'ctaLabel', '');
-  const ctaUrl = setting<string>(section, 'ctaUrl', '');
+  const ctaUrl = inStore(setting<string>(section, 'ctaUrl', ''),
+                         ctx.storeSlug, '');
   if (!imageUrl && !w.title && !body) return null;
 
   const words = (
