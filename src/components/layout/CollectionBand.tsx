@@ -3,6 +3,7 @@ import { ArrowUpRight } from 'lucide-react';
 import type { OrderingCategory, OrderingProduct } from '@xeboki/sdk';
 import { ProductImage } from '@/components/product/ProductImage';
 import type { SectionWords } from '@/lib/section-copy';
+import { BAND_RHYTHM } from '@/components/home/bands/Band';
 
 interface Props {
   category: OrderingCategory;
@@ -31,7 +32,7 @@ export function CollectionBand({ category, products, storeSlug, words }: Props) 
   const heading = words.title || category.name;
 
   return (
-    <section className="relative overflow-hidden border-t border-line py-14 sm:py-20 lg:py-32">
+    <section className={`relative overflow-hidden ${BAND_RHYTHM}`}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="relative">
           {/* A phone gets a heading it can read. The ghost treatment below

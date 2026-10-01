@@ -48,7 +48,7 @@ export function TextCardBlock({ section, ctx, nested }: SectionProps) {
     : undefined;
 
   return (
-    <Band nested={nested} bordered={false} tight fill>
+    <Band nested={nested} tight fill>
       <div
         style={style}
         // `ring-fg/10` on the merchant's own colour, so the card keeps an
@@ -170,7 +170,7 @@ export function TileBlock({ section, ctx, nested }: SectionProps) {
     ? <Link href={ctaUrl} className="block h-full">{inner}</Link>
     : inner;
 
-  return <Band nested={nested} bordered={false} tight fill>{content}</Band>;
+  return <Band nested={nested} tight fill>{content}</Band>;
 }
 
 /**
@@ -267,7 +267,7 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
   if (list.length === 0) return null;
 
   return (
-    <Band nested={nested} bordered={!nested}>
+    <Band nested={nested}>
       {w.title && <SectionHeader {...w} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />}
       <ul className="divide-y divide-line border-y border-line">
         {list.map((product) => (
@@ -317,7 +317,7 @@ export function MapBlock({ section, ctx, nested }: SectionProps) {
   const zoom = setting<number>(section, 'zoom', 14);
 
   return (
-    <Band nested={nested} tight={nested} bordered={section.variant === 'framed'}>
+    <Band nested={nested} tight={nested}>
       {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
       {/* `wide` runs the map edge to edge; `framed` keeps it inside the page
           margin with the rest of the content. Nested, it is always framed —

@@ -19,7 +19,7 @@ import { SectionHeader } from '@/components/layout/SectionHeader';
 import { ScrollRail } from '@/components/layout/ScrollRail';
 import { bandWords, setting } from '@/lib/band-words';
 import { inStore } from '@/lib/hero-slides';
-import { Band } from './Band';
+import { Band, BAND_RHYTHM } from './Band';
 import type { SectionProps } from '../types';
 
 export function RichTextBand({ section, nested }: SectionProps) {
@@ -75,11 +75,11 @@ export function ImageTextBand({ section, ctx, nested }: SectionProps) {
 
   if (section.variant === 'overlay') {
     return (
-      <section className="relative isolate border-t border-line">
+      <section className="relative isolate">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {imageUrl && <img src={imageUrl} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />}
         <div className="absolute inset-0 -z-10 bg-black/45" />
-        <div className="mx-auto max-w-3xl px-4 py-24 text-center text-white sm:px-6 lg:px-8">
+        <div className={`mx-auto max-w-3xl px-4 text-center text-white sm:px-6 lg:px-8 ${BAND_RHYTHM}`}>
           {w.title && <h2 className="text-3xl font-bold sm:text-4xl">{w.title}</h2>}
           {body && <p className="mt-4 whitespace-pre-line text-white/85">{body}</p>}
           {ctaLabel && ctaUrl && (
@@ -138,7 +138,7 @@ export function GalleryBand({ section, nested }: SectionProps) {
 
   if (section.variant === 'strip') {
     return (
-      <section className="border-t border-line">
+      <section>
         <div className="grid grid-cols-2 gap-px bg-line sm:grid-cols-4">
           {images.slice(0, 8).map((src, i) => (
             // eslint-disable-next-line @next/next/no-img-element

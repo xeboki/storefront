@@ -92,7 +92,7 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
   }, nested);
 
   return (
-    <Band nested={nested} bordered={false}>
+    <Band nested={nested}>
       <SectionHeader {...words} reserveEyebrow={nested} href={`/${ctx.storeSlug}/catalog`} />
       {section.variant === 'carousel' ? (
         <ScrollRail trackClassName="flex gap-4 pb-2">

@@ -60,7 +60,7 @@ export function PromoBand({ section, ctx, nested }: SectionProps) {
 
   if (section.variant === 'split') {
     return (
-      <section className="border-t border-line">
+      <section>
         <div className="mx-auto grid max-w-7xl grid-cols-1 lg:grid-cols-2">
           <div className="flex flex-col justify-center bg-primary-solid px-8 py-16 text-primary-foreground lg:px-14">
             {inner}
@@ -98,7 +98,7 @@ export function PromoBand({ section, ctx, nested }: SectionProps) {
     // in the middle of the page with the background showing either side. It
     // only looked right because every example had an image, and the image
     // was already positioned against the section.
-    <section className={`relative isolate border-t border-line ${
+    <section className={`relative isolate ${
       imageUrl ? '' : 'bg-primary-solid text-primary-foreground'}`}>
       {imageUrl && (
         <>
@@ -165,7 +165,7 @@ export function CountdownBand({ section, ctx, nested }: SectionProps) {
 
   if (section.variant === 'band') {
     return (
-      <section className="border-y border-line bg-surface-alt py-12">
+      <section className="bg-surface-alt py-12">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 text-center sm:px-6 lg:px-8">
           {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
           {w.lede && <p className="text-fg-muted">{w.lede}</p>}
@@ -218,7 +218,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
 
   if (section.variant === 'bar') {
     return (
-      <section className="border-y border-line bg-surface-alt py-6">
+      <section className="bg-surface-alt py-6">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
           {w.title && <p className="font-semibold text-fg">{w.title}</p>}
           {form}

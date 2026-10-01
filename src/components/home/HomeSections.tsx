@@ -6,6 +6,7 @@
  * This renders it, and its only opinions are the two below.
  */
 import { bandFor } from './registry';
+import { BandShell } from './BandShell';
 import type { SectionContext } from './types';
 import type { HomeSection } from '@xeboki/sdk';
 
@@ -15,7 +16,7 @@ export function HomeSections({ sections, ctx }: {
 }) {
   return (
     <div>
-      {sections.map((section) => {
+      {sections.map((section, index) => {
         // Switched off by the merchant. Kept in the list rather than deleted,
         // so switching it back on restores its place and its words.
         if (!section.visible) return null;
@@ -27,7 +28,14 @@ export function HomeSections({ sections, ctx }: {
         const Band = bandFor(section.type);
         if (!Band) return null;
 
-        return <Band key={section.id} section={section} ctx={ctx} />;
+        // The shell draws the band's ground and the line above it. Bands
+        // used to draw that line themselves, nine of them, which is exactly
+        // why it could not be switched off.
+        return (
+          <BandShell key={section.id} section={section} first={index === 0}>
+            <Band section={section} ctx={ctx} />
+          </BandShell>
+        );
       })}
     </div>
   );

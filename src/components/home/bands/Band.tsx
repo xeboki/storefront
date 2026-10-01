@@ -7,11 +7,32 @@
  * fails the build, and it failed it here: a layout primitive has no business
  * living next to server code.
  */
+/**
+ * The page's vertical rhythm, in one place.
+ *
+ * The gap between two bands is this padding TWICE — one band's floor plus
+ * the next one's ceiling. At the old `lg:py-32` that was **256px** of empty
+ * page between a paragraph and the next heading: more than a quarter of a
+ * laptop screen, which reads as the page having ended rather than as a new
+ * section. `lg:py-20` makes it 160px — still generous for an editorial
+ * shop, and about four times the 40px that separates a heading from its own
+ * content, which is the relationship that makes a break legible.
+ *
+ * Exported because two other places had their OWN copy of the old scale and
+ * went out of step the moment this one changed: `CollectionBand`, which
+ * cannot use `Band` (it bleeds and clips), and the `imageText` overlay,
+ * which was a flat `py-24` at every width. A page rhythm with three
+ * definitions is three rhythms.
+ */
+export const BAND_RHYTHM = 'py-12 sm:py-16 lg:py-20';
+
+/** For a band that is a strip rather than a section — a trust row, a card. */
+export const BAND_RHYTHM_TIGHT = 'py-10 sm:py-12';
+
 export function Band({
-  children, bordered = true, tight = false, nested = false, fill = false,
+  children, tight = false, nested = false, fill = false,
 }: {
   children: React.ReactNode;
-  bordered?: boolean;
   tight?: boolean;
   /**
    * Take the whole column's height.
@@ -36,9 +57,9 @@ export function Band({
 }) {
   if (nested) return <div className={fill ? 'h-full' : undefined}>{children}</div>;
   return (
-    <section className={bordered ? 'border-t border-line' : undefined}>
+    <section>
       <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${
-        tight ? 'py-10 sm:py-14' : 'py-14 sm:py-20 lg:py-32'}`}>
+        tight ? BAND_RHYTHM_TIGHT : BAND_RHYTHM}`}>
         {children}
       </div>
     </section>

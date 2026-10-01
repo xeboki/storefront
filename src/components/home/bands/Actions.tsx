@@ -9,6 +9,7 @@
 import Link from 'next/link';
 import { bandWords } from '@/lib/band-words';
 import type { SectionProps } from '../types';
+import { BAND_RHYTHM_TIGHT } from './Band';
 
 /**
  * A sentence and a button, in one of three weights.
@@ -29,7 +30,7 @@ function CallToAction({
 
   if (variant === 'card') {
     return (
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <section className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${BAND_RHYTHM_TIGHT}`}>
         <div className="rounded-brand border border-line bg-surface-alt p-8 text-center">
           <h2 className="text-2xl font-bold text-fg">{title}</h2>
           {lede && <p className="mx-auto mt-2 max-w-xl text-fg-muted">{lede}</p>}
@@ -43,8 +44,8 @@ function CallToAction({
 
   if (variant === 'split') {
     return (
-      <section className="border-y border-line bg-surface-alt">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 py-14 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8">
+      <section className="bg-surface-alt">
+        <div className={`mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 ${BAND_RHYTHM_TIGHT}`}>
           <div>
             <h2 className="text-3xl font-bold text-fg">{title}</h2>
             {lede && <p className="mt-3 text-fg-muted">{lede}</p>}
