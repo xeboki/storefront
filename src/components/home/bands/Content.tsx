@@ -97,13 +97,18 @@ export function ImageTextBand({ section, nested }: SectionProps) {
             and a screen reader both get the heading before the photograph. */}
         {words}
         {imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
-            alt=""
-            className={`h-full min-h-[16rem] w-full rounded-brand object-cover ${
-              section.variant === 'imageLeft' ? 'lg:order-first' : ''}`}
-          />
+          // The picture is positioned INSIDE a frame rather than sized by
+          // itself. `h-full` in an auto-height grid row resolves to the
+          // image's own natural height — a 588px-wide column rendered a
+          // portrait photograph 882px tall and dragged the whole band with
+          // it, leaving the words floating in the middle of an empty half.
+          // The frame contributes only its minimum; the words decide the
+          // rest, and the picture crops to fit.
+          <div className={`relative min-h-[16rem] overflow-hidden rounded-brand ${
+            section.variant === 'imageLeft' ? 'lg:order-first' : ''}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          </div>
         )}
       </div>
     </Band>
@@ -295,7 +300,9 @@ export function TeamBand({ section, nested }: SectionProps) {
         <div className="mx-auto aspect-square w-32 rounded-full bg-surface-alt" />
       )}
       <p className="mt-4 font-semibold text-fg">{m.name}</p>
-      {m.role && <p className="text-sm text-fg-muted">{m.role}</p>}
+      {/* The line is kept whether or not this person has a role, so three
+          people in a row are three cards of the same height. */}
+      <p className="min-h-[1.25rem] text-sm text-fg-muted">{m.role || '\u00a0'}</p>
     </div>
   );
 

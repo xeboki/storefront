@@ -11,6 +11,7 @@
  */
 import Link from 'next/link';
 import { SectionHeader } from '@/components/layout/SectionHeader';
+import { moneyFor } from '@/lib/format-money';
 import { bandWords, setting } from '@/lib/band-words';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
@@ -24,6 +25,13 @@ import type { SectionProps } from '../types';
  * same list, read.
  */
 export function MenuBand({ section, ctx, nested }: SectionProps) {
+  // The shop's own currency. A menu that prints `9.99` is printing a number,
+  // and which number depends on where the reader lives.
+  // A plain formatter, not the React hook: these bands render on the
+  // server, and the hook is client-only. TypeScript cannot see that
+  // boundary, so it compiled and then threw at render. The currency is
+  // already in the context every band is handed.
+  const money = moneyFor(ctx.storeConfig.currencyCode);
   const w = bandWords(section, { eyebrow: 'The menu', title: 'What we serve' });
   const chosen = setting<string[]>(section, 'categoryIds', []);
   const courses = (chosen.length
@@ -46,7 +54,7 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
                 {items.map((item) => (
                   <li key={item.id} className="flex justify-between gap-4 text-sm">
                     <span className="text-fg">{item.name}</span>
-                    <span className="flex-none text-fg-muted">{item.price}</span>
+                    <span className="flex-none text-fg-muted">{money(item.price ?? 0)}</span>
                   </li>
                 ))}
               </ul>
@@ -81,7 +89,7 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
                       <p className="mt-0.5 text-sm text-fg-muted">{item.description}</p>
                     )}
                   </div>
-                  <span className="flex-none font-semibold text-fg">{item.price}</span>
+                  <span className="flex-none font-semibold text-fg">{money(item.price ?? 0)}</span>
                 </li>
               ))}
             </ul>
@@ -100,6 +108,11 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
  * price beside name, and a booking link on every row.
  */
 export function ServicesBand({ section, ctx, nested }: SectionProps) {
+  // A plain formatter, not the React hook: these bands render on the
+  // server, and the hook is client-only. TypeScript cannot see that
+  // boundary, so it compiled and then threw at render. The currency is
+  // already in the context every band is handed.
+  const money = moneyFor(ctx.storeConfig.currencyCode);
   const w = bandWords(section, {
     eyebrow: 'What we do', title: 'Services', linkLabel: 'Book',
   });
@@ -125,7 +138,7 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
                 )}
               </div>
               <div className="flex flex-none items-center gap-4">
-                <span className="font-semibold text-fg">{item.price}</span>
+                <span className="font-semibold text-fg">{money(item.price ?? 0)}</span>
                 <Link href={`/${ctx.storeSlug}/book`}
                   className="rounded-brand border border-primary px-4 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/5">
                   {w.linkLabel}
@@ -145,7 +158,9 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {list.map((item) => (
           <div key={item.id}
-            className={`rounded-brand border border-line bg-surface p-5 ${cards ? 'flex flex-col' : ''}`}>
+            // Always a flex column, so the price can sit on the card's
+            // floor whether or not the service above it has a description.
+            className="flex h-full flex-col rounded-brand border border-line bg-surface p-5">
             {cards && item.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={item.imageUrl} alt=""
@@ -155,8 +170,12 @@ export function ServicesBand({ section, ctx, nested }: SectionProps) {
             {item.description && (
               <p className="mt-1 text-sm text-fg-muted">{item.description}</p>
             )}
-            <div className="mt-4 flex items-center justify-between">
-              <span className="font-semibold text-fg">{item.price}</span>
+            {/* The price sits on the floor of the card rather than directly
+                under whatever happens to be above it. A service with no
+                description pulled its price and its Book link a line higher
+                than the ones beside it. */}
+            <div className="mt-4 flex flex-1 items-end justify-between">
+              <span className="font-semibold text-fg">{money(item.price ?? 0)}</span>
               <Link href={`/${ctx.storeSlug}/book`}
                 className="text-sm font-semibold text-primary hover:underline">
                 {w.linkLabel}

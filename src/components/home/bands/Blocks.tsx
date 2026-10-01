@@ -11,7 +11,7 @@
  */
 import Link from 'next/link';
 import { SectionHeader } from '@/components/layout/SectionHeader';
-import { useMoney } from '@/lib/currency';
+import { moneyFor } from '@/lib/format-money';
 import { bandWords, setting } from '@/lib/band-words';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
@@ -168,23 +168,35 @@ export function MosaicBlock({ section, nested }: SectionProps) {
     .filter((t) => (t?.title ?? '').trim() || (t?.imageUrl ?? '').trim());
   if (tiles.length === 0) return null;
 
-  // Which tile gets the room, per shape. Everything beyond what the shape
-  // names is drawn at the ordinary size rather than dropped — a merchant who
-  // added a fifth tile meant to show it.
-  const big = { 'feature-two': 0, 'wide-pair': 0, 'two-two': -1 }[section.variant] ?? 0;
+  // Each shape, as a number of columns and what the first tile spans.
+  //
+  // These three used to share one four-column grid, which made two of them
+  // identical and made the third a lie: "one large, two small" left FOUR
+  // small slots beside the large one, so a merchant who gave it three tiles
+  // got a hole. The grid now follows the name.
+  //
+  // Everything beyond what a shape names flows on at the ordinary size rather
+  // than being dropped — somebody who added a fifth tile meant to show it.
+  const shape = {
+    // One large on the left, two stacked beside it: three columns, the first
+    // tile taking two of them and both rows.
+    'feature-two': { cols: 'lg:grid-cols-3', first: 'lg:col-span-2 lg:row-span-2', tallFirst: true },
+    // Two above, two below: everything equal.
+    'two-two': { cols: 'lg:grid-cols-2', first: '', tallFirst: false },
+    // A wide one across the top, a pair underneath.
+    'wide-pair': { cols: 'lg:grid-cols-2', first: 'lg:col-span-2', tallFirst: true },
+  }[section.variant] ?? { cols: 'lg:grid-cols-3', first: 'lg:col-span-2 lg:row-span-2', tallFirst: true };
 
   return (
     <Band nested={nested}>
       {w.title && <SectionHeader {...w} />}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${shape.cols}`}>
         {tiles.map((tile, i) => {
-          const wide = section.variant === 'wide-pair' ? i === big : i === big;
-          const span = section.variant === 'two-two'
-            ? 'col-span-2'
-            : wide ? 'col-span-2 row-span-2 lg:col-span-2' : 'col-span-1 lg:col-span-1';
+          const wide = i === 0 && shape.first !== '';
+          const span = wide ? shape.first : '';
           const content = (
-            <div className={`relative isolate flex items-end overflow-hidden rounded-brand bg-surface-alt ${
-              wide && section.variant !== 'two-two' ? 'min-h-[20rem]' : 'min-h-[10rem]'}`}>
+            <div className={`relative isolate flex h-full items-end overflow-hidden rounded-brand bg-surface-alt ${
+              wide && shape.tallFirst ? 'min-h-[20rem]' : 'min-h-[10rem]'}`}>
               {tile.imageUrl && (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -220,7 +232,11 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
   // The shop's own currency. This rendered a bare `39.99` beside cards that
   // said `€39.99` — money without its symbol is a number, and which number
   // depends on where the reader lives.
-  const money = useMoney();
+  // A plain formatter, not the React hook: these bands render on the
+  // server, and the hook is client-only. TypeScript cannot see that
+  // boundary, so it compiled and then threw at render. The currency is
+  // already in the context every band is handed.
+  const money = moneyFor(ctx.storeConfig.currencyCode);
   const w = bandWords(section, {});
   const limit = setting<number>(section, 'limit', 4);
   const chosen = setting<string[]>(section, 'productIds', []);

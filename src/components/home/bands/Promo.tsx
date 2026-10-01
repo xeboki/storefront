@@ -60,8 +60,14 @@ export function PromoBand({ section, nested }: SectionProps) {
             {inner}
           </div>
           {imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={imageUrl} alt="" className="h-full min-h-[18rem] w-full object-cover" />
+            // Framed, not self-sizing — see the note on the picture-and-words
+            // band. `h-full` on the image itself resolves to its natural
+            // height and drags the band to whatever the photograph happens
+            // to be.
+            <div className="relative min-h-[18rem] overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            </div>
           )}
         </div>
       </section>
