@@ -11,6 +11,7 @@ import { ProductGrid } from '@/components/product/ProductGrid'
 import { EmptyStoreNotice } from '@/components/product/EmptyStoreNotice'
 import { storeName } from '@/lib/store-name'
 import { sectionWords } from '@/lib/section-copy'
+import { catalogueWords } from '@/lib/business-type'
 
 interface Props {
   params: { store: string }
@@ -91,9 +92,12 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   // something else — 'The whole cellar', 'Every service'. A category listing
   // is named by the category and a search by what was typed, so neither takes
   // an override: replacing those with fixed words would make them wrong.
+  // The defaults follow the trade: "12 products" on a menu reads as though
+  // the kitchen sells twelve products. The merchant's override still wins.
+  const words = catalogueWords(store.storeConfig.businessType)
   const masthead = sectionWords(store.storefrontConfig, 'catalog', {
-    eyebrow: 'Shop',
-    title: 'All Products',
+    eyebrow: words.eyebrow,
+    title: words.title,
   })
   const categoryName = searchParams.category
     ? categories.find((c) => c.id === searchParams.category)?.name ?? 'Products'
@@ -112,7 +116,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
           {search ? `“${search}”` : categoryName}
         </h1>
         <p className="mt-3 text-sm text-fg-muted">
-          {total} {total === 1 ? 'product' : 'products'}
+          {total} {total === 1 ? words.one : words.many}
           {totalPages > 1 && ` · page ${page} of ${totalPages}`}
         </p>
       </header>

@@ -81,3 +81,69 @@ export function isFoodBusiness(businessType: string | null | undefined): boolean
 export function hasClasses(businessType: string | null | undefined): boolean {
   return CLASSES.has(key(businessType));
 }
+
+/**
+ * What this shop is, in schema.org's vocabulary.
+ *
+ * Every Xeboki shop used to declare itself `LocalBusiness`, the most
+ * generic type there is — a restaurant, a pharmacy, an optician and a gym
+ * all looked identical to a search engine, and none of them could be shown
+ * as what they are. schema.org has an exact type for nearly all 22 trades,
+ * and the whole point of emitting JSON-LD is to be specific.
+ *
+ * `LocalBusiness` stays the fallback, for `service` (a genuinely general
+ * trade) and for any id this map has not been taught.
+ */
+const SCHEMA_TYPES: Record<string, string> = {
+  restaurant: 'Restaurant',
+  bar: 'BarOrPub',
+  coffeeshop: 'CafeOrCoffeeShop',
+  qsr: 'FastFoodRestaurant',
+  bakery: 'Bakery',
+  grocery: 'GroceryStore',
+  conveniencestore: 'ConvenienceStore',
+  liquor: 'LiquorStore',
+  pharmacy: 'Pharmacy',
+  optical: 'Optician',
+  salon: 'BeautySalon',
+  gym: 'ExerciseGym',
+  laundry: 'DryCleaningOrLaundry',
+  petstore: 'PetStore',
+  florist: 'Florist',
+  jewelry: 'JewelryStore',
+  bookstore: 'BookStore',
+  electronics: 'ElectronicsStore',
+  mobilerepair: 'MobilePhoneStore',
+  autoparts: 'AutoPartsStore',
+  retail: 'Store',
+  service: 'LocalBusiness',
+};
+
+export function schemaType(businessType: string | null | undefined): string {
+  return SCHEMA_TYPES[key(businessType)] ?? 'LocalBusiness';
+}
+
+/**
+ * What the unfiltered catalogue listing calls itself, and what it counts.
+ *
+ * "Shop / All Products / 12 products" was every trade's, which reads wrong
+ * on a menu: a kitchen does not sell twelve products. The merchant can
+ * still override the words — `sectionWords(…, 'catalog')` — so this is only
+ * the starting point, and it changes only where the generic one was plainly
+ * wrong rather than guessing for trades that genuinely sell things.
+ *
+ * Deliberately NOT keyed on appointments. A salon's catalogue is its
+ * treatments, but an optician's and a repair shop's hold frames and
+ * handsets, and all three take bookings — so "services" would be wrong for
+ * two of the three. Those shops are better served by the override.
+ */
+export function catalogueWords(businessType: string | null | undefined): {
+  eyebrow: string; title: string; one: string; many: string;
+} {
+  if (isFoodBusiness(businessType)) {
+    return { eyebrow: 'The menu', title: 'Everything we serve',
+             one: 'dish', many: 'dishes' };
+  }
+  return { eyebrow: 'Shop', title: 'All Products',
+           one: 'product', many: 'products' };
+}

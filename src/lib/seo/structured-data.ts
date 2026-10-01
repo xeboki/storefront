@@ -7,6 +7,7 @@
  */
 import type { StoreConfig, StorefrontConfig, OrderingProduct, BlogPost, WeeklyHours } from '@xeboki/sdk';
 import { storeName } from '@/lib/store-name';
+import { schemaType } from '@/lib/business-type';
 
 const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store';
 
@@ -27,7 +28,11 @@ export function generateOrganization(
 
   return {
     '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
+    // What this shop actually is, not "a business". Every Xeboki shop used
+    // to say `LocalBusiness`, so a restaurant, a pharmacy and a gym were
+    // indistinguishable to a search engine and none could be shown as what
+    // it is.
+    '@type': schemaType(storeConfig.businessType),
     name: storeName(storeConfig),
     url: base,
     ...(storefrontConfig?.logoUrl && { logo: storefrontConfig.logoUrl }),
