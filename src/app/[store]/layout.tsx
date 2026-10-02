@@ -10,6 +10,7 @@ import { showSection } from '@/lib/sections';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { PromoNotice } from '@/components/layout/PromoNotice';
 import { ClosedForOrders } from '@/components/layout/ClosedForOrders';
+import { NotOpenYet } from '@/components/layout/NotOpenYet';
 import { AgeNotice } from '@/components/layout/AgeNotice';
 import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
@@ -75,12 +76,29 @@ export default async function StoreLayout({ params, children }: Props) {
   // Overview tab since it shipped and read by nothing, so a trade-only shop
   // that asked for this was wide open.
   //
+  // Switched off by the merchant. Gated here, above everything, because
+  // "Enable Online Store — make your store visible to customers" only ever
+  // reached `robots.ts` and the sitemap: a shop that had been switched off
+  // was hidden from search engines and still answering 200 on its home page,
+  // its catalogue AND its cart. Absent means published, so a shop that has
+  // never opened the switch is untouched by this.
+  if (resolved.storefrontConfig?.isPublished === false) {
+    // No providers: the theme variables are set on <html> by the root
+    // layout, so this is styled without a cart, a session or a catalogue
+    // being loaded for a shop nobody is allowed into.
+    return <NotOpenYet storeConfig={resolved.storeConfig} />;
+  }
+
   // Gated in the LAYOUT, not on the catalogue: a guard that covers the listing
   // and leaves the product pages, the search and the sitemap open guards
   // nothing. The sign-in and register pages are the exception, or there is no
   // way in.
   if (resolved.storefrontConfig?.requireLoginToBrowse) {
-    const path = headers().get('x-invoke-path') ?? headers().get('x-pathname') ?? '';
+    // `x-xeboki-path` is set by the middleware. The two Next internals this
+    // used to read are not set in this version, so the path was always ''
+    // and the sign-in page was gated along with everything else.
+    const path = headers().get('x-xeboki-path')
+      ?? headers().get('x-invoke-path') ?? headers().get('x-pathname') ?? '';
     const isWayIn = /\/(login|register)(\/|$)/.test(path);
     if (!isWayIn && !(await getSession())) {
       redirect(`/${params.store}/login`);

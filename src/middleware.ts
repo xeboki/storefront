@@ -211,6 +211,13 @@ export async function middleware(request: NextRequest) {
   // `headers()` in a server component. Setting it on the response only sent it
   // back to the browser, so every reader fell through to its 'demo' default.
   const requestHeaders = new Headers(request.headers)
+  // The path the shopper asked for, for a server component that has to
+  // know it. Next does not reliably expose one: the store layout was
+  // reading `x-invoke-path`/`x-pathname`, got an empty string, and so
+  // could not tell the sign-in page from any other — a shop with
+  // "require login to browse" on redirected /login to /login, which is
+  // a shop nobody can get into.
+  requestHeaders.set('x-xeboki-path', pathname)
   if (themePreview) requestHeaders.set('x-xeboki-theme', themePreview)
   // Also on the REQUEST, because a cookie set on the response is not visible to
   // `cookies()` in the render it was set during — the first page after a switch
