@@ -61,15 +61,15 @@ const TITLE_SIZE: Record<string, string> = {
  * banner rendered left, which looks like the setting was never read.
  */
 const ALIGN_MOBILE: Record<string, string> = {
-  left: 'items-start text-left',
+  left: 'items-start text-start',
   centre: 'items-center text-center',
-  right: 'items-end text-right',
+  right: 'items-end text-end',
 };
 
 const ALIGN_DESKTOP: Record<string, string> = {
-  left: 'sm:items-start sm:text-left',
+  left: 'sm:items-start sm:text-start',
   centre: 'sm:items-center sm:text-center',
-  right: 'sm:items-end sm:text-right',
+  right: 'sm:items-end sm:text-end',
 };
 
 /**
@@ -86,15 +86,15 @@ const ALIGN_DESKTOP: Record<string, string> = {
  * runtime is never in a file Tailwind scans and never gets a rule.
  */
 const MEASURE_MOBILE: Record<string, string> = {
-  left: 'mr-auto',
+  left: 'me-auto',
   centre: 'mx-auto',
-  right: 'ml-auto',
+  right: 'ms-auto',
 };
 
 const MEASURE_DESKTOP: Record<string, string> = {
-  left: 'sm:mr-auto sm:ml-0',
+  left: 'sm:me-auto sm:ms-0',
   centre: 'sm:mx-auto',
-  right: 'sm:ml-auto sm:mr-0',
+  right: 'sm:ms-auto sm:me-0',
 };
 
 const BUTTONS_MOBILE: Record<string, string> = {
@@ -167,6 +167,7 @@ export function HeroSlideView({
       <div className={layout === 'split' ? 'max-w-2xl' : 'max-w-xl'}>
         {slide.eyebrow && (
           <p
+            dir="auto"
             className={`eyebrow text-white/70 ${
               EYEBROW_RULE[slide.align] ?? EYEBROW_RULE.left
             }`}
@@ -175,12 +176,13 @@ export function HeroSlideView({
           </p>
         )}
 
-        <h2 className={`${TITLE_SIZE[slide.titleSize] ?? TITLE_SIZE.large} mt-5 text-white drop-shadow-sm`}>
+        <h2 dir="auto" className={`${TITLE_SIZE[slide.titleSize] ?? TITLE_SIZE.large} mt-5 text-white drop-shadow-sm`}>
           {slide.title}
         </h2>
 
         {slide.subtitle && (
           <p
+            dir="auto"
             className={`mt-5 max-w-md text-lg leading-relaxed text-white/85 ${
               MEASURE_MOBILE[slide.alignMobile] ?? MEASURE_MOBILE.left
             } ${MEASURE_DESKTOP[slide.align] ?? MEASURE_DESKTOP.left}`}
@@ -259,7 +261,7 @@ export function HeroSlideView({
           // No image: build depth out of the brand colour instead of a flat
           // fill. The dark wash is what guarantees the copy is legible.
           <div aria-hidden className="absolute inset-0">
-            <div className="absolute -left-1/4 top-[-30%] h-[130%] w-[70%] rounded-full bg-white/10 blur-3xl" />
+            <div className="absolute -start-1/4 top-[-30%] h-[130%] w-[70%] rounded-full bg-white/10 blur-3xl" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-transparent" />
           </div>
         )}

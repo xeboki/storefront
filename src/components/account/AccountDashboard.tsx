@@ -106,7 +106,7 @@ export function AccountDashboard({ session, storeSlug, initialOrders }: Props) {
                       {formatDate(order.createdAt)}
                     </p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-end">
                     <p className="font-bold text-fg text-sm">
                       {money(order.total)}
                     </p>

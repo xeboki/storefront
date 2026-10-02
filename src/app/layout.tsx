@@ -10,6 +10,7 @@ import Script from 'next/script';
 import './globals.css';
 import { loadStore } from '@/lib/sdk/store';
 import { buildThemeVars } from '@/lib/theme';
+import { direction } from '@/lib/i18n/dictionaries';
 import { activeLocale } from '@/lib/i18n/server';
 import { ColorSchemeProvider, colorSchemeScript } from '@/components/layout/color-scheme';
 
@@ -139,6 +140,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html
       lang={locale}
+      // Direction, not just language. Without it an Arabic or Hebrew shop
+      // would read right to left inside a left-to-right page: the cart on
+      // the wrong side, every chevron pointing away from the thing it opens.
+      // `dir` is also what makes Tailwind's logical utilities (`ms-`, `pe-`,
+      // `text-start`, `end-0`) mirror, which is what the components use.
+      dir={direction(locale)}
       className={`${sans.variable} ${FONT_VARS}`}
       style={themeVars as React.CSSProperties}
       // The pre-paint script adds `.dark` before React sees the document.

@@ -33,6 +33,19 @@ interface Props {
  * page read as a stack of lists with no hierarchy. An eyebrow does the work a
  * second heading size would otherwise be asked to do.
  */
+/**
+ * Merchant words carry their own direction.
+ *
+ * `dir="auto"` makes each string take the direction of its OWN first strong
+ * character rather than the page's. Without it, English copy in an Arabic
+ * shop is reordered by the bidi algorithm: "30 days to change your mind"
+ * renders as "days to change your mind 30" and a full stop jumps to the far
+ * end of the line. Seen on screen, not reasoned about.
+ *
+ * It belongs on merchant and catalogue text — a shop's own heading, a
+ * product's name — and NOT on the interface's own words, which are already
+ * in the page's language.
+ */
 export function SectionHeader({
   eyebrow, title, lede, href, linkLabel, align = 'left',
   reserveEyebrow = false,
@@ -79,7 +92,7 @@ export function SectionHeader({
     >
       <div className={centered ? 'mx-auto max-w-2xl' : 'max-w-2xl'}>
         {eyebrow ? (
-          <p className={`eyebrow ${centered ? '' : 'eyebrow-rule'} text-primary`}>{eyebrow}</p>
+          <p dir="auto" className={`eyebrow ${centered ? '' : 'eyebrow-rule'} text-primary`}>{eyebrow}</p>
         ) : reserveEyebrow ? (
           // The line, kept empty. `aria-hidden` because there is nothing to
           // read — this is spacing that happens to be made of text, so that
@@ -87,8 +100,8 @@ export function SectionHeader({
           // being a hard-coded margin that drifts the moment the type does.
           <p className="eyebrow" aria-hidden="true">&nbsp;</p>
         ) : null}
-        {title && <h2 className="display-lg mt-3 text-fg">{title}</h2>}
-        {lede && <p className="mt-3 text-fg-muted">{lede}</p>}
+        {title && <h2 dir="auto" className="display-lg mt-3 text-fg">{title}</h2>}
+        {lede && <p dir="auto" className="mt-3 text-fg-muted">{lede}</p>}
       </div>
 
       {href && !centered && (

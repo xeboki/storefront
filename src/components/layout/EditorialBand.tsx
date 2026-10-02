@@ -52,7 +52,7 @@ export function EditorialBand({ storeConfig, storeSlug, imageUrl, stores, words,
             fallback={
               <div aria-hidden className="absolute inset-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-primary/5 to-transparent" />
-                <div className="absolute -bottom-1/3 -right-1/4 h-[80%] w-[80%] rounded-full bg-primary/15 blur-3xl" />
+                <div className="absolute -bottom-1/3 -end-1/4 h-[80%] w-[80%] rounded-full bg-primary/15 blur-3xl" />
               </div>
             }
           />

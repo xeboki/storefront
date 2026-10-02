@@ -193,7 +193,7 @@ export function StorefrontFooter({
             config — never a row of card logos we cannot honour. */}
         {paymentMethods.length > 0 && (
           <div className="mt-12 flex flex-wrap items-center gap-2 border-t border-line pt-8">
-            <span className="eyebrow mr-2 text-[10px]">We accept</span>
+            <span className="eyebrow me-2 text-[10px]">We accept</span>
             {paymentMethods.map((method) => (
               <span
                 key={method.key}

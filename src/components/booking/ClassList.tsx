@@ -156,7 +156,7 @@ export function ClassList({ storeSlug }: Props) {
                 </p>
               </div>
 
-              <div className="text-right shrink-0">
+              <div className="text-end shrink-0">
                 {session.price > 0 && (
                   <p className="font-semibold text-fg mb-2">
                     {money(session.price)}

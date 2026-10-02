@@ -119,7 +119,7 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
               href={`/${ctx.storeSlug}/catalog?category=${c.id}`}
               className="flex-none w-44 rounded-brand border border-line bg-surface p-5 text-center transition-colors hover:border-primary"
             >
-              <span className="text-sm font-semibold text-fg">{c.name}</span>
+              <span dir="auto" className="text-sm font-semibold text-fg">{c.name}</span>
               <span className="mt-1 block min-h-[1rem] text-xs text-fg-muted">
                 {countIn(c.id) > 0 ? items(countIn(c.id)) : '\u00a0'}
               </span>
@@ -134,7 +134,7 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
                 href={`/${ctx.storeSlug}/catalog?category=${c.id}`}
                 className="flex items-center justify-between py-4 text-fg transition-colors hover:text-primary"
               >
-                <span className="font-medium">{c.name}</span>
+                <span dir="auto" className="font-medium">{c.name}</span>
                 {countIn(c.id) > 0 && (
                   <span className="text-sm text-fg-muted">{countIn(c.id)}</span>
                 )}
@@ -167,7 +167,7 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
               className={`group flex aspect-[4/3] flex-col justify-end rounded-brand p-5 transition-transform hover:-translate-y-0.5 ${
                 c.color ? '' : 'border border-line bg-surface-alt text-fg'}`}
             >
-              <span className="text-lg font-bold leading-tight">{c.name}</span>
+              <span dir="auto" className="text-lg font-bold leading-tight">{c.name}</span>
               {/* The line is kept whether or not there is a count to put in
                   it. Without it, a department with nothing filed under it
                   sat a line lower than the one beside it, so a row of tiles

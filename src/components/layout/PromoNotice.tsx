@@ -85,7 +85,7 @@ export function PromoNotice({ popup, storeSlug }: Props) {
           type="button"
           onClick={dismiss}
           aria-label="Close"
-          className="absolute right-3 top-3 rounded-full p-1.5 text-fg-muted transition-colors hover:bg-fg/5 hover:text-fg"
+          className="absolute end-3 top-3 rounded-full p-1.5 text-fg-muted transition-colors hover:bg-fg/5 hover:text-fg"
         >
           <X size={18} />
         </button>
@@ -93,14 +93,14 @@ export function PromoNotice({ popup, storeSlug }: Props) {
         {popup.title && (
           <h2
             id="promo-notice-title"
-            className="pr-8 font-display text-xl font-semibold text-fg"
+            className="pe-8 font-display text-xl font-semibold text-fg"
           >
             {popup.title}
           </h2>
         )}
 
         {popup.message && (
-          <p className={`text-sm leading-relaxed text-fg-muted ${popup.title ? 'mt-2' : 'pr-8'}`}>
+          <p className={`text-sm leading-relaxed text-fg-muted ${popup.title ? 'mt-2' : 'pe-8'}`}>
             {popup.message}
           </p>
         )}

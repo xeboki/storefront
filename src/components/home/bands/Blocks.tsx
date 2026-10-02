@@ -72,7 +72,7 @@ export function TextCardBlock({ section, ctx, nested }: SectionProps) {
           </p>
         )}
         {w.title && <h2 className="mt-2 text-2xl font-bold leading-tight">{w.title}</h2>}
-        {body && <p className="mt-3 text-sm opacity-90">{body}</p>}
+        {body && <p dir="auto" className="mt-3 text-sm opacity-90">{body}</p>}
         {ctaLabel && ctaUrl && (
           <Link
             href={ctaUrl}
@@ -286,7 +286,7 @@ export function ProductListBlock({ section, ctx, nested }: SectionProps) {
                 <div className="h-16 w-16 flex-none rounded-brand border border-line bg-surface-alt" />
               )}
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-fg">{product.name}</p>
+                <p dir="auto" className="truncate text-sm font-medium text-fg">{product.name}</p>
                 {section.variant === 'detailed' && (
                   <p className="mt-0.5 text-sm text-fg-muted">
                     {money(product.price ?? 0)}

@@ -77,7 +77,7 @@ export function CatalogFilterSheet({
   const sortLabel = SORT_OPTIONS.find((o) => o.value === sort)?.label ?? 'Featured';
 
   const row =
-    'flex w-full items-center justify-between gap-3 rounded-brand px-3 py-3 text-left text-sm transition-colors hover:bg-surface-alt';
+    'flex w-full items-center justify-between gap-3 rounded-brand px-3 py-3 text-start text-sm transition-colors hover:bg-surface-alt';
 
   return (
     <>
@@ -92,7 +92,7 @@ export function CatalogFilterSheet({
           <SlidersHorizontal size={16} aria-hidden />
           Filter
           {activeCount > 0 && (
-            <span className="ml-0.5 rounded-full bg-primary-solid px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
+            <span className="ms-0.5 rounded-full bg-primary-solid px-1.5 py-0.5 text-xs font-semibold text-primary-foreground">
               {activeCount}
             </span>
           )}

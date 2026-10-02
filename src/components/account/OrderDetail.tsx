@@ -149,7 +149,7 @@ export function OrderDetail({
             <button
               onClick={fetchOrder}
               disabled={refreshing}
-              className="ml-1 hover:text-primary disabled:opacity-40 transition-colors"
+              className="ms-1 hover:text-primary disabled:opacity-40 transition-colors"
               aria-label="Refresh"
             >
               <RotateCw size={12} className={refreshing ? 'animate-spin' : ''} />
@@ -209,7 +209,7 @@ export function OrderDetail({
             {STATUS_STEPS.map((step, i) => (
               <div key={step.key} className="flex-1 last:flex-none">
                 <span
-                  className={`text-xs block text-center first:text-left ${
+                  className={`text-xs block text-center first:text-start ${
                     i === stepIndex
                       ? 'text-primary font-semibold'
                       : i < stepIndex

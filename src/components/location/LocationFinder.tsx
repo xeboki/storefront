@@ -60,7 +60,7 @@ export function LocationFinder({ storeSlug, rows }: Props) {
         <div className="relative mb-6">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle"
+            className="absolute start-3 top-1/2 -translate-y-1/2 text-fg-subtle"
             aria-hidden
           />
           <input
@@ -68,7 +68,7 @@ export function LocationFinder({ storeSlug, rows }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by city, area or store name…"
             aria-label="Search stores"
-            className="w-full rounded-brand border border-line bg-surface py-2.5 pl-9 pr-3 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:outline-none"
+            className="w-full rounded-brand border border-line bg-surface py-2.5 ps-9 pe-3 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:outline-none"
           />
         </div>
       )}

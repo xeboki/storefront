@@ -79,7 +79,7 @@ export function StorePicker({ stores, activeId, storeSlug, className = '' }: Pro
           />
           <ul
             role="listbox"
-            className="animate-sheet absolute right-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-brand border border-line bg-surface py-1 shadow-lg"
+            className="animate-sheet absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-brand border border-line bg-surface py-1 shadow-lg"
           >
             <li className="px-3 pb-1 pt-1.5 text-xs font-medium text-fg-subtle">
               Shopping at
@@ -93,7 +93,7 @@ export function StorePicker({ stores, activeId, storeSlug, className = '' }: Pro
                     role="option"
                     aria-selected={isActive}
                     onClick={() => choose(s)}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-alt"
+                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-sm text-fg transition-colors hover:bg-surface-alt"
                   >
                     <span>
                       <span className="block">{label(s)}</span>

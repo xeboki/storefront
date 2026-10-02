@@ -77,3 +77,23 @@ export type Locale = keyof typeof MESSAGES;
 export type MessageKey = keyof (typeof MESSAGES)['en'];
 export const LOCALES = Object.keys(MESSAGES) as Locale[];
 export const DEFAULT_LOCALE: Locale = 'en';
+
+/**
+ * Which languages are written right to left.
+ *
+ * Only `en` and `es` ship today and both are left to right, so nothing in
+ * the shop had a `dir` at all — `<html>` carried `lang` and nothing else.
+ * That is not a missing translation, it is a missing *mechanism*: adding an
+ * Arabic dictionary to a document with no direction would have produced
+ * Arabic text in a left-to-right layout, with the basket on the wrong side
+ * and every chevron pointing the wrong way.
+ *
+ * Listed by language rather than detected, because direction is a property
+ * of the script and there is no way to work it out from a two-letter code.
+ */
+const RTL_LOCALES = new Set(['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'yi']);
+
+export function direction(locale: string | null | undefined): 'ltr' | 'rtl' {
+  const base = (locale || '').toLowerCase().split('-')[0];
+  return RTL_LOCALES.has(base) ? 'rtl' : 'ltr';
+}

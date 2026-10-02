@@ -215,7 +215,7 @@ function Control({
       aria-label={side === 'left' ? 'Previous banner' : 'Next banner'}
       className={`absolute top-1/2 z-20 -translate-y-1/2 rounded-full border border-white/30 bg-black/30 p-2.5 text-white backdrop-blur-sm transition hover:bg-black/55 disabled:pointer-events-none disabled:opacity-0 ${
         hideOnPhone ? 'hidden sm:block' : ''
-      } ${side === 'left' ? 'left-3 sm:left-5' : 'right-3 sm:right-5'}`}
+      } ${side === 'left' ? 'start-3 sm:start-5' : 'end-3 sm:end-5'}`}
     >
       <Icon size={20} />
     </button>

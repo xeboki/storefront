@@ -53,7 +53,7 @@ export function CollectionBand({ category, products, storeSlug, words }: Props) 
             className="display-hero pointer-events-none hidden select-none whitespace-nowrap text-fg/[0.07] lg:block"
           >
             {heading}
-            <span className="text-outline ml-4">{heading}</span>
+            <span className="text-outline ms-4">{heading}</span>
           </h2>
 
           {/* Pulled up into the type on wide screens only — there is nothing

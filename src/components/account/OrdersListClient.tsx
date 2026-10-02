@@ -98,7 +98,7 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
                     <p className="text-xs text-fg-subtle mt-0.5">
                       {formatDate(order.createdAt)}
                       {order.orderType && (
-                        <span className="ml-2 capitalize">{order.orderType}</span>
+                        <span className="ms-2 capitalize">{order.orderType}</span>
                       )}
                     </p>
                     <p className="text-xs text-fg-subtle mt-0.5">
@@ -108,7 +108,7 @@ export function OrdersListClient({ initialOrders, total, storeSlug, initialStatu
                 </div>
 
                 {/* Right: total + status */}
-                <div className="text-right flex-shrink-0">
+                <div className="text-end flex-shrink-0">
                   <p className="font-bold text-fg text-sm">
                     {money(order.total)}
                   </p>

@@ -489,11 +489,11 @@ export function StorefrontHeader({
         key="cart"
         href={`/${storeSlug}/cart`}
         aria-label={t('nav.cart')}
-        className="relative ml-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-solid text-primary-foreground transition-opacity hover:opacity-90"
+        className="relative ms-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-solid text-primary-foreground transition-opacity hover:opacity-90"
       >
         <ShoppingCart size={18} />
         {hydrated && itemCount > 0 && (
-          <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-bold text-bg">
+          <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-fg px-1 text-[10px] font-bold text-bg">
             {itemCount > 9 ? '9+' : itemCount}
           </span>
         )}

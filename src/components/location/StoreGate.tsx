@@ -88,7 +88,7 @@ export function StoreGate({ stores, storeSlug, businessName }: Props) {
                 type="button"
                 onClick={() => choose(s)}
                 disabled={choosing !== null}
-                className="flex w-full items-start gap-3 rounded-brand border border-line bg-surface p-4 text-left transition-colors hover:border-primary hover:bg-surface-alt disabled:opacity-60"
+                className="flex w-full items-start gap-3 rounded-brand border border-line bg-surface p-4 text-start transition-colors hover:border-primary hover:bg-surface-alt disabled:opacity-60"
               >
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold text-fg">{label(s)}</span>

@@ -64,7 +64,7 @@ export function ImageTextBand({ section, ctx, nested }: SectionProps) {
         </p>
       )}
       {w.title && <h2 className="mt-3 text-3xl font-bold text-fg sm:text-4xl">{w.title}</h2>}
-      {body && <p className="mt-4 whitespace-pre-line text-fg-muted">{body}</p>}
+      {body && <p dir="auto" className="mt-4 whitespace-pre-line text-fg-muted">{body}</p>}
       {ctaLabel && ctaUrl && (
         <Link href={ctaUrl} className="mt-7 inline-block self-start rounded-brand bg-primary-solid px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
           {ctaLabel}
@@ -81,7 +81,7 @@ export function ImageTextBand({ section, ctx, nested }: SectionProps) {
         <div className="absolute inset-0 -z-10 bg-black/45" />
         <div className={`mx-auto max-w-3xl px-4 text-center text-white sm:px-6 lg:px-8 ${BAND_RHYTHM}`}>
           {w.title && <h2 className="text-3xl font-bold sm:text-4xl">{w.title}</h2>}
-          {body && <p className="mt-4 whitespace-pre-line text-white/85">{body}</p>}
+          {body && <p dir="auto" className="mt-4 whitespace-pre-line text-white/85">{body}</p>}
           {ctaLabel && ctaUrl && (
             <Link href={ctaUrl} className="mt-7 inline-block rounded-brand bg-white px-7 py-3 text-sm font-semibold text-black">
               {ctaLabel}
@@ -250,7 +250,7 @@ function FaqRow({ item }: { item: QA }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-4 py-4 text-left font-semibold text-fg"
+        className="flex w-full items-center justify-between gap-4 py-4 text-start font-semibold text-fg"
       >
         {item.q}
         <ChevronDown size={18} className={`flex-none transition-transform ${open ? 'rotate-180' : ''}`} />

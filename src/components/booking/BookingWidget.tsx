@@ -191,7 +191,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
               <li key={svc.id}>
                 <button
                   onClick={() => { setSelectedService(svc); setStep('staff'); }}
-                  className="w-full flex items-center justify-between p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-left"
+                  className="w-full flex items-center justify-between p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-start"
                 >
                   <div>
                     <p className="font-semibold text-fg text-sm">{svc.name}</p>
@@ -199,7 +199,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
                       <p className="text-xs text-fg-muted mt-0.5 line-clamp-1">{svc.description}</p>
                     )}
                   </div>
-                  <span className="font-bold text-primary ml-4 whitespace-nowrap">
+                  <span className="font-bold text-primary ms-4 whitespace-nowrap">
                     {money(svc.price)}
                   </span>
                 </button>
@@ -228,7 +228,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
 
         <button
           onClick={() => { setSelectedStaff(null); setStep('datetime'); }}
-          className="w-full flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-left"
+          className="w-full flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-start"
         >
           <div className="w-9 h-9 rounded-full bg-surface-alt flex items-center justify-center flex-shrink-0">
             <User size={18} className="text-fg-subtle" />
@@ -243,7 +243,7 @@ export function BookingWidget({ storeSlug, services, staff }: Props) {
           <button
             key={s.id}
             onClick={() => { setSelectedStaff(s); setStep('datetime'); }}
-            className="w-full flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-left"
+            className="w-full flex items-center gap-3 p-4 rounded-brand border border-line hover:border-primary hover:bg-primary/5 transition-colors text-start"
           >
             <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary font-bold text-sm">
               {s.name.charAt(0).toUpperCase()}

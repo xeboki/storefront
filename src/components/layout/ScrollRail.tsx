@@ -77,13 +77,13 @@ export function ScrollRail({
         <>
           <span
             aria-hidden
-            className={`pointer-events-none absolute inset-y-0 left-0 z-[5] w-10 bg-gradient-to-r ${fade} to-transparent`}
+            className={`pointer-events-none absolute inset-y-0 start-0 z-[5] w-10 bg-gradient-to-r ${fade} to-transparent`}
           />
           <button
             type="button"
             onClick={() => nudge(-1)}
             aria-label="Scroll left"
-            className={`${arrow} left-0`}
+            className={`${arrow} start-0`}
           >
             <ChevronLeft size={16} />
           </button>
@@ -98,13 +98,13 @@ export function ScrollRail({
         <>
           <span
             aria-hidden
-            className={`pointer-events-none absolute inset-y-0 right-0 z-[5] w-10 bg-gradient-to-l ${fade} to-transparent`}
+            className={`pointer-events-none absolute inset-y-0 end-0 z-[5] w-10 bg-gradient-to-l ${fade} to-transparent`}
           />
           <button
             type="button"
             onClick={() => nudge(1)}
             aria-label="Scroll right"
-            className={`${arrow} right-0`}
+            className={`${arrow} end-0`}
           >
             <ChevronRight size={16} />
           </button>

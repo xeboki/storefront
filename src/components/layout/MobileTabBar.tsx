@@ -58,7 +58,7 @@ export function MobileTabBar({ storeSlug, onOpenMenu }: Props) {
                   {/* Cart count comes from localStorage, so it waits for
                       hydration or the server and client disagree. */}
                   {href.endsWith('/cart') && hydrated && itemCount > 0 && (
-                    <span className="absolute -right-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-solid px-1 text-[10px] font-bold text-primary-foreground">
+                    <span className="absolute -end-2 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary-solid px-1 text-[10px] font-bold text-primary-foreground">
                       {itemCount > 9 ? '9+' : itemCount}
                     </span>
                   )}

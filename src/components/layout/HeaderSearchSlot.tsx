@@ -144,7 +144,7 @@ export function HeaderSearchSlot({
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={t('search.placeholder')}
-            className={clsx(iconClassName, 'hidden md:flex', open && 'ml-0.5')}
+            className={clsx(iconClassName, 'hidden md:flex', open && 'ms-0.5')}
           >
             {open ? <X size={20} /> : <Search size={20} />}
           </button>

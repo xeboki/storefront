@@ -192,7 +192,7 @@ export function HeaderSearch({
             <Search
               size={16}
               aria-hidden
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle"
+              className="pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-fg-subtle"
             />
           )}
           <input
@@ -219,14 +219,14 @@ export function HeaderSearch({
                 // no pill to separate it from anything, and the shop's own
                 // corner radius rather than a hardcoded one.
                 ? 'h-10 w-full rounded-brand border border-line bg-surface px-3.5 text-sm text-fg focus:border-primary focus:outline-none'
-                : 'h-11 w-full rounded-full border border-line bg-surface-alt pl-11 pr-10 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:bg-surface focus:outline-none'
+                : 'h-11 w-full rounded-full border border-line bg-surface-alt ps-11 pe-10 text-sm text-fg placeholder:text-fg-subtle focus:border-primary focus:bg-surface focus:outline-none'
             }
           />
           {loading && (
             <Loader2
               size={15}
               aria-hidden
-              className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-fg-subtle"
+              className="absolute end-4 top-1/2 -translate-y-1/2 animate-spin text-fg-subtle"
             />
           )}
         </div>
@@ -237,7 +237,7 @@ export function HeaderSearch({
           id={listId}
           role="listbox"
           aria-label={t('search.placeholder')}
-          className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-brand border border-line bg-surface shadow-xl"
+          className="absolute start-0 end-0 top-[calc(100%+0.5rem)] z-50 overflow-hidden rounded-brand border border-line bg-surface shadow-xl"
         >
           {rows.length === 0 && !loading && (
             // Named, not blank: "nothing matched that" is information, an
@@ -285,7 +285,7 @@ export function HeaderSearch({
               </span>
 
               {row.kind === 'product' && (
-                <span className="flex-shrink-0 text-right">
+                <span className="flex-shrink-0 text-end">
                   <span
                     className={`price block text-sm ${
                       row.soldOut ? 'text-fg-subtle line-through' : 'text-fg'

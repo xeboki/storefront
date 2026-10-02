@@ -102,7 +102,7 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
                     makes a row read as a curated selection. */}
                 <span
                   aria-hidden
-                  className="price pointer-events-none absolute -bottom-5 left-3 text-[5rem] font-medium leading-none text-white/25"
+                  className="price pointer-events-none absolute -bottom-5 start-3 text-[5rem] font-medium leading-none text-white/25"
                   style={{ textShadow: '0 2px 20px rgba(0,0,0,0.35)' }}
                 >
                   {String(index + 1).padStart(2, '0')}
@@ -110,7 +110,7 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
                 {!sellable && (
                   <>
                     <span aria-hidden className="absolute inset-0 bg-bg/55" />
-                    <span className="absolute left-4 top-4 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
+                    <span className="absolute start-4 top-4 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
                       Sold out
                     </span>
                   </>
@@ -133,7 +133,7 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
                   </h3>
                 </div>
                 <p className="price flex-shrink-0 text-sm text-fg-muted">
-                  {product.hasVariants && <span className="mr-1 text-xs">From</span>}
+                  {product.hasVariants && <span className="me-1 text-xs">From</span>}
                   {money(product.price ?? 0)}
                 </p>
               </div>
@@ -152,7 +152,7 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
                 aria-label="Next" className={arrow}>
           <ArrowRight size={16} />
         </button>
-        <span className="price ml-2 text-xs uppercase tracking-[0.14em] text-fg-subtle">
+        <span className="price ms-2 text-xs uppercase tracking-[0.14em] text-fg-subtle">
           {String(products.length).padStart(2, '0')} items
         </span>
       </div>

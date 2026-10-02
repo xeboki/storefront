@@ -37,7 +37,7 @@ export function CatalogSort({ current, className = '' }: { current: string; clas
           p.delete('page');
           router.push(`${pathname}?${p.toString()}`, { scroll: false });
         }}
-        className="cursor-pointer appearance-none rounded-brand border border-line bg-surface py-2 pl-3 pr-8 text-sm text-fg focus:border-primary focus:outline-none"
+        className="cursor-pointer appearance-none rounded-brand border border-line bg-surface py-2 ps-3 pe-8 text-sm text-fg focus:border-primary focus:outline-none"
       >
         {OPTIONS.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -46,7 +46,7 @@ export function CatalogSort({ current, className = '' }: { current: string; clas
       <ChevronDown
         size={14}
         aria-hidden
-        className="pointer-events-none absolute right-3 text-fg-subtle"
+        className="pointer-events-none absolute end-3 text-fg-subtle"
       />
     </label>
   );

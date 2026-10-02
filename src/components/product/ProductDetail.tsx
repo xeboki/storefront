@@ -160,7 +160,7 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
             }
           />
           {!isAvailable && (
-            <span className="absolute left-4 top-4 bg-fg px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
+            <span className="absolute start-4 top-4 bg-fg px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
               Sold out
             </span>
           )}
@@ -240,7 +240,7 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
           <div key={group.id} className="space-y-2">
             <p className="text-sm font-semibold text-fg">
               {group.name}
-              {group.required && <span className="text-danger-fg ml-1">*</span>}
+              {group.required && <span className="text-danger-fg ms-1">*</span>}
             </p>
             <div className="grid grid-cols-2 gap-2">
               {group.options.map((option) => (
@@ -380,7 +380,7 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
           {delivery && (
             <div className="flex justify-between gap-4 py-3">
               <dt className="text-fg-muted">Delivery</dt>
-              <dd className="text-right text-fg">
+              <dd className="text-end text-fg">
                 {delivery.range}
                 {delivery.cutoff && (
                   <span className="block text-xs text-fg-muted">{delivery.cutoff}</span>
@@ -405,7 +405,7 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
           onClick={handleAddToCart}
           disabled={!isAvailable}
           className={clsx(
-            'ml-auto flex h-12 flex-1 items-center justify-center gap-2 rounded-brand px-6 font-semibold transition-opacity',
+            'ms-auto flex h-12 flex-1 items-center justify-center gap-2 rounded-brand px-6 font-semibold transition-opacity',
             isAvailable
               ? 'bg-primary-solid text-primary-foreground hover:opacity-90'
               : 'bg-surface-alt text-fg-subtle cursor-not-allowed',

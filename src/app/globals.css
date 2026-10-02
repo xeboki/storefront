@@ -293,6 +293,39 @@
 
 }
 
+/* ── Right to left ───────────────────────────────────────────────────────────
+   Logical utilities (`ms-`, `pe-`, `text-start`, `end-0`) mirror on their own
+   once <html> has a `dir`. Two things do not, and both point the wrong way in
+   an Arabic or Hebrew shop:
+
+   An ARROW is a picture of a direction. `lucide` classes every icon by name,
+   so the directional ones are flipped here rather than at forty-six call
+   sites — a `rtl:` variant on each would be forty-six chances to forget one,
+   and the next arrow added would be the forty-seventh.
+
+   A TRANSFORM that nudges on hover moves along the x axis, which does not
+   know about writing direction either: a "view all" arrow that slides toward
+   the text it belongs to is sliding away from it in RTL. */
+[dir="rtl"] svg.lucide-arrow-right,
+[dir="rtl"] svg.lucide-arrow-left,
+[dir="rtl"] svg.lucide-chevron-right,
+[dir="rtl"] svg.lucide-chevron-left,
+[dir="rtl"] svg.lucide-arrow-up-right,
+[dir="rtl"] svg.lucide-move-right {
+  transform: scaleX(-1);
+}
+
+/* The hover nudge, mirrored. Written against the utility rather than the
+   element so it covers every place that uses it. */
+@media (prefers-reduced-motion: no-preference) {
+  [dir="rtl"] .group:hover .motion-safe\:group-hover\:translate-x-1 {
+    --tw-translate-x: -0.25rem;
+  }
+  [dir="rtl"] .group:hover .motion-safe\:group-hover\:translate-x-0\.5 {
+    --tw-translate-x: -0.125rem;
+  }
+}
+
 /* ── The page's vertical rhythm ──────────────────────────────────────────────
    The gap between two bands is a band's padding TWICE — its floor plus the
    next one's ceiling — so this is the single number that decides how the

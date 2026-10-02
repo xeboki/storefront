@@ -82,7 +82,7 @@ export function TrustBar({ storefrontConfig, currency, variant = 'icons' }: Prop
           {items.map(({ Icon, title }, i) => (
             <span key={`${title}-${i}`} className="flex items-center gap-2 text-sm text-fg-muted">
               <Icon size={15} aria-hidden className="text-primary" />
-              {title}
+              <span dir="auto">{title}</span>
             </span>
           ))}
         </div>
@@ -101,8 +101,8 @@ export function TrustBar({ storefrontConfig, currency, variant = 'icons' }: Prop
               </span>
             )}
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-fg">{title}</p>
-              <p className="mt-0.5 text-sm text-fg-muted">{body}</p>
+              <p dir="auto" className="text-sm font-semibold text-fg">{title}</p>
+              <p dir="auto" className="mt-0.5 text-sm text-fg-muted">{body}</p>
             </div>
           </div>
         ))}

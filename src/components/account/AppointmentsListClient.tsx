@@ -163,7 +163,7 @@ export function AppointmentsListClient({ initialAppointments, storeSlug }: Props
                 </div>
 
                 {appt.notes && (
-                  <p className="mt-2 text-xs text-fg-subtle ml-13 pl-13">
+                  <p className="mt-2 text-xs text-fg-subtle ms-13 ps-13">
                     Note: {appt.notes}
                   </p>
                 )}

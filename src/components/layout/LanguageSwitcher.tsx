@@ -72,7 +72,7 @@ export function LanguageSwitcher({ locales, active, className = '' }: Props) {
           />
           <ul
             role="listbox"
-            className="animate-sheet absolute right-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-brand border border-line bg-surface py-1 shadow-lg"
+            className="animate-sheet absolute end-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-brand border border-line bg-surface py-1 shadow-lg"
           >
             {locales.map((code) => {
               const lang = describe(code);
@@ -84,7 +84,7 @@ export function LanguageSwitcher({ locales, active, className = '' }: Props) {
                     role="option"
                     aria-selected={isActive}
                     onClick={() => choose(code)}
-                    className="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-fg transition-colors hover:bg-surface-alt"
+                    className="flex w-full items-center gap-2.5 px-3 py-2 text-start text-sm text-fg transition-colors hover:bg-surface-alt"
                   >
                     <span aria-hidden className="text-base leading-none">{lang.flag}</span>
                     <span className="flex-1">{lang.native}</span>

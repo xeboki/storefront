@@ -22,7 +22,7 @@ export function Marquee({ announcement }: { announcement?: Announcement | null }
   const painted = announcement.background.trim();
 
   const run = Array.from({ length: 4 }, (_, i) => (
-    <span key={i} className="flex items-center gap-6 pr-6">
+    <span key={i} className="flex items-center gap-6 pe-6">
       <span className="text-[11px] font-semibold uppercase tracking-[0.22em]">{message}</span>
       <Asterisk size={13} className="flex-shrink-0 opacity-60" aria-hidden />
     </span>

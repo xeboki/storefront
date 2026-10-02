@@ -687,7 +687,7 @@ export function CheckoutView({
                     : 'bg-surface text-fg border-line hover:border-primary',
                 )}
               >
-                {key === 'dineIn' && <Utensils size={12} className="inline mr-1.5" />}
+                {key === 'dineIn' && <Utensils size={12} className="inline me-1.5" />}
                 {label}
               </button>
             ))}
@@ -843,7 +843,7 @@ export function CheckoutView({
                 <div className="flex items-center justify-between p-3 rounded-brand bg-success-bg border border-success-border text-sm">
                   <div>
                     <span className="font-semibold text-success-fg">{discountState.code}</span>
-                    <span className="text-success-fg ml-2">
+                    <span className="text-success-fg ms-2">
                       −{money(discountState.discountAmount ?? 0)}
                     </span>
                   </div>
@@ -892,7 +892,7 @@ export function CheckoutView({
                 <div className="flex items-center justify-between p-3 rounded-brand bg-violet-50 border border-violet-200 text-sm">
                   <div>
                     <span className="font-semibold text-violet-800">{giftCardState.code}</span>
-                    <span className="text-violet-700 ml-2">
+                    <span className="text-violet-700 ms-2">
                       Balance: {money(giftCardState.balance)} · Applying {money(giftCardApplied)}
                     </span>
                   </div>
@@ -957,7 +957,7 @@ export function CheckoutView({
                 key={m.id}
                 onClick={() => setPaymentMethod(m.id)}
                 className={clsx(
-                  'w-full flex items-center gap-3 p-4 rounded-brand border text-left transition-colors',
+                  'w-full flex items-center gap-3 p-4 rounded-brand border text-start transition-colors',
                   paymentMethod === m.id
                     ? 'border-primary bg-primary/5'
                     : 'border-line bg-surface hover:border-line',

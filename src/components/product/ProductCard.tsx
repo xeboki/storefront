@@ -103,7 +103,7 @@ export function ProductCard({ product, storeSlug, index }: Props) {
           // arbitrary photography is a gamble, and on the pale shots the
           // number simply disappeared.
           <span
-            className="price absolute left-4 top-4 text-[11px] font-medium tracking-[0.2em] text-white"
+            className="price absolute start-4 top-4 text-[11px] font-medium tracking-[0.2em] text-white"
             style={{ textShadow: '0 1px 6px rgba(0,0,0,0.55)' }}
           >
             {String(index + 1).padStart(2, '0')}
@@ -113,7 +113,7 @@ export function ProductCard({ product, storeSlug, index }: Props) {
         {!sellable && (
           <>
             <span aria-hidden className="absolute inset-0 bg-bg/55" />
-            <span className="absolute left-4 top-4 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
+            <span className="absolute start-4 top-4 bg-fg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-bg">
               Sold out
             </span>
           </>
@@ -123,7 +123,7 @@ export function ProductCard({ product, storeSlug, index }: Props) {
           onClick={handleToggleWishlist}
           aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
           className={clsx(
-            'absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition',
+            'absolute end-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full backdrop-blur transition',
             isWishlisted
               ? 'bg-danger text-white'
               : 'bg-black/25 text-white opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
@@ -139,9 +139,9 @@ export function ProductCard({ product, storeSlug, index }: Props) {
               <p className="eyebrow text-[9px] text-white/60">{product.categoryName}</p>
             )}
             <div className="mt-1 flex items-end justify-between gap-3">
-              <h3 className="line-clamp-1 text-sm font-medium text-white">{product.name}</h3>
+              <h3 dir="auto" className="line-clamp-1 text-sm font-medium text-white">{product.name}</h3>
               <span className="price flex-shrink-0 text-sm font-medium text-white">
-                {product.hasVariants && <span className="mr-1 text-xs font-normal opacity-70">From</span>}
+                {product.hasVariants && <span className="me-1 text-xs font-normal opacity-70">From</span>}
                 {money(product.price ?? 0)}
               </span>
             </div>
@@ -164,9 +164,9 @@ export function ProductCard({ product, storeSlug, index }: Props) {
         {product.categoryName && (
           <p className="eyebrow text-[9px]">{product.categoryName}</p>
         )}
-        <h3 className="mt-1 line-clamp-1 text-sm font-medium text-fg">{product.name}</h3>
+        <h3 dir="auto" className="mt-1 line-clamp-1 text-sm font-medium text-fg">{product.name}</h3>
         <p className="price mt-0.5 text-sm text-fg-muted">
-          {product.hasVariants && <span className="mr-1 text-xs">From</span>}
+          {product.hasVariants && <span className="me-1 text-xs">From</span>}
           {money(product.price ?? 0)}
         </p>
       </div>
