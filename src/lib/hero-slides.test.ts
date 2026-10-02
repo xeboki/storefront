@@ -157,6 +157,27 @@ describe('links stay inside the shop', () => {
     expect(inStore('mailto:a@b.c', 'gamebench', '/x')).toBe('mailto:a@b.c');
   });
 
+  /**
+   * The obvious way to fill one of these fields in is to copy the address
+   * out of the browser, which is `/gamebench/catalog` and not `/catalog`.
+   * Prefixing that again gave `/gamebench/gamebench/catalog` — a 404 with
+   * nothing anywhere to say it had happened. A shop cannot have a page
+   * whose first segment is its own slug, so both forms are accepted.
+   */
+  it('a path that already names the store is not prefixed twice', () => {
+    expect(inStore('/gamebench/catalog', 'gamebench', '/x'))
+      .toBe('/gamebench/catalog');
+    expect(inStore('gamebench/catalog', 'gamebench', '/x'))
+      .toBe('/gamebench/catalog');
+    expect(inStore('/gamebench', 'gamebench', '/x')).toBe('/gamebench/');
+  });
+
+  it('a page that merely starts with the slug is left alone', () => {
+    // `gamebenchers` is not `gamebench/…`, so it is an ordinary page name.
+    expect(inStore('/gamebenchers', 'gamebench', '/x'))
+      .toBe('/gamebench/gamebenchers');
+  });
+
   it('blank falls back to what the caller asked for', () => {
     expect(inStore('   ', 'gamebench', '/gamebench/catalog')).toBe('/gamebench/catalog');
   });
