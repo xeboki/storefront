@@ -29,9 +29,22 @@ interface Props {
    * of the page and the whole of a narrow column.
    */
   inset?: boolean;
+  /**
+   * How the products are laid out.
+   *
+   * This component was a scrolling row and nothing else, while the band
+   * above it offered "A grid", "A row that scrolls" and "Fewer, larger".
+   * Only the last one branched — on the COUNT — so a merchant who picked
+   * "A grid" was given the row, and `grid` and `carousel` rendered
+   * byte-for-byte the same page.
+   */
+  layout?: 'carousel' | 'grid';
 }
 
-export function FeaturedProducts({ products, storeSlug, inset = false }: Props) {
+export function FeaturedProducts({
+  products, storeSlug, inset = false, layout = 'carousel',
+}: Props) {
+  const grid = layout === 'grid';
   const money = useMoney();
   const track = useRef<HTMLDivElement>(null);
   const [atStart, setAtStart] = useState(true);
@@ -72,8 +85,13 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
     <div>
       <div
         ref={track}
-        className={`flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2 scrollbar-hide ${
-          inset ? '' : '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8'}`}
+        className={grid
+          // A grid wraps and bleeds nowhere: the negative margin that lets a
+          // row run to the page edge would pull a grid's first column out of
+          // the measure the rest of the page keeps to.
+          ? `grid grid-cols-2 gap-6 ${inset ? 'lg:grid-cols-2' : 'lg:grid-cols-4'}`
+          : `flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2 scrollbar-hide ${
+              inset ? '' : '-mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8'}`}
       >
         {products.map((product, index) => {
           const sellable = productIsSellable(product);
@@ -81,9 +99,11 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
             <Link
               key={product.id}
               href={`/${storeSlug}/product/${product.id}`}
-              className={`group flex-shrink-0 snap-start ${
-                inset ? 'w-[68vw] sm:w-[38vw] lg:w-[15rem]'
-                      : 'w-[72vw] sm:w-[44vw] lg:w-[24rem]'}`}
+              className={grid
+                ? 'group'
+                : `group flex-shrink-0 snap-start ${
+                    inset ? 'w-[68vw] sm:w-[38vw] lg:w-[15rem]'
+                          : 'w-[72vw] sm:w-[44vw] lg:w-[24rem]'}`}
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-brand bg-surface-alt">
                 <ProductImage
@@ -142,8 +162,9 @@ export function FeaturedProducts({ products, storeSlug, inset = false }: Props) 
         })}
       </div>
 
-      {/* Controls sit under the rail, not floating over the images. */}
-      <div className="mt-8 flex items-center gap-3">
+      {/* Controls sit under the rail, not floating over the images — and a
+          grid has no rail to nudge, so it has no controls either. */}
+      <div className={`mt-8 items-center gap-3 ${grid ? 'hidden' : 'flex'}`}>
         <button type="button" onClick={() => nudge(-1)} disabled={atStart}
                 aria-label="Previous" className={arrow}>
           <ArrowLeft size={16} />

@@ -11,6 +11,18 @@ interface Props {
   storeSlug: string;
   /** The merchant's wording. Blank fields fall back to the category's name. */
   words: SectionWords;
+  /**
+   * Which of the three arrangements the band offers.
+   *
+   * It offered "Picture beside the products", "A grid" and "A row that
+   * scrolls" and received NONE of them — `CollectionSection` never passed
+   * `section.variant` down, so all three drew the split. A merchant picked
+   * a carousel, was told it saved, and got the same page back.
+   *
+   * `split` is first in the catalogue and so is the fallback; keeping it as
+   * the default here means a shop that predates this renders unchanged.
+   */
+  variant?: 'split' | 'grid' | 'carousel';
 }
 
 /**
@@ -22,8 +34,12 @@ interface Props {
  * and it costs no photography to look deliberate, which matters for a shop
  * that has not shot a campaign.
  */
-export function CollectionBand({ category, products, storeSlug, words }: Props) {
-  const picks = products.slice(0, 3);
+export function CollectionBand({
+  category, products, storeSlug, words, variant = 'split',
+}: Props) {
+  // A grid and a rail are worth more than three things; the split is a
+  // composition built around exactly three.
+  const picks = products.slice(0, variant === 'split' ? 3 : 8);
   if (picks.length === 0) return null;
 
   const href = `/${storeSlug}/catalog?category=${category.id}`;
@@ -47,14 +63,18 @@ export function CollectionBand({ category, products, storeSlug, words }: Props) 
           </div>
 
           {/* Wide screens: the name at the size of an image. aria-hidden
-              because the heading above and the link below both name it. */}
-          <h2
-            aria-hidden
-            className="display-hero pointer-events-none hidden select-none whitespace-nowrap text-fg/[0.07] lg:block"
-          >
-            {heading}
-            <span className="text-outline ms-4">{heading}</span>
-          </h2>
+              because the heading above and the link below both name it.
+              The split's own flourish — a grid or a rail is a listing, and
+              type at that size behind one is just noise. */}
+          {variant === 'split' && (
+            <h2
+              aria-hidden
+              className="display-hero pointer-events-none hidden select-none whitespace-nowrap text-fg/[0.07] lg:block"
+            >
+              {heading}
+              <span className="text-outline ms-4">{heading}</span>
+            </h2>
+          )}
 
           {/* Pulled up into the type on wide screens only — there is nothing
               to overlap on a phone.
@@ -65,16 +85,35 @@ export function CollectionBand({ category, products, storeSlug, words }: Props) 
               the browser. So the band's whole move — cards riding up into
               the outlined word behind them — had never once happened, and
               the comment above described something nobody had seen. */}
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:-mt-24 lg:grid-cols-3">
+          <div className={
+            variant === 'carousel'
+              // A row that scrolls. The cards keep a width of their own and
+              // the track bleeds to the page edge, as the featured rail does.
+              ? 'mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 scrollbar-hide sm:gap-6 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8'
+              : variant === 'grid'
+                // A grid, and no pull-up: the type it would ride into is not
+                // drawn for this arrangement.
+                ? 'mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4'
+                : 'mt-8 grid grid-cols-2 gap-4 sm:gap-6 lg:-mt-24 lg:grid-cols-3'
+          }>
             {picks.map((product, i) => (
               <Link
                 key={product.id}
                 href={`/${storeSlug}/product/${product.id}`}
                 className={
-                  'group block ' +
-                  // The middle card sits lower, so the row is a composition
-                  // rather than three things in a line.
-                  (i === 1 ? 'lg:mt-16' : i === 2 ? 'hidden lg:block lg:mt-6' : '')
+                  variant === 'carousel'
+                    // In a rail every card is the same and keeps its width.
+                    ? 'group block flex-shrink-0 snap-start w-[60vw] sm:w-[34vw] lg:w-[18rem]'
+                    : variant === 'grid'
+                      // In a grid every card is the same, and none is hidden:
+                      // the split hides its third below `lg` because the
+                      // stagger needs three abreast to read as a composition.
+                      ? 'group block'
+                      : 'group block ' +
+                        // The middle card sits lower, so the row is a
+                        // composition rather than three things in a line.
+                        (i === 1 ? 'lg:mt-16'
+                          : i === 2 ? 'hidden lg:block lg:mt-6' : '')
                 }
               >
                 <div className="relative aspect-[3/4] overflow-hidden rounded-brand bg-surface-alt shadow-2xl">

@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { SectionHeader } from '@/components/layout/SectionHeader';
 import { moneyFor } from '@/lib/format-money';
 import { bandWords, setting } from '@/lib/band-words';
+import { ClassTimetable } from '@/components/booking/ClassTimetable';
 import { Band } from './Band';
 import type { SectionProps } from '../types';
 
@@ -211,14 +212,30 @@ export function TimetableBand({ section, ctx, nested }: SectionProps) {
   }, false);
   return (
     <Band nested={nested}>
-      <div className="mx-auto max-w-2xl text-center">
-        {w.eyebrow && (
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fg-subtle">
-            {w.eyebrow}
-          </p>
-        )}
-        {w.title && <h2 className="mt-3 text-3xl font-bold text-fg">{w.title}</h2>}
-        {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
+      {/* The words stay on a measure; the timetable under them takes the
+          band's width, because a week of days inside a 42rem column is
+          three columns of one line each. */}
+      <div className="text-center">
+        <div className="mx-auto max-w-2xl">
+          {w.eyebrow && (
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-fg-subtle">
+              {w.eyebrow}
+            </p>
+          )}
+          {w.title && <h2 className="mt-3 text-3xl font-bold text-fg">{w.title}</h2>}
+          {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
+        </div>
+        {/* What is actually on. The band offered "A week at a time" and "A
+            list" and read `variant` nowhere, so both drew this heading and
+            this button — two names for one band.
+
+            Below the words rather than instead of them, and silent when
+            there is nothing on: a shop with an empty timetable gets exactly
+            the band it got before this, heading and link included. */}
+        <ClassTimetable
+          storeSlug={ctx.storeSlug}
+          layout={section.variant === 'list' ? 'list' : 'week'}
+        />
         <Link href={`/${ctx.storeSlug}/classes`}
           className="mt-7 inline-block rounded-brand bg-primary-solid px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
           {w.linkLabel}

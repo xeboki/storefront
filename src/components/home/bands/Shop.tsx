@@ -228,7 +228,12 @@ export function FeaturedBand({ section, ctx, nested }: SectionProps) {
           })).filter((t) => t.products.length > 0)}
         />
       ) : (
-        <FeaturedProducts products={shown} storeSlug={ctx.storeSlug} inset={nested} />
+        <FeaturedProducts products={shown} storeSlug={ctx.storeSlug}
+          inset={nested}
+          // "A grid" and "A row that scrolls" are two of the three
+          // arrangements this band offers, and only the third one — which
+          // changes the COUNT — ever reached the renderer.
+          layout={section.variant === 'grid' ? 'grid' : 'carousel'} />
       )}
     </Band>
   );
@@ -251,6 +256,8 @@ export function CollectionSection({ section, ctx, nested }: SectionProps) {
       products={spotlight.items}
       storeSlug={ctx.storeSlug}
       words={bandWords(section, { eyebrow: 'Collection' }, nested)}
+      // It offered three arrangements and was handed none of them.
+      variant={section.variant as 'split' | 'grid' | 'carousel'}
     />
   );
 }
@@ -264,7 +271,7 @@ export function EditorialSection({ section, ctx, nested }: SectionProps) {
         || ctx.storefrontConfig?.heroImageUrl || ''}
       stores={onlineStores(ctx.storefrontConfig)}
       words={bandWords(section, { eyebrow: 'The store', linkLabel: 'Find a store' }, nested)}
-      flip={section.variant === 'imageLeft'}
+      arrangement={section.variant as 'imageRight' | 'imageLeft' | 'overlay'}
     />
   );
 }

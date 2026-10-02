@@ -272,10 +272,23 @@ export function StatsBand({ section, nested }: SectionProps) {
   return (
     <Band nested={nested} tight>
       {w.title && <SectionHeader {...w} reserveEyebrow={nested} />}
-      <dl className={`grid gap-8 ${section.variant === 'grid'
-        ? 'grid-cols-2 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-4'}`}>
+      {/* "One row" and "A grid" were `grid-cols-2 sm:grid-cols-4` and
+          `grid-cols-2 lg:grid-cols-4`: at any desktop width both resolve to
+          four columns, so the two choices drew the same band on the screen
+          most shoppers are on, and differed only in a 640–1024px window.
+          Two names for one arrangement is not a choice.
+
+          A row is now a row at every count — four numbers or seven, they
+          sit abreast and share the width (stacked on a phone, where seven
+          columns is not a row, it is a queue). A grid is a four-up that
+          wraps, so two numbers take two of four columns rather than half
+          the page each. */}
+      <dl className={section.variant === 'grid'
+        ? 'grid grid-cols-2 gap-8 lg:grid-cols-4'
+        : 'flex flex-col gap-8 sm:flex-row sm:justify-between'}>
         {items.map((s, i) => (
-          <div key={i} className="text-center">
+          <div key={i} className={`text-center${
+            section.variant === 'grid' ? '' : ' sm:flex-1'}`}>
             <dt className="text-3xl font-bold text-fg sm:text-4xl">{s.value}</dt>
             <dd className="mt-1 text-sm text-fg-muted">{s.label}</dd>
           </div>
