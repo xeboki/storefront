@@ -142,19 +142,43 @@ function paletteVars(prefix: string, p: Palette, accent: Rgb, accent2: Rgb): The
  * The direction of every tint flips on how dark the choice is — a shop that
  * picks charcoal needs its surfaces lighter than the page, not darker.
  */
-function paletteFromBackground(bg: Rgb, base: Palette): Palette {
+/**
+ * A text colour that clears the AA floor on every ground it can sit on.
+ *
+ * `ensureContrast` only ever moves further from its surface, so applying it
+ * once per ground converges rather than undoing itself.
+ */
+function legibleOn(colour: Rgb, grounds: Rgb[]): Rgb {
+  return grounds.reduce((out, ground) => ensureContrast(out, ground, 4.5), colour);
+}
+
+export function paletteFromBackground(bg: Rgb, base: Palette): Palette {
   const dark = luminance(bg) < 0.4;
   const toward: Rgb = dark ? [255, 255, 255] : [0, 0, 0];
   const fg = readableOn(bg);
+  const surface = mix(bg, toward, 0.04);
+  const surfaceAlt = mix(bg, toward, 0.08);
   return {
     ...base,
     bg,
-    surface: mix(bg, toward, 0.04),
-    surfaceAlt: mix(bg, toward, 0.08),
+    surface,
+    surfaceAlt,
     border: mix(bg, fg, 0.16),
     fg,
-    fgMuted: mix(fg, bg, 0.35),
-    fgSubtle: mix(fg, bg, 0.55),
+    // Blended toward the page for hierarchy, then pulled back until it can
+    // be read. The blend alone had no floor: 55% toward the background put
+    // `fgSubtle` at **2.87:1** on a fragrance shop's bone page, measured on
+    // screen, and `fgMuted` at 4.46 on a tinted band — both below AA, on
+    // every shop that sets a background of its own. Fixing the PRESETS did
+    // not touch this: a chosen background takes this path instead.
+    //
+    // Cleared against EVERY ground it can sit on, not a chosen one. Which
+    // ground is hardest flips with the page: on a pale shop the tints are
+    // darker than the page and bind; on a dark or saturated one they are
+    // lighter and the page binds instead. Picking either in advance passes
+    // half the shops.
+    fgMuted: legibleOn(mix(fg, bg, 0.35), [bg, surface, surfaceAlt]),
+    fgSubtle: legibleOn(mix(fg, bg, 0.55), [bg, surface, surfaceAlt]),
   };
 }
 
@@ -179,19 +203,32 @@ export function buildTheme(config: StorefrontConfig | null): Theme {
   // A brand colour chosen against white can disappear on a background the
   // merchant picked afterwards, so it is lifted against whatever they chose —
   // but only then, so no existing store's brand colour shifts underneath it.
-  const lightPrimary = chosenBg ? ensureContrast(primary, light.bg) : primary;
-  const lightSecondary = chosenBg ? ensureContrast(secondary, light.bg) : secondary;
+  // Against `surfaceAlt` and at the 4.5 text floor, for the same reason as
+  // the dark lift below: this is the colour `text-primary` draws with, and a
+  // tinted band is the ground it has the least contrast against.
+  const lightPrimary = chosenBg
+    ? ensureContrast(primary, light.surfaceAlt, 4.5) : primary;
+  const lightSecondary = chosenBg
+    ? ensureContrast(secondary, light.surfaceAlt, 4.5) : secondary;
 
   return {
     vars: {
       ...paletteVars('l', light, lightPrimary, lightSecondary),
       // A brand colour is chosen against white. On a near-black page the deep
       // ones vanish, so dark mode gets a lifted copy rather than the same hex.
+      //
+      // Lifted against `surfaceAlt`, not `bg`. `--color-primary` is a TEXT
+      // colour — `text-primary` draws every band's eyebrow — and a band can
+      // now choose a tinted ground, which in dark mode is LIGHTER than the
+      // page. Lifting against the page therefore guaranteed nothing where
+      // the text actually sat: a fragrance shop's espresso eyebrow came out
+      // at 3.60:1 on a tinted band, measured on screen. The lighter ground
+      // is the binding one, and clearing it clears the page too.
       ...paletteVars(
         'd',
         preset.dark,
-        liftForDark(primary, preset.dark.bg),
-        liftForDark(secondary, preset.dark.bg),
+        liftForDark(primary, preset.dark.surfaceAlt),
+        liftForDark(secondary, preset.dark.surfaceAlt),
       ),
       // The four things a shop says that are not its brand. Built through the
       // same scale, so they have a dark variant and readable text — sixty

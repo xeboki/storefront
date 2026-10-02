@@ -307,6 +307,15 @@
    `--band-space` is set by `BandShell` from the merchant's choice and
    defaults to 1, which is exactly the page as it was. */
 @layer components {
+  /* A reversed band: the page's own foreground becomes the ground.
+     Its contrast is therefore the page's own fg/bg contrast, which is high
+     by construction in BOTH themes — 19:1 here, where the brand colour gave
+     4.57:1 in dark mode because the dark theme derives it to a mid grey.
+     "Reversed" should mean reversed, not "the brand colour". */
+  .band-reversed {
+    background-color: rgb(var(--color-fg));
+  }
+
   .band-rhythm {
     padding-block: calc(3rem * var(--band-space, 1));
   }

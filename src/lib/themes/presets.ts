@@ -62,22 +62,43 @@ export interface ThemePreset {
 // already speaks. slate = cool, zinc = neutral, stone = warm.
 const SLATE = {
   50: [248, 250, 252], 100: [241, 245, 249], 200: [226, 232, 240],
+  300: [203, 213, 225],
   400: [148, 163, 184], 500: [100, 116, 139], 600: [71, 85, 105],
   700: [51, 65, 85], 800: [30, 41, 59], 900: [15, 23, 42], 950: [2, 6, 23],
 } as const;
 const ZINC = {
   50: [250, 250, 250], 100: [244, 244, 245], 200: [228, 228, 231],
+  300: [212, 212, 216],
   400: [161, 161, 170], 500: [113, 113, 122], 600: [82, 82, 91],
   700: [63, 63, 70], 800: [39, 39, 42], 900: [24, 24, 27], 950: [9, 9, 11],
 } as const;
 const STONE = {
   50: [250, 250, 249], 100: [245, 245, 244], 200: [231, 229, 228],
+  300: [214, 211, 209],
   400: [168, 162, 158], 500: [120, 113, 108], 600: [87, 83, 78],
   700: [68, 64, 60], 800: [41, 37, 36], 900: [28, 25, 23], 950: [12, 10, 9],
 } as const;
 
 type Ramp = typeof SLATE | typeof ZINC | typeof STONE;
 
+/*
+ * `fgSubtle` sits one step further from its ground than it used to.
+ *
+ * It was ramp 400 on white and ramp 500 on a 950 ground, which came out at
+ * 3-4:1 — below the 4.5 AA floor, in EVERY preset, in both themes, on every
+ * ground. The binding case is a tinted band: ramp 500 clears 4.76 on white
+ * and only 4.34 on `surfaceAlt`, so the step had to move twice, and
+ * `fgMuted` with it. The colour whose own comment calls it "the dimmest legible text"
+ * was not legible anywhere, and nothing checked: `scale.test.ts` holds the
+ * twelve-step scale to APCA and these palettes had no contrast assertion at
+ * all. `presets.test.ts` is that assertion now.
+ *
+ * Dark also moves `fgMuted` a step lighter, so the two roles stay a step
+ * apart rather than collapsing onto each other. That needed a 300 on each
+ * ramp — these are Tailwind's slate, zinc and stone, which have one; it had
+ * simply never been copied across, and without it dark had no legible step
+ * between `fgMuted` and the ground.
+ */
 function lightFrom(r: Ramp): Palette {
   return {
     bg: [255, 255, 255],
@@ -85,8 +106,8 @@ function lightFrom(r: Ramp): Palette {
     surfaceAlt: [...r[100]] as Rgb,
     border: [...r[200]] as Rgb,
     fg: [...r[900]] as Rgb,
-    fgMuted: [...r[600]] as Rgb,
-    fgSubtle: [...r[400]] as Rgb,
+    fgMuted: [...r[700]] as Rgb,
+    fgSubtle: [...r[600]] as Rgb,
   };
 }
 
@@ -99,8 +120,8 @@ function tintedLightFrom(r: Ramp): Palette {
     surfaceAlt: [...r[100]] as Rgb,
     border: [...r[200]] as Rgb,
     fg: [...r[900]] as Rgb,
-    fgMuted: [...r[600]] as Rgb,
-    fgSubtle: [...r[400]] as Rgb,
+    fgMuted: [...r[700]] as Rgb,
+    fgSubtle: [...r[600]] as Rgb,
   };
 }
 
@@ -111,8 +132,8 @@ function darkFrom(r: Ramp): Palette {
     surfaceAlt: [...r[800]] as Rgb,
     border: [...r[800]] as Rgb,
     fg: [...r[50]] as Rgb,
-    fgMuted: [...r[400]] as Rgb,
-    fgSubtle: [...r[500]] as Rgb,
+    fgMuted: [...r[300]] as Rgb,
+    fgSubtle: [...r[400]] as Rgb,
   };
 }
 
@@ -186,7 +207,11 @@ export const THEME_PRESETS: ThemePreset[] = [
       border: [...SLATE[400]] as Rgb,
       fg: [...SLATE[950]] as Rgb,
       fgMuted: [...SLATE[700]] as Rgb,
-      fgSubtle: [...SLATE[500]] as Rgb,
+      // 600, not 500, and for a sharper reason than the shared builders:
+      // this preset's `surfaceAlt` is a step darker than theirs, so 500
+      // came out at 3.86:1 here when it cleared elsewhere. A hand-written
+      // palette does not get the shared fix for free.
+      fgSubtle: [...SLATE[600]] as Rgb,
     },
     dark: darkFrom(SLATE),
     radius: '0.125rem',

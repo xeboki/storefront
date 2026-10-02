@@ -112,10 +112,21 @@ export function solidFill(brand: Rgb): { fill: Rgb; text: Rgb } {
  * would be lifted paler still. This picks the direction from the surface.
  */
 export function ensureContrast(accent: Rgb, surface: Rgb, min = 3): Rgb {
-  const target: Rgb = luminance(surface) > 0.4 ? [0, 0, 0] : WHITE;
+  // Which way to move is decided by MEASURING both, not by a luminance
+  // threshold — the same correction `readableOn` above already carries, and
+  // for the same reason. On a saturated mid teal the threshold said "this is
+  // dark, go lighter", while black actually reads at 4.77 there and white at
+  // 3.74: it was pushing toward the worse of the two and then giving up.
+  const target: Rgb = readableOn(surface);
+  // All the way to the target, not 80% of the way. The old bound stopped at
+  // `10 * 0.08` and returned whatever it had reached — so on a saturated
+  // teal it handed back 4.42:1 when 4.77 was available by going the last
+  // step. Falling short quietly is the worst of the three outcomes: it
+  // neither reads nor reports.
+  const STEPS = 12;
   let out = accent;
-  for (let step = 0; step <= 10; step++) {
-    out = mix(accent, target, step * 0.08);
+  for (let step = 0; step <= STEPS; step++) {
+    out = mix(accent, target, step / STEPS);
     if (contrastRatio(out, surface) >= min) return out;
   }
   return out;

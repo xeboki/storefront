@@ -26,6 +26,7 @@ import { onlineStores } from '@/lib/location';
 import { Band } from './Band';
 import { ProductTabs } from './ProductTabs';
 import type { SectionProps } from '../types';
+import { parseHex, readableOn } from '@/lib/themes/color';
 
 export function HeroBand({ section, ctx, nested }: SectionProps) {
   const slides = resolveSlides(ctx.storefrontConfig, ctx.storeConfig, ctx.storeSlug);
@@ -57,6 +58,22 @@ export function TrustBand({ section, ctx, nested }: SectionProps) {
       variant={variant}
     />
   );
+}
+
+/**
+ * Black or white on a department's own colour, whichever can be read.
+ *
+ * A category colour is chosen in the back office with no contrast check, and
+ * the tile painted its name white regardless — 2.54:1 on a mid green.
+ * Returns a CSS colour so it can sit beside `backgroundColor` in the same
+ * inline style; the count line under it inherits by opacity rather than by
+ * a second hardcoded white.
+ */
+function onTile(hex: string): string {
+  const rgb = parseHex(hex);
+  if (!rgb) return 'inherit';
+  const [r, g, b] = readableOn(rgb);
+  return `rgb(${r} ${g} ${b})`;
 }
 
 export function CategoriesBand({ section, ctx, nested }: SectionProps) {
@@ -138,9 +155,17 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
             <Link
               key={c.id}
               href={`/${ctx.storeSlug}/catalog?category=${c.id}`}
-              style={c.color ? { backgroundColor: c.color } : undefined}
+              // The tile's own colour decides whether its name is black or
+              // white. It used to be white always, and a department colour
+              // is the merchant's: a mid green gave 2.54:1 and a mid blue
+              // 3.68:1, measured on screen. `readableOn` compares both and
+              // takes the better, which is the same call the theme already
+              // makes for the page.
+              style={c.color
+                ? { backgroundColor: c.color, color: onTile(c.color) }
+                : undefined}
               className={`group flex aspect-[4/3] flex-col justify-end rounded-brand p-5 transition-transform hover:-translate-y-0.5 ${
-                c.color ? 'text-white' : 'border border-line bg-surface-alt text-fg'}`}
+                c.color ? '' : 'border border-line bg-surface-alt text-fg'}`}
             >
               <span className="text-lg font-bold leading-tight">{c.name}</span>
               {/* The line is kept whether or not there is a count to put in
@@ -148,7 +173,7 @@ export function CategoriesBand({ section, ctx, nested }: SectionProps) {
                   sat a line lower than the one beside it, so a row of tiles
                   had its names at two different heights. */}
               <span className={`mt-1 min-h-[1.25rem] text-sm ${
-                c.color ? 'text-white/80' : 'text-fg-muted'}`}>
+                c.color ? 'opacity-80' : 'text-fg-muted'}`}>
                 {countIn(c.id) > 0 ? items(countIn(c.id)) : '\u00a0'}
               </span>
             </Link>

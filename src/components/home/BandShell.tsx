@@ -30,7 +30,7 @@ const SURFACES: Record<string, string> = {
   page: '',
   tinted: 'bg-surface-alt',
   panel: 'bg-surface',
-  contrast: 'bg-primary-solid',
+  contrast: 'band-reversed',
 };
 
 /**
@@ -44,12 +44,17 @@ const SURFACES: Record<string, string> = {
  * Redefining `--color-fg` and friends for the subtree means `text-fg` keeps
  * meaning "the readable colour here", so every band comes right without one
  * of them being touched — including bands written after this.
+ *
+ * They go on an INNER element. The ground is `rgb(var(--color-fg))`, and a
+ * custom property redefined on an element applies to that element's own
+ * declarations too — so painting and flipping on the same node would make
+ * the background resolve to the flipped value and cancel itself.
  */
 const CONTRAST_TOKENS = {
-  '--color-fg': 'var(--color-primary-fg)',
-  '--color-fg-muted': 'var(--color-primary-fg)',
-  '--color-fg-subtle': 'var(--color-primary-fg)',
-  '--color-border': 'var(--color-primary-fg)',
+  '--color-fg': 'var(--color-bg)',
+  '--color-fg-muted': 'var(--color-bg)',
+  '--color-fg-subtle': 'var(--color-bg)',
+  '--color-border': 'var(--color-bg)',
 } as React.CSSProperties;
 
 /**
@@ -101,14 +106,17 @@ export function BandShell({ section, first = false, children }: {
 
   if (!className && !reversed && !scaled) return <>{children}</>;
 
-  const style = {
-    ...(reversed ? CONTRAST_TOKENS : null),
-    // Inherited by whatever draws the padding inside, which is `.band-rhythm`
-    // on the band's own container. Set here because this is the only place
-    // that knows the section; read there because that is where the padding
-    // lives and a band may bring its own density.
-    ...(scaled ? { '--band-space': spacing } : null),
-  } as React.CSSProperties;
+  // Inherited by whatever draws the padding inside, which is `.band-rhythm`
+  // on the band's own container. Set here because this is the only place
+  // that knows the section; read there because that is where the padding
+  // lives and a band may bring its own density.
+  const style = (scaled
+    ? { '--band-space': spacing }
+    : undefined) as React.CSSProperties | undefined;
 
-  return <div className={className} style={style}>{children}</div>;
+  return (
+    <div className={className} style={style}>
+      {reversed ? <div style={CONTRAST_TOKENS}>{children}</div> : children}
+    </div>
+  );
 }
