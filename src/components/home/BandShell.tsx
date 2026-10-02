@@ -30,7 +30,7 @@ const SURFACES: Record<string, string> = {
   page: '',
   tinted: 'bg-surface-alt',
   panel: 'bg-surface',
-  contrast: 'band-reversed',
+  contrast: 'bg-primary-solid',
 };
 
 /**
@@ -45,16 +45,18 @@ const SURFACES: Record<string, string> = {
  * meaning "the readable colour here", so every band comes right without one
  * of them being touched — including bands written after this.
  *
- * They go on an INNER element. The ground is `rgb(var(--color-fg))`, and a
- * custom property redefined on an element applies to that element's own
- * declarations too — so painting and flipping on the same node would make
- * the background resolve to the flipped value and cancel itself.
+ * The ground stays the merchant's `primary-solid`, paired with its own
+ * `primary-fg`, which `solidFill` already guarantees is readable on it —
+ * 4.57:1 at its worst, measured. A version of this used the page's
+ * foreground instead, which reached 19:1 and turned a fragrance shop's
+ * espresso band into a generic navy: the band is the brand statement, and
+ * trading the brand colour for contrast it did not need is not a fix.
  */
 const CONTRAST_TOKENS = {
-  '--color-fg': 'var(--color-bg)',
-  '--color-fg-muted': 'var(--color-bg)',
-  '--color-fg-subtle': 'var(--color-bg)',
-  '--color-border': 'var(--color-bg)',
+  '--color-fg': 'var(--color-primary-fg)',
+  '--color-fg-muted': 'var(--color-primary-fg)',
+  '--color-fg-subtle': 'var(--color-primary-fg)',
+  '--color-border': 'var(--color-primary-fg)',
 } as React.CSSProperties;
 
 /**
