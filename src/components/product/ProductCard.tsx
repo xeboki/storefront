@@ -172,10 +172,16 @@ export function ProductCard({ product, storeSlug, index }: Props) {
           <p className="eyebrow text-[9px]">{product.categoryName}</p>
         )}
         <h3 dir="auto" className="mt-1 line-clamp-1 text-sm font-medium text-fg">{product.name}</h3>
-        <p className="price mt-0.5 text-sm text-fg-muted">
-          {product.hasVariants && <span className="me-1 text-xs">From</span>}
-          {money(product.price ?? 0)}
-        </p>
+        {/* The card draws its details twice — once over the image for a
+            pointer that can hover, once underneath for a phone that cannot.
+            Guarding only the first left every price on the page still
+            showing, in the half of the markup a phone sees. */}
+        {showPrices && (
+          <p className="price mt-0.5 text-sm text-fg-muted">
+            {product.hasVariants && <span className="me-1 text-xs">From</span>}
+            {money(product.price ?? 0)}
+          </p>
+        )}
       </div>
     </Link>
   );
