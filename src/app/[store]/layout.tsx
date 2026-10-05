@@ -72,6 +72,29 @@ export default async function StoreLayout({ params, children }: Props) {
   const resolved = await loadStore(params.store);
   if (!resolved) notFound();
 
+  // The back office's band preview: one band, drawn bare.
+  //
+  // Above both gates below, deliberately. A merchant arranges their page
+  // BEFORE they open the shop, so a preview that respects "not open yet"
+  // would be blank for exactly the person it is for — and one that respects
+  // "members only" would send the editor's frame to a sign-in page.
+  //
+  // It is a fragment, not a page: no header, no footer, no providers, so
+  // what the merchant sees in the dialog is the band and nothing else. The
+  // theme still applies, because the root layout puts it on <html>.
+  //
+  // Nothing here is private. Every band on this route draws from the same
+  // catalogue the shop's own front page shows a stranger.
+  // `band-preview`, not `_band`: a folder whose name starts with an
+  // underscore is PRIVATE to the Next router and never becomes a route at
+  // all — the first version of this answered 404 and looked like a broken
+  // layout. Custom pages live under `/p/`, so a plain segment here cannot
+  // collide with a page a merchant made.
+  const previewPath = headers().get('x-xeboki-path') ?? '';
+  if (/\/band-preview(\/|$|\?)/.test(previewPath)) {
+    return <>{children}</>;
+  }
+
   // A shop can put itself behind a sign-in. The switch has been on the
   // Overview tab since it shipped and read by nothing, so a trade-only shop
   // that asked for this was wide open.
