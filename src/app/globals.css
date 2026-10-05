@@ -264,6 +264,18 @@
   letter-spacing: -0.015em;
 }
 
+/* A smaller section title, for a band whose heading sits inside something —
+   a column, a card, a promotional panel. It exists because sixteen headings
+   across five bands were sized with a raw `text-2xl` or `text-3xl` instead,
+   which meant they ignored the type scale the merchant set on the Design
+   screen: a shop that asked for larger type got it everywhere except there. */
+.display-md {
+  font-size: clamp(calc(1.375rem * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(2.4vw * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(1.75rem * var(--type-scale, 1) * var(--band-type-scale, 1)));
+  line-height: 1.15;
+  font-weight: var(--heading-weight, 600);
+  letter-spacing: -0.01em;
+}
+
 /* A short rule that sits beside an eyebrow, as an editorial page would set it.
    Which SIDE follows the alignment: a single leading rule under a centred
    headline pulls the eyebrow off the centre it is supposed to share, and under

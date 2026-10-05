@@ -44,7 +44,7 @@ export function PromoBand({ section, ctx, nested }: SectionProps) {
       {w.eyebrow && (
         <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">{w.eyebrow}</p>
       )}
-      {w.title && <h2 className="mt-2 text-3xl font-bold sm:text-4xl">{w.title}</h2>}
+      {w.title && <h2 className="mt-2 display-lg">{w.title}</h2>}
       {w.lede && <p className="mt-3 opacity-90">{w.lede}</p>}
       {ctaLabel && ctaUrl && (
         // `self-start` as well as `inline-block`. The split arrangement puts
@@ -156,7 +156,7 @@ export function CountdownBand({ section, ctx, nested }: SectionProps) {
     <div className="flex items-center gap-4">
       {parts.map(([value, label]) => (
         <div key={label} className="text-center">
-          <div className="text-2xl font-bold tabular-nums">{String(value).padStart(2, '0')}</div>
+          <div className="display-md tabular-nums">{String(value).padStart(2, '0')}</div>
           <div className="text-[0.65rem] uppercase tracking-wider opacity-75">{label}</div>
         </div>
       ))}
@@ -167,7 +167,7 @@ export function CountdownBand({ section, ctx, nested }: SectionProps) {
     return (
       <section className={`bg-surface-alt ${BAND_RHYTHM_TIGHT}`}>
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 text-center sm:px-6 lg:px-8">
-          {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
+          {w.title && <h2 className="display-lg text-fg">{w.title}</h2>}
           {w.lede && <p className="text-fg-muted">{w.lede}</p>}
           <div className="text-fg">{clock}</div>
           {ctaLabel && ctaUrl && (
@@ -232,7 +232,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
       <Band nested={nested}>
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
           <div>
-            {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
+            {w.title && <h2 className="display-lg text-fg">{w.title}</h2>}
             {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
           </div>
           <div className="lg:justify-self-end">{form}</div>
@@ -249,7 +249,7 @@ export function NewsletterBand({ section, nested }: SectionProps) {
           390px screen left the email field too narrow for the placeholder it
           carries, which came out as "you@example.cor". */}
       <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center gap-5 rounded-brand border border-line bg-surface-alt p-6 text-center sm:p-10">
-        {w.title && <h2 className="text-2xl font-bold text-fg">{w.title}</h2>}
+        {w.title && <h2 className="display-md text-fg">{w.title}</h2>}
         {w.lede && <p className="text-fg-muted">{w.lede}</p>}
         {form}
       </div>
@@ -310,7 +310,7 @@ export function VideoBand({ section, nested }: SectionProps) {
       <Band nested={nested}>
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div>
-            {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
+            {w.title && <h2 className="display-lg text-fg">{w.title}</h2>}
             {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
           </div>
           {frame}

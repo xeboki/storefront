@@ -32,7 +32,7 @@ function CallToAction({
     return (
       <section className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${BAND_RHYTHM_TIGHT}`}>
         <div className="rounded-brand border border-line bg-surface-alt p-8 text-center">
-          <h2 className="text-2xl font-bold text-fg">{title}</h2>
+          <h2 className="display-md text-fg">{title}</h2>
           {lede && <p className="mx-auto mt-2 max-w-xl text-fg-muted">{lede}</p>}
           <Link href={href} className={`mt-6 inline-block rounded-brand px-7 py-3 text-sm font-semibold transition-opacity ${button}`}>
             {label}
@@ -47,7 +47,7 @@ function CallToAction({
       <section className="bg-surface-alt">
         <div className={`mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:px-8 ${BAND_RHYTHM_TIGHT}`}>
           <div>
-            <h2 className="text-3xl font-bold text-fg">{title}</h2>
+            <h2 className="display-lg text-fg">{title}</h2>
             {lede && <p className="mt-3 text-fg-muted">{lede}</p>}
           </div>
           <div className="lg:justify-self-end">

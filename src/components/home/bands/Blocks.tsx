@@ -71,7 +71,7 @@ export function TextCardBlock({ section, ctx, nested }: SectionProps) {
             {w.eyebrow}
           </p>
         )}
-        {w.title && <h2 className="mt-2 text-2xl font-bold leading-tight">{w.title}</h2>}
+        {w.title && <h2 className="mt-2 display-md leading-tight">{w.title}</h2>}
         {body && <p dir="auto" className="mt-3 text-sm opacity-90">{body}</p>}
         {ctaLabel && ctaUrl && (
           <Link
@@ -120,7 +120,7 @@ export function TileBlock({ section, ctx, nested }: SectionProps) {
       {w.eyebrow && (
         <p className="text-xs font-semibold uppercase tracking-[0.18em] opacity-80">{w.eyebrow}</p>
       )}
-      {w.title && <h3 className="mt-1 text-2xl font-bold leading-tight">{w.title}</h3>}
+      {w.title && <h3 className="mt-1 display-md leading-tight">{w.title}</h3>}
       {body && <p className="mt-2 text-sm opacity-90">{body}</p>}
       {ctaLabel && ctaUrl && (
         <span className="mt-4 inline-block border-b border-current pb-0.5 text-sm font-semibold">

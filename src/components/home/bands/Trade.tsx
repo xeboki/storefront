@@ -74,7 +74,7 @@ export function MenuBand({ section, ctx, nested }: SectionProps) {
         {courses.map(({ course, items }) => (
           <div key={course.id}>
             {!flat && (
-              <h3 className="text-center text-2xl font-bold text-fg">{course.name}</h3>
+              <h3 className="text-center display-md text-fg">{course.name}</h3>
             )}
             {flat && (
               <h3 className="mt-8 border-b border-line pb-2 text-sm font-semibold uppercase tracking-wider text-fg-muted">
@@ -222,7 +222,7 @@ export function TimetableBand({ section, ctx, nested }: SectionProps) {
               {w.eyebrow}
             </p>
           )}
-          {w.title && <h2 className="mt-3 text-3xl font-bold text-fg">{w.title}</h2>}
+          {w.title && <h2 className="mt-3 display-lg text-fg">{w.title}</h2>}
           {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
         </div>
         {/* What is actually on. The band offered "A week at a time" and "A
@@ -319,7 +319,7 @@ export function ContactBand({ section, ctx, nested }: SectionProps) {
     return (
       <Band nested={nested}>
         <div className="mx-auto max-w-xl rounded-brand border border-line bg-surface-alt p-8 text-center">
-          {w.title && <h2 className="text-2xl font-bold text-fg">{w.title}</h2>}
+          {w.title && <h2 className="display-md text-fg">{w.title}</h2>}
           {w.lede && <p className="mt-2 text-fg-muted">{w.lede}</p>}
           <div className="mt-6 flex justify-center">{details}</div>
         </div>
@@ -331,7 +331,7 @@ export function ContactBand({ section, ctx, nested }: SectionProps) {
     <Band nested={nested}>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
-          {w.title && <h2 className="text-3xl font-bold text-fg">{w.title}</h2>}
+          {w.title && <h2 className="display-lg text-fg">{w.title}</h2>}
           {w.lede && <p className="mt-3 text-fg-muted">{w.lede}</p>}
         </div>
         <div className="lg:justify-self-end">{details}</div>

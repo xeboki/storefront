@@ -36,7 +36,7 @@ export function RichTextBand({ section, nested }: SectionProps) {
             {w.eyebrow}
           </p>
         )}
-        {w.title && <h2 className="mt-3 text-3xl font-bold text-fg sm:text-4xl">{w.title}</h2>}
+        {w.title && <h2 className="mt-3 display-lg text-fg">{w.title}</h2>}
         {body && (
           <div className="mt-5 whitespace-pre-line text-base leading-relaxed text-fg-muted">
             {body}
@@ -63,7 +63,7 @@ export function ImageTextBand({ section, ctx, nested }: SectionProps) {
           {w.eyebrow}
         </p>
       )}
-      {w.title && <h2 className="mt-3 text-3xl font-bold text-fg sm:text-4xl">{w.title}</h2>}
+      {w.title && <h2 className="mt-3 display-lg text-fg">{w.title}</h2>}
       {body && <p dir="auto" className="mt-4 whitespace-pre-line text-fg-muted">{body}</p>}
       {ctaLabel && ctaUrl && (
         <Link href={ctaUrl} className="mt-7 inline-block self-start rounded-brand bg-primary-solid px-7 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90">
@@ -80,7 +80,7 @@ export function ImageTextBand({ section, ctx, nested }: SectionProps) {
         {imageUrl && <img src={imageUrl} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />}
         <div className="absolute inset-0 -z-10 bg-black/45" />
         <div className={`mx-auto max-w-3xl px-4 text-center text-white sm:px-6 lg:px-8 ${BAND_RHYTHM}`}>
-          {w.title && <h2 className="text-3xl font-bold sm:text-4xl">{w.title}</h2>}
+          {w.title && <h2 className="display-lg">{w.title}</h2>}
           {body && <p dir="auto" className="mt-4 whitespace-pre-line text-white/85">{body}</p>}
           {ctaLabel && ctaUrl && (
             <Link href={ctaUrl} className="mt-7 inline-block rounded-brand bg-white px-7 py-3 text-sm font-semibold text-black">
@@ -289,7 +289,7 @@ export function StatsBand({ section, nested }: SectionProps) {
         {items.map((s, i) => (
           <div key={i} className={`text-center${
             section.variant === 'grid' ? '' : ' sm:flex-1'}`}>
-            <dt className="text-3xl font-bold text-fg sm:text-4xl">{s.value}</dt>
+            <dt className="display-lg text-fg">{s.value}</dt>
             <dd className="mt-1 text-sm text-fg-muted">{s.label}</dd>
           </div>
         ))}
