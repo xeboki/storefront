@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import type { StorefrontConfig, StoreConfig } from '@xeboki/sdk';
 import { CurrencyProvider } from '@/lib/currency';
+import { StorefrontConfigProvider } from '@/lib/storefront-config';
 
 interface Props {
   slug: string;
@@ -21,7 +22,9 @@ interface Props {
   } | null;
 }
 
-export function StoreProviders({ children, initialCustomer, storeConfig }: Props) {
+export function StoreProviders({
+  children, initialCustomer, storeConfig, storefrontConfig,
+}: Props) {
   const { setCustomer, setLoaded } = useAuthStore();
   const setStoreConfig = useStoreConfigStore((s) => s.set);
 
@@ -54,8 +57,10 @@ export function StoreProviders({ children, initialCustomer, storeConfig }: Props
 
   return (
     <CurrencyProvider code={storeConfig.currencyCode}>
+      <StorefrontConfigProvider config={storefrontConfig}>
       {children}
       <Toaster position="bottom-center" />
+      </StorefrontConfigProvider>
     </CurrencyProvider>
   );
 }

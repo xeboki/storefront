@@ -7,6 +7,7 @@ import { clsx } from 'clsx';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { useCatalogDisplay } from '@/lib/storefront-config';
 import { useMoney } from '@/lib/currency';
 import { canBuy, variantIsSellable } from '@/lib/availability';
 import { ProductImage } from './ProductImage';
@@ -34,6 +35,8 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
   const variants: ProductVariant[] = product.hasVariants ? product.variants ?? [] : [];
   const axes = product.variantOptions ?? [];
 
+  const { showPrices, showStock } = useCatalogDisplay();
+
   // Stock only limits a product that tracks it; an untracked item never sells out.
   const inStock = (v: ProductVariant) => variantIsSellable(product, v);
 
@@ -47,6 +50,16 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
   const selectedVariant: ProductVariant | null =
     variants.find((v) => axes.every((axis) => v.attributes?.[axis.name] === choice[axis.name])) ??
     null;
+  /// How many are left, when the shop tracks this product and says so.
+  ///
+  /// Null for an untracked product rather than zero: "0 in stock" on a
+  /// service or a made-to-order piece is a lie, and a figure nobody counts
+  /// should not be printed. The variation's own count wins when one is
+  /// chosen, because that is what the shopper would be buying.
+  const stockLeft: number | null = !product.trackInventory
+    ? null
+    : (selectedVariant?.stock ?? product.stockQuantity ?? null);
+
   const [selectedModifiers, setSelectedModifiers] = useState<Set<string>>(new Set());
   const [quantity, setQuantity] = useState(1);
   const addItem = useCartStore((s) => s.addItem);
@@ -174,7 +187,20 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
             <p className="eyebrow eyebrow-rule text-primary">{product.categoryName}</p>
           )}
           <h1 className="display-lg mt-4 text-fg">{product.name}</h1>
-          <p className="price mt-4 text-2xl font-medium text-fg">{money(activePrice)}</p>
+          {showPrices ? (
+            <p className="price mt-4 text-2xl font-medium text-fg">{money(activePrice)}</p>
+          ) : (
+            // A trade shop that does not publish prices still has to tell a
+            // visitor what to do next, or the page just stops.
+            <p className="mt-4 text-sm text-fg-muted">
+              Price on request — get in touch and we will quote you.
+            </p>
+          )}
+          {showStock && stockLeft !== null && stockLeft > 0 && (
+            <p className="mt-2 text-sm text-fg-muted">
+              {stockLeft} in stock
+            </p>
+          )}
         </div>
 
         {product.description && (
@@ -265,7 +291,13 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
         ))}
 
         {/* Quantity + CTA. Hidden on a phone — the sticky bar below owns it
-            there, because this one scrolls out of reach past the fold. */}
+            there, because this one scrolls out of reach past the fold.
+
+            Gone entirely when the shop does not publish prices: a basket
+            cannot total something that has no price on it, and a checkout
+            that asks for payment against a blank line is worse than no
+            checkout. The enquiry line above the fold is the way through. */}
+        {showPrices && (
         <div className="hidden sm:flex items-center gap-4 pt-2">
           <div className="flex h-12 items-center rounded-brand border border-line">
             <button
@@ -314,8 +346,10 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
             <Heart size={20} className={isWishlisted ? 'fill-danger-fg' : ''} />
           </button>
         </div>
+        )}
 
         {/* Phone: quantity stays in the flow, buying lives in the sticky bar. */}
+        {showPrices && (
         <div className="flex sm:hidden items-center gap-4 pt-2">
           <div className="flex items-center border border-line rounded-brand overflow-hidden">
             <button
@@ -349,6 +383,7 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
             <Heart size={20} className={isWishlisted ? 'fill-danger-fg' : ''} />
           </button>
         </div>
+        )}
 
         {/* Only what the record actually says. A PDP is where invented
             reassurance does the most damage — it is the last thing read before
@@ -394,7 +429,13 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
 
     {/* Sticky buy bar — phones only. It carries the price so a shopper deep in
         the description still knows what they are about to pay, and it sits
-        above the home indicator via safe-area padding. */}
+        above the home indicator via safe-area padding.
+
+        Absent when the shop does not publish prices. It is the one piece of
+        buying chrome that follows a shopper down the page, so leaving it
+        would have left a phone with a Add to Cart button over a blank price
+        on a shop that cannot sell. */}
+    {showPrices && (
     <div className="sm:hidden fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
       <div className="flex items-center gap-3">
         <div className="min-w-0">
@@ -416,6 +457,7 @@ export function ProductDetail({ product, storeSlug, deliveryEstimate }: Props) {
         </button>
       </div>
     </div>
+    )}
 
     {/* Reviews */}
     <div className="mt-12 border-t border-line pt-10">

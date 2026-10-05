@@ -8,6 +8,7 @@ import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cartStore';
 import { useWishlistStore } from '@/stores/wishlistStore';
 import { formatCurrency } from '@/lib/utils';
+import { useCatalogDisplay } from '@/lib/storefront-config';
 import { useMoney } from '@/lib/currency';
 import { trackAddToCart } from '@/lib/analytics';
 import { productIsSellable } from '@/lib/availability';
@@ -23,6 +24,10 @@ interface Props {
 
 export function ProductCard({ product, storeSlug, index }: Props) {
   const money = useMoney();
+  // A shop that does not publish prices does not publish them on the card
+  // either — and cannot take an order for something with no price on it, so
+  // the quick-add goes with them.
+  const { showPrices } = useCatalogDisplay();
   // A card only ever quick-adds a product with no variations, so its own pool
   // is the right question. "Sold Out" used to mean `isActive === false` alone,
   // which said nothing about whether the shop had any.
@@ -140,12 +145,14 @@ export function ProductCard({ product, storeSlug, index }: Props) {
             )}
             <div className="mt-1 flex items-end justify-between gap-3">
               <h3 dir="auto" className="line-clamp-1 text-sm font-medium text-white">{product.name}</h3>
-              <span className="price flex-shrink-0 text-sm font-medium text-white">
-                {product.hasVariants && <span className="me-1 text-xs font-normal opacity-70">From</span>}
-                {money(product.price ?? 0)}
-              </span>
+              {showPrices && (
+                <span className="price flex-shrink-0 text-sm font-medium text-white">
+                  {product.hasVariants && <span className="me-1 text-xs font-normal opacity-70">From</span>}
+                  {money(product.price ?? 0)}
+                </span>
+              )}
             </div>
-            {sellable && !product.hasVariants && (
+            {showPrices && sellable && !product.hasVariants && (
               <button
                 onClick={handleAddToCart}
                 className="mt-3 flex h-9 w-full items-center justify-center gap-2 rounded-brand bg-white text-[11px] font-semibold uppercase tracking-[0.14em] text-black"

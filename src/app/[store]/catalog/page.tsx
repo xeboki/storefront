@@ -18,7 +18,12 @@ interface Props {
   searchParams: { category?: string; q?: string; page?: string; instock?: string; sort?: string; loc?: string }
 }
 
-const PER_PAGE = 24
+/// Where the page size comes from when a shop has not chosen one.
+///
+/// It was a constant here, so every Xeboki shop on the internet showed
+/// twenty-four products a page whatever it sold — a jeweller with nine
+/// pieces and a wholesaler with nine hundred got the same listing.
+const DEFAULT_PER_PAGE = 24
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const store = await loadStore(params.store)
@@ -40,7 +45,14 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   const page = Math.max(1, parseInt(searchParams.page ?? '1', 10) || 1)
   const inStockOnly = searchParams.instock === '1'
   const search = searchParams.q?.trim() || undefined
-  const sort = (searchParams.sort as 'name_asc'|'name_desc'|'price_asc'|'price_desc'|'newest'|undefined) || undefined
+  // The shopper's choice first, then the shop's own default. A merchant who
+  // sells seasonal stock wants newest first and had no way to say so: the
+  // listing always opened in whatever order the API returned.
+  const chosenSort = searchParams.sort
+    || store.storefrontConfig?.catalogDefaultSort
+    || undefined
+  const sort = chosenSort as
+    'name_asc'|'name_desc'|'price_asc'|'price_desc'|'newest'|undefined
 
   // Which store the shopper is shopping at — one answer, shared with the
   // product page, the cart and checkout. `?loc=` is remembered by the
@@ -58,6 +70,9 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   // the Overview tab since it shipped and read by nothing, so "hide
   // out-of-stock products" listed them anyway.
   const hideSoldOut = store.storefrontConfig?.showOutOfStock === false
+  // Clamped by the API too; the fallback is here for a storefront talking to
+  // an older one that does not serve it.
+  const perPage = store.storefrontConfig?.catalogPerPage || DEFAULT_PER_PAGE
   const scopedToStock = locationFirst || inStockOnly || hideSoldOut
 
   // Search / category / paging all happen SERVER-SIDE against the API, so the
@@ -70,7 +85,7 @@ export default async function CatalogPage({ params, searchParams }: Props) {
       sort,
       locationId: activeLoc,
       page,
-      perPage: PER_PAGE,
+      perPage,
     }),
     loadCategories(store.apiKey),
   ])
@@ -78,14 +93,18 @@ export default async function CatalogPage({ params, searchParams }: Props) {
   const products = catalogResult.status === 'fulfilled' ? (catalogResult.value.data ?? []) : []
   const total = catalogResult.status === 'fulfilled' ? (catalogResult.value.total ?? products.length) : products.length
   const categories = categoriesResult.status === 'fulfilled' ? (categoriesResult.value.data ?? []) : []
-  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
 
   const base = `/${params.store}/catalog`
   const sp = new URLSearchParams()
   if (searchParams.category) sp.set('category', searchParams.category)
   if (search) sp.set('q', search)
   if (inStockOnly) sp.set('instock', '1')
-  if (sort) sp.set('sort', sort)
+  // Only a sort the SHOPPER asked for. The shop's own default is how the
+  // page looks with no sort on it, so putting it in the links here would
+  // give every page of the listing a query string it does not need — and
+  // make the plain `/catalog` URL a different page from its own first page.
+  if (searchParams.sort) sp.set('sort', searchParams.sort)
   if (locationFirst && activeLoc) sp.set('loc', activeLoc)
 
   // The unfiltered listing is the one page a merchant might want to call
