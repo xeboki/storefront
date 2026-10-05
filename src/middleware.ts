@@ -182,6 +182,13 @@ export async function middleware(request: NextRequest) {
   // a request header. Visual only, never persisted — safe to leave public.
   const themePreview = searchParams.get('theme')
 
+  // ── Design preview ─────────────────────────────────────────────────────────
+  // `?design=<json>` lets the back office show the shop with settings that are
+  // on the form but not yet saved — the Design screen set colours, faces and
+  // the header with nothing but a type specimen to judge them by. Same rules
+  // as the theme preview above: visual only, never persisted.
+  const designPreview = searchParams.get('design')
+
   // ── Chosen store ───────────────────────────────────────────────────────────
   // `?loc=` used to be read by the catalog page alone, so the store a shopper
   // picked was forgotten the moment they opened a product. Remember it here and
@@ -217,8 +224,20 @@ export async function middleware(request: NextRequest) {
   // could not tell the sign-in page from any other — a shop with
   // "require login to browse" on redirected /login to /login, which is
   // a shop nobody can get into.
-  requestHeaders.set('x-xeboki-path', pathname)
-  if (themePreview) requestHeaders.set('x-xeboki-theme', themePreview)
+  //
+  // Percent-encoded, because a header value is a ByteString: anything above
+  // U+00FF throws when it is set, and the whole request 500s. The design
+  // preview carried a shop's own words — "Free delivery over EUR 50" with the
+  // symbol in it — and took the page down with a TypeError about index 542.
+  // A path can do it too, the moment a custom page has a non-ASCII slug.
+  // `encodeURI`, not `encodeURIComponent`: the latter escapes `/` too, and
+  // both layouts below test this path with regexes that look for `/login`
+  // and `/preview`. Escaping the separators would have matched none of them
+  // and quietly reopened the sign-in gate.
+  const headerSafe = (value: string) => encodeURI(value)
+  requestHeaders.set('x-xeboki-path', headerSafe(pathname))
+  if (themePreview) requestHeaders.set('x-xeboki-theme', headerSafe(themePreview))
+  if (designPreview) requestHeaders.set('x-xeboki-design', headerSafe(designPreview))
   // Also on the REQUEST, because a cookie set on the response is not visible to
   // `cookies()` in the render it was set during — the first page after a switch
   // would still show the old store.

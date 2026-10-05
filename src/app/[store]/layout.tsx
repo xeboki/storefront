@@ -10,6 +10,7 @@ import { showSection } from '@/lib/sections';
 import { StorefrontFooter } from '@/components/layout/StorefrontFooter';
 import { PromoNotice } from '@/components/layout/PromoNotice';
 import { ClosedForOrders } from '@/components/layout/ClosedForOrders';
+import { withDesignPreview } from '@/lib/design-preview';
 import { NotOpenYet } from '@/components/layout/NotOpenYet';
 import { AgeNotice } from '@/components/layout/AgeNotice';
 import { generateOrganization } from '@/lib/seo/structured-data';
@@ -139,7 +140,12 @@ export default async function StoreLayout({ params, children }: Props) {
     }
   }
 
-  const { storeConfig, storefrontConfig, slug } = resolved;
+  const { storeConfig, slug } = resolved;
+  // What the merchant is trying out, over what the shop has saved. The
+  // header and the footer below are most of what the Design screen sets, so
+  // they have to see it too — the theme alone would recolour a header that
+  // was still in the old layout.
+  const storefrontConfig = withDesignPreview(resolved.storefrontConfig);
   // Resolved from the shopper's choice, not just the deployment default —
   // the dictionaries have always been here, the switch has not.
   const locale = activeLocale();

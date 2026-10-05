@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import Script from 'next/script';
 import './globals.css';
 import { loadStore } from '@/lib/sdk/store';
+import { withDesignPreview } from '@/lib/design-preview';
 import { buildThemeVars } from '@/lib/theme';
 import { direction } from '@/lib/i18n/dictionaries';
 import { activeLocale } from '@/lib/i18n/server';
@@ -128,7 +129,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // `?theme=<preset>` (carried by the middleware, since a layout cannot read
   // searchParams) previews a preset without saving it — Manager links to it.
   const preview = h.get('x-xeboki-theme');
-  const config = resolved?.storefrontConfig ?? null;
+  // `?design=<json>` is the same idea with the whole palette and both faces:
+  // the back office frames the shop while a merchant is still choosing, and
+  // what is on the form is not yet in the database.
+  const config = withDesignPreview(resolved?.storefrontConfig ?? null);
   const themeVars = buildThemeVars(
     preview && config ? { ...config, theme: preview } : config,
   );
