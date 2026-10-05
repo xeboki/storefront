@@ -250,7 +250,7 @@
 /* Hero. Clamped so it is dramatic on a desktop without wrapping to five lines
    on a phone. */
 .display-xl {
-  font-size: clamp(calc(2.5rem * var(--type-scale, 1)), calc(6vw * var(--type-scale, 1)), calc(4.5rem * var(--type-scale, 1)));
+  font-size: clamp(calc(2.5rem * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(6vw * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(4.5rem * var(--type-scale, 1) * var(--band-type-scale, 1)));
   line-height: 1.02;
   font-weight: var(--heading-weight, 600);
   letter-spacing: -0.02em;
@@ -258,7 +258,7 @@
 
 /* Section titles. */
 .display-lg {
-  font-size: clamp(calc(1.75rem * var(--type-scale, 1)), calc(3vw * var(--type-scale, 1)), calc(2.5rem * var(--type-scale, 1)));
+  font-size: clamp(calc(1.75rem * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(3vw * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(2.5rem * var(--type-scale, 1) * var(--band-type-scale, 1)));
   line-height: 1.1;
   font-weight: var(--heading-weight, 600);
   letter-spacing: -0.015em;
@@ -337,20 +337,18 @@
    beat every `text-3xl` in the bands and flatten the page instead of
    dressing it. */
 @layer components {
-  /* Larger headings and more air between the lines. The scale, not a size:
-     a shop on Cormorant at 1.1 and a shop on Inter at 0.9 both grow by the
-     same proportion and neither stops looking like itself. */
-  .band-type-display {
-    --type-scale: calc(var(--type-scale, 1) * 1.25);
-  }
+  /* A SECOND scale, multiplied into the shop's own.
+     `--type-scale: calc(var(--type-scale) * 1.25)` reads as a cycle — a
+     custom property defined in terms of itself on the same element is
+     invalid, the inherited value is thrown away, and both "Large and airy"
+     and "Small and tight" came out the same size as each other and smaller
+     than normal. Measured, not guessed: 33px where normal was 38.9. */
+  .band-type-display { --band-type-scale: 1.25; }
+  .band-type-compact { --band-type-scale: 0.85; }
+  .band-type-caps    { --band-type-scale: 0.92; }
+
   .band-type-display :is(h2, h3) {
     line-height: 1.1;
-  }
-
-  /* Tighter and smaller, for a strip that is furniture rather than a
-     statement. */
-  .band-type-compact {
-    --type-scale: calc(var(--type-scale, 1) * 0.85);
   }
   .band-type-compact :is(p, li) {
     line-height: 1.45;
@@ -359,11 +357,14 @@
   /* Capitals, spaced. Tracking is not optional with caps — unspaced capitals
      read as a solid block, which is why the eyebrows on this site already
      carry it. Applied to the heading alone: a paragraph in capitals is not a
-     style, it is shouting. */
+     style, it is shouting.
+
+     The size comes from `--band-type-scale` above, not a `font-size` here.
+     `font-size: 0.82em` resolves against the PARENT's size, not the
+     heading's own, so it took a 39px heading down to 13px. */
   .band-type-caps :is(h2, h3) {
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: 0.82em;
   }
 
   /* Centred, including the things a band aligns to its own start — a
@@ -472,7 +473,7 @@ body::before {
 /* Layered: see the note on the type scale. */
 @layer components {
   .display-hero {
-    font-size: clamp(calc(3rem * var(--type-scale, 1)), calc(13vw * var(--type-scale, 1)), calc(11rem * var(--type-scale, 1)));
+    font-size: clamp(calc(3rem * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(13vw * var(--type-scale, 1) * var(--band-type-scale, 1)), calc(11rem * var(--type-scale, 1) * var(--band-type-scale, 1)));
     line-height: 0.88;
     font-weight: 600;
     letter-spacing: -0.035em;
