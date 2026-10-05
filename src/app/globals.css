@@ -326,6 +326,61 @@
   }
 }
 
+/* ── How a band's words are set ──────────────────────────────────────────────
+   Four named treatments, every one built from the shop's own two faces and
+   its type scale. A merchant choosing "Large and airy" is not choosing a
+   pixel size; they are scaling what the shop already decided, so a band set
+   differently still reads as the same shop.
+
+   `@layer components`, so a utility written on a heading still wins — a band
+   that sets its own size for a reason keeps it. Unlayered rules here would
+   beat every `text-3xl` in the bands and flatten the page instead of
+   dressing it. */
+@layer components {
+  /* Larger headings and more air between the lines. The scale, not a size:
+     a shop on Cormorant at 1.1 and a shop on Inter at 0.9 both grow by the
+     same proportion and neither stops looking like itself. */
+  .band-type-display {
+    --type-scale: calc(var(--type-scale, 1) * 1.25);
+  }
+  .band-type-display :is(h2, h3) {
+    line-height: 1.1;
+  }
+
+  /* Tighter and smaller, for a strip that is furniture rather than a
+     statement. */
+  .band-type-compact {
+    --type-scale: calc(var(--type-scale, 1) * 0.85);
+  }
+  .band-type-compact :is(p, li) {
+    line-height: 1.45;
+  }
+
+  /* Capitals, spaced. Tracking is not optional with caps — unspaced capitals
+     read as a solid block, which is why the eyebrows on this site already
+     carry it. Applied to the heading alone: a paragraph in capitals is not a
+     style, it is shouting. */
+  .band-type-caps :is(h2, h3) {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.82em;
+  }
+
+  /* Centred, including the things a band aligns to its own start — a
+     heading rule, a button, the block the words sit in. `text-align` alone
+     centres the sentences and leaves the button hard against the side. */
+  .band-align-center {
+    text-align: center;
+  }
+  .band-align-center :is(.eyebrow, h2, h3, p) {
+    margin-inline: auto;
+  }
+  .band-align-center :is(.self-start, .items-start) {
+    align-self: center;
+    align-items: center;
+  }
+}
+
 /* ── The page's vertical rhythm ──────────────────────────────────────────────
    The gap between two bands is a band's padding TWICE — its floor plus the
    next one's ceiling — so this is the single number that decides how the

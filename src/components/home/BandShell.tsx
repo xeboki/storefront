@@ -1,4 +1,5 @@
 import type { HomeSection } from '@xeboki/sdk';
+import { parseHex, readableOn, triplet, mix } from '@/lib/themes/color';
 
 /**
  * What a band sits on, and what separates it from the one above.
@@ -69,6 +70,35 @@ const CONTRAST_TOKENS = {
  *
  * Same shape as `--type-scale`, which the display sizes already use.
  */
+/**
+ * How the words in a band are set.
+ *
+ * Built from the shop's own two faces and its type scale rather than from
+ * sizes typed here, so a band set differently still reads as the same shop.
+ * `normal` adds nothing, which is every band that existed before this.
+ *
+ * The classes land on the band's wrapper and are inherited, so a band
+ * written later is covered without being told.
+ */
+const TEXT_STYLES: Record<string, string> = {
+  normal: '',
+  display: 'band-type-display',
+  compact: 'band-type-compact',
+  caps: 'band-type-caps',
+};
+
+/**
+ * Where the heading and the words under it sit.
+ *
+ * `start`, not `left`: in Arabic the start of a line is on the right, and a
+ * band that hard-coded left would be the one thing on the page facing the
+ * wrong way.
+ */
+const ALIGNMENTS: Record<string, string> = {
+  start: '',
+  center: 'band-align-center',
+};
+
 const SPACINGS: Record<string, string> = {
   normal: '1',
   tight: '0.6',
@@ -98,23 +128,58 @@ export function BandShell({ section, first = false, children }: {
   children: React.ReactNode;
 }) {
   const settings = (section.settings ?? {}) as Record<string, unknown>;
-  const surface = pick(SURFACES, settings.surface, 'page');
   const divider = first ? '' : pick(DIVIDERS, settings.divider, 'line');
   const spacing = pick(SPACINGS, settings.spacing, 'normal');
+  const textStyle = pick(TEXT_STYLES, settings.textStyle, 'normal');
+  const alignment = pick(ALIGNMENTS, settings.align, 'start');
 
-  const className = [surface, divider].filter(Boolean).join(' ');
-  const reversed = settings.surface === 'contrast';
+  /**
+   * A colour the merchant picked, with text worked out to sit on it.
+   *
+   * The named grounds stay the first answer, because they come from the
+   * palette the shop already has and a page built from them holds together.
+   * This is the escape hatch for the band that has to be a particular
+   * colour — and it is guarded: the foreground is DERIVED from the colour
+   * rather than left as the page's ink, so picking a dark green cannot
+   * produce near-black type on it.
+   *
+   * The same reason the reversed band redefines tokens instead of setting a
+   * colour: every band writes `text-fg` on its own heading, and a class on
+   * an element beats a colour inherited from an ancestor.
+   */
+  const custom = parseHex(
+    typeof settings.surfaceColor === 'string' ? settings.surfaceColor : '');
+  const customTokens = custom
+    ? ({
+        '--color-bg': triplet(custom),
+        '--color-surface': triplet(custom),
+        '--color-surface-alt': triplet(mix(custom, readableOn(custom), 0.08)),
+        '--color-fg': triplet(readableOn(custom)),
+        '--color-fg-muted': triplet(mix(readableOn(custom), custom, 0.25)),
+        '--color-fg-subtle': triplet(mix(readableOn(custom), custom, 0.45)),
+        '--color-border': triplet(mix(readableOn(custom), custom, 0.75)),
+        backgroundColor: 'rgb(var(--color-bg))',
+      } as React.CSSProperties)
+    : undefined;
+
+  // A picked colour wins the ground; the named one is what it replaces.
+  const surface = custom ? '' : pick(SURFACES, settings.surface, 'page');
+
+  const className = [surface, divider, textStyle, alignment]
+    .filter(Boolean).join(' ');
+  const reversed = !custom && settings.surface === 'contrast';
   const scaled = spacing !== SPACINGS.normal;
 
-  if (!className && !reversed && !scaled) return <>{children}</>;
+  if (!className && !reversed && !scaled && !custom) return <>{children}</>;
 
   // Inherited by whatever draws the padding inside, which is `.band-rhythm`
   // on the band's own container. Set here because this is the only place
   // that knows the section; read there because that is where the padding
   // lives and a band may bring its own density.
-  const style = (scaled
-    ? { '--band-space': spacing }
-    : undefined) as React.CSSProperties | undefined;
+  const style = {
+    ...(scaled ? ({ '--band-space': spacing } as React.CSSProperties) : null),
+    ...customTokens,
+  } as React.CSSProperties;
 
   return (
     <div className={className} style={style}>
