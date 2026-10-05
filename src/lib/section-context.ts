@@ -1,4 +1,6 @@
-import { loadStore, loadCatalog, loadCategories, loadProduct } from '@/lib/sdk/store';
+import {
+  loadStore, loadStoreDraft, loadCatalog, loadCategories, loadProduct,
+} from '@/lib/sdk/store';
 import type { SectionContext } from '@/components/home/types';
 
 /**
@@ -12,8 +14,16 @@ import type { SectionContext } from '@/components/home/types';
  */
 export async function loadSectionContext(
   slug: string,
+  /**
+   * Show the page the merchant is still working on. The token is minted by
+   * the API for one shop; without one this is the published page, which is
+   * what every caller but the preview wants.
+   */
+  previewToken?: string,
 ): Promise<{ ctx: SectionContext; homeSections: unknown[] } | null> {
-  const resolved = await loadStore(slug);
+  const resolved = previewToken
+    ? await loadStoreDraft(slug, previewToken)
+    : await loadStore(slug);
   if (!resolved) return null;
 
   const { apiKey, storefrontConfig, storeConfig } = resolved;

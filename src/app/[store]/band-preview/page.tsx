@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { loadSectionContext } from '@/lib/section-context';
 import { HomeSections } from '@/components/home/HomeSections';
 import type { HomeSection } from '@xeboki/sdk';
-import { ReportHeight } from './ReportHeight';
+import { ReportHeight, BAND_ELEMENT_ID } from './ReportHeight';
 
 interface Props {
   params: { store: string };
@@ -65,7 +65,14 @@ export default async function BandPreview({ params, searchParams }: Props) {
 
   return (
     <>
-      <HomeSections sections={[section]} ctx={loaded.ctx} />
+      {/* Wrapped and named so the band can be measured on its own.
+          `body` carries `min-h-screen`, so measuring the document returns
+          the FRAME's height for any band shorter than it — which is how a
+          thin strip came to sit in a panel of empty space, reporting itself
+          as exactly as tall as the box it was given. */}
+      <div id={BAND_ELEMENT_ID}>
+        <HomeSections sections={[section]} ctx={loaded.ctx} />
+      </div>
       <ReportHeight />
     </>
   );

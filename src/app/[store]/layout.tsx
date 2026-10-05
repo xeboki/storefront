@@ -95,6 +95,17 @@ export default async function StoreLayout({ params, children }: Props) {
     return <>{children}</>;
   }
 
+  // The merchant previewing their own page, with the shop's chrome on —
+  // unlike the band preview above, which is a fragment. It skips the two
+  // gates below for the same reason: a merchant arranges their page BEFORE
+  // they open the shop, so a preview that respected "not open yet" would be
+  // blank for exactly the person it is for, and one that respected "members
+  // only" would send them to a sign-in page to look at their own work.
+  //
+  // Nothing is given away by skipping them: the page is only drawn at all
+  // when the API accepts a preview token minted for this shop.
+  const isOwnerPreview = /\/preview(\/|$|\?)/.test(previewPath);
+
   // A shop can put itself behind a sign-in. The switch has been on the
   // Overview tab since it shipped and read by nothing, so a trade-only shop
   // that asked for this was wide open.
@@ -105,7 +116,7 @@ export default async function StoreLayout({ params, children }: Props) {
   // was hidden from search engines and still answering 200 on its home page,
   // its catalogue AND its cart. Absent means published, so a shop that has
   // never opened the switch is untouched by this.
-  if (resolved.storefrontConfig?.isPublished === false) {
+  if (resolved.storefrontConfig?.isPublished === false && !isOwnerPreview) {
     // No providers: the theme variables are set on <html> by the root
     // layout, so this is styled without a cart, a session or a catalogue
     // being loaded for a shop nobody is allowed into.
@@ -116,7 +127,7 @@ export default async function StoreLayout({ params, children }: Props) {
   // and leaves the product pages, the search and the sitemap open guards
   // nothing. The sign-in and register pages are the exception, or there is no
   // way in.
-  if (resolved.storefrontConfig?.requireLoginToBrowse) {
+  if (resolved.storefrontConfig?.requireLoginToBrowse && !isOwnerPreview) {
     // `x-xeboki-path` is set by the middleware. The two Next internals this
     // used to read are not set in this version, so the path was always ''
     // and the sign-in page was gated along with everything else.

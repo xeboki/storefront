@@ -71,6 +71,51 @@ export const loadStore = unstable_cache(
   { revalidate: 300, tags: ['store-config'] }, // 5 min cache
 );
 
+/**
+ * The same shop, but showing the page the merchant is still working on.
+ *
+ * Deliberately NOT cached. `loadStore` holds a store for five minutes under
+ * one key, which is right for a published shop and wrong for a draft in two
+ * ways at once: a merchant would arrange a band and see the old page for
+ * five minutes, and — far worse — a draft served into that cache would then
+ * be handed to shoppers.
+ *
+ * The token is minted by the API for one shop and carries a purpose of its
+ * own, so this can only ever reveal the draft of the shop being asked about.
+ * It goes to the API as a query parameter rather than through the SDK
+ * because it is one extra parameter on one call.
+ */
+export async function loadStoreDraft(
+  slug: string,
+  previewToken: string,
+): Promise<ResolvedStore | null> {
+  const apiKey = await resolveApiKey(slug);
+  if (!apiKey || !previewToken) return null;
+
+  const { getXebokiClient } = await import('./client');
+  const client = getXebokiClient(apiKey);
+
+  // The SDK's own call, with the token on it. A hand-rolled fetch here mapped
+  // four fields and spread the rest raw, so the preview drew the right bands
+  // with every other setting fallen back to a default — the shop's hero said
+  // "Shop our latest products" instead of its own words. One mapping, used
+  // by both.
+  const [storeConfig, storefrontConfig] = await Promise.all([
+    client.ordering.getStoreConfig(),
+    client.ordering.getStorefrontConfig({ previewToken }).catch(() => null),
+  ]);
+
+  if (!storeConfig) return null;
+
+  return {
+    slug,
+    apiKey,
+    isTestMode: apiKey.startsWith('xbk_test_'),
+    storeConfig,
+    storefrontConfig,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Catalog helpers (60s ISR — product listings change more frequently)
 // ---------------------------------------------------------------------------
