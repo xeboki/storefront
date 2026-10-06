@@ -8,9 +8,17 @@
  * a catalogue of unrelated things — a card shop, a hardware shop — the
  * picture is carrying meaning no label of two words can.
  *
- * Top level only, for the same reason as the rail: this is a strip a finger
- * drags sideways, and a panel hanging off something that is itself moving is
- * not a thing anybody can aim at. A shop wanting submenus wants the mega.
+ * Top level only. This used to cite the rail's reasoning, and the rail has
+ * since changed its mind — a panel anchored to its own trigger and closed on
+ * scroll turns out to be perfectly aimable, and the rail is the DEFAULT, so
+ * dropping a merchant's submenus there was dropping them for anybody who had
+ * never chosen a style at all.
+ *
+ * This one stays flat on its own merits. A tile is a picture of a department,
+ * and the thing a shopper does with it is recognise it and press it; hanging
+ * a word list off a photograph makes it neither. A shop wanting submenus
+ * wants the rail, the inline bar or the mega — and the back office only
+ * offers the first two, so nobody reaches this by accident.
  *
  * An entry with no picture keeps its place and gets a plain frame. The mega
  * panel drops a pictureless tile on the grounds that an empty tile is worse
@@ -29,6 +37,16 @@ import { ScrollRail } from '../../layout/ScrollRail';
 import { NodeLink } from '../NodeLink';
 import type { MenuStyleProps } from '../types';
 import styles from './tiles.module.css';
+
+/**
+ * This style shows top-level entries only.
+ *
+ * Declared in code rather than left to the docstring, because
+ * `menu-styles-answer-for-submenus.test.ts` reads it: a style that neither
+ * renders children nor says this is one nobody has thought about, and a
+ * merchant's submenus vanishing with no explanation looks like data loss.
+ */
+export const SHOWS_SUBMENUS = false;
 
 export default function TileMenu({
   nodes, allHref, allLabel, collapsed, linkCase, onDark, align, showAll,

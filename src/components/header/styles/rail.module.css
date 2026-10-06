@@ -15,3 +15,69 @@
     transition: grid-template-rows 300ms ease-out, opacity 300ms ease-out;
   }
 }
+
+/* ── Submenus ───────────────────────────────────────────────────────────────
+   The rail used to be top level only, so a merchant who built a menu with
+   submenus and never chose a style had them silently dropped. These mirror
+   the inline menu's panel deliberately: two menus opening visibly different
+   dropdowns in the same shop is the kind of difference nobody chose. */
+
+.chevron {
+  transition: transform 180ms ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* Positioned by AnchoredPanel, which puts it in the body — the row of
+   departments clips, and a panel inside it is present, the right size, and
+   painted nowhere. */
+.panel {
+  min-width: 13rem;
+  max-height: 70vh;
+  overflow-y: auto;
+  border: 1px solid rgb(var(--color-border));
+  border-radius: calc(var(--radius) * 1.75);
+  background: rgb(var(--color-surface));
+  padding: 0.375rem;
+  box-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.28);
+}
+
+/* A group's name inside the dropdown, where two levels are flattened into
+   one list. Without it the shopper gets one undifferentiated column. */
+.panelHeading {
+  margin: 0.5rem 0 0.25rem;
+  padding: 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgb(var(--color-fg-subtle));
+}
+
+.panelHeading:first-child { margin-top: 0; }
+
+.panelItem {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  color: rgb(var(--color-fg));
+}
+
+.panelItem:hover {
+  background: rgb(var(--color-surface-alt));
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .panel {
+    animation: railDrop 160ms ease-out;
+  }
+}
+
+@keyframes railDrop {
+  from { opacity: 0; transform: translateY(-0.25rem); }
+  to   { opacity: 1; transform: none; }
+}
