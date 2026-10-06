@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { clsx } from 'clsx';
@@ -44,10 +44,25 @@ interface PayPalState {
 }
 
 interface DiscountState {
+  /** The promotion's id, so a refetch can tell "the same offer again" from
+   *  "a different one" without comparing every field. */
+  id?: string;
   code: string;
   type: string | null;
   value: number | null;
   discountAmount: number | null;
+
+  /** Worth the delivery fee, not a sum off the goods. Added to
+   *  `discountAmount` it would give the shopper the offer twice. */
+  freeShipping: boolean;
+
+  /** Applied by the shop with nothing typed, so there is no code to remove
+   *  and no box to put one in — it is announced, not entered. */
+  automatic?: boolean;
+
+  /** What the merchant called it, for an automatic one. A line reading
+   *  "Discount" tells a shopper nothing about why they are paying less. */
+  name?: string;
 }
 
 interface GiftCardState {
@@ -184,7 +199,12 @@ export function CheckoutView({
   // Delivery is charged on the discounted goods; pickup/dine-in are free.
   // City/location-based: the branch serving the buyer's city sets the fee.
   const deliveryBranch = resolveDeliveryLocation(deliveryCity, storefrontConfig);
-  const shipping = computeShippingForCity(deliveryType, goods, deliveryCity, storefrontConfig);
+  const chargedShipping = computeShippingForCity(deliveryType, goods, deliveryCity, storefrontConfig);
+  // A free-delivery promotion is worth the fee, so it comes off the fee —
+  // not off the goods as well, which would be the offer given twice. The
+  // API zeroes it again when the order is written; this is what the shopper
+  // sees while deciding.
+  const shipping = discountState?.freeShipping ? 0 : chargedShipping;
   const billBeforeLoyalty = goods + shipping;
 
   // Fulfilling branch: the serving branch for delivery, the chosen branch for
@@ -291,6 +311,86 @@ export function CheckoutView({
 
   // ── Guards ──────────────────────────────────────────────────────────────────
 
+  // ── The offer that needs no code ────────────────────────────────────────────
+  //
+  // A shop can run "10% off everything this week" with nothing to type. It is
+  // looked up once the basket and the delivery fee are known, because which
+  // offer is worth most depends on both — free delivery wins a small order
+  // and loses a large one.
+  //
+  // It lives ABOVE the empty-basket return below, because hooks have to
+  // run on every render: placed after it, the component called more
+  // hooks with a basket than without one and React refused to render at
+  // all — the checkout showed "Something went wrong".
+  //
+  // The effect must NOT depend on the state it sets. The first version listed
+  // `discountState` in its deps and wrote a fresh object every pass, so each
+  // write re-ran the effect and the checkout died in an update loop behind
+  // "Something went wrong". It reads the current value through a ref instead,
+  // and returns the PREVIOUS object when nothing has changed so React can
+  // bail out of the render.
+  const discountRef = useRef<DiscountState | null>(null);
+  discountRef.current = discountState;
+  const basketCount = items.reduce((n, i) => n + i.quantity, 0);
+
+  useEffect(() => {
+    if (basketCount === 0) return;
+    // One promotion applies to an order. Replacing a code the shopper chose
+    // with one the shop preferred would be the platform overruling them.
+    const current = discountRef.current;
+    if (current && !current.automatic) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/checkout/automatic-discount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storeSlug,
+            orderTotal: subtotal,
+            quantity: basketCount,
+            shippingAmount: chargedShipping,
+          }),
+        });
+        const data = await res.json();
+        if (cancelled) return;
+        setDiscountState((prev) => {
+          if (prev && !prev.automatic) return prev;
+          if (!data.applies) {
+            // It may have stopped applying — the basket shrank below its
+            // minimum — so an offer already shown has to go away again.
+            return prev?.automatic ? null : prev;
+          }
+          const same =
+            prev?.automatic &&
+            prev.id === data.id &&
+            prev.discountAmount === (data.discountAmount ?? 0) &&
+            prev.freeShipping === (data.freeShipping ?? false);
+          if (same) return prev;
+          return {
+            id: data.id,
+            code: '',
+            automatic: true,
+            name: data.name ?? undefined,
+            type: data.type ?? null,
+            value: data.value ?? null,
+            discountAmount: data.discountAmount ?? 0,
+            freeShipping: data.freeShipping ?? false,
+          };
+        });
+      } catch {
+        // An offer that cannot be looked up is not a checkout that stops.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // `chargedShipping` rather than `shipping`: the fee BEFORE any offer, or
+    // winning free delivery would zero the fee and make the offer look
+    // worthless on the next pass.
+  }, [storeSlug, subtotal, basketCount, chargedShipping]);
+
   if (items.length === 0) {
     return (
       <p className="text-center text-fg-muted py-16">
@@ -376,7 +476,14 @@ export function CheckoutView({
     const res = await fetch('/api/checkout/discount', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ storeSlug, code: discountCode.trim(), orderTotal: subtotal }),
+      body: JSON.stringify({
+        storeSlug,
+        code: discountCode.trim(),
+        orderTotal: subtotal,
+        // A promotion with a minimum item count cannot be judged without it,
+        // and the shopper would be told their valid code was invalid.
+        quantity: items.reduce((n, i) => n + i.quantity, 0),
+      }),
     });
 
     setDiscountLoading(false);
@@ -393,6 +500,7 @@ export function CheckoutView({
       type: data.type,
       value: data.value,
       discountAmount: data.discountAmount ?? 0,
+      freeShipping: data.freeShipping ?? data.free_shipping ?? false,
     });
   }
 
@@ -537,7 +645,7 @@ export function CheckoutView({
   if (paypalState) {
     return (
       <div className="max-w-md mx-auto">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} discountLabel={discountState?.name ?? null} freeDelivery={discountState?.freeShipping ?? false} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
         <div className="mt-6">
           <PayPalPaymentPanel
             storeSlug={storeSlug}
@@ -554,7 +662,7 @@ export function CheckoutView({
   if (codItems) {
     return (
       <div className="max-w-md mx-auto">
-        <_OrderSummary items={codItems} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
+        <_OrderSummary items={codItems} subtotal={subtotal} discountAmount={discountAmount} discountLabel={discountState?.name ?? null} freeDelivery={discountState?.freeShipping ?? false} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} />
         <div className="mt-6">
           <CodPaymentPanel
             storeSlug={storeSlug}
@@ -842,14 +950,26 @@ export function CheckoutView({
               {discountState ? (
                 <div className="flex items-center justify-between p-3 rounded-brand bg-success-bg border border-success-border text-sm">
                   <div>
-                    <span className="font-semibold text-success-fg">{discountState.code}</span>
+                    <span className="font-semibold text-success-fg">
+                      {/* An automatic offer has no code: showing an empty
+                          box with a Remove button beside it would invite a
+                          shopper to take away something they never applied
+                          and cannot put back. */}
+                      {discountState.automatic
+                        ? (discountState.name || 'Offer applied')
+                        : discountState.code}
+                    </span>
                     <span className="text-success-fg ms-2">
-                      −{money(discountState.discountAmount ?? 0)}
+                      {discountState.freeShipping
+                        ? 'Free delivery'
+                        : `−${money(discountState.discountAmount ?? 0)}`}
                     </span>
                   </div>
-                  <button onClick={removeDiscount} className="text-success-fg hover:text-danger-fg transition-colors text-xs font-medium">
-                    Remove
-                  </button>
+                  {!discountState.automatic && (
+                    <button onClick={removeDiscount} className="text-success-fg hover:text-danger-fg transition-colors text-xs font-medium">
+                      Remove
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="flex gap-2">
@@ -1011,7 +1131,7 @@ export function CheckoutView({
 
       {/* Right: order summary */}
       <div className="lg:col-span-2">
-        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} taxRate={taxRate} taxInclusive={taxInclusive} sticky />
+        <_OrderSummary items={items} subtotal={subtotal} discountAmount={discountAmount} discountLabel={discountState?.name ?? null} freeDelivery={discountState?.freeShipping ?? false} shipping={shipping} loyaltyDiscount={loyaltyDiscount} giftCardApplied={giftCardApplied} orderTotal={orderTotal} taxRate={taxRate} taxInclusive={taxInclusive} sticky />
       </div>
     </div>
   );
@@ -1030,6 +1150,10 @@ interface OrderSummaryProps {
   }>;
   subtotal: number;
   discountAmount: number;
+  /** What the merchant called the offer, when they called it something. */
+  discountLabel?: string | null;
+  /** Shown as a reason the delivery line is zero. */
+  freeDelivery?: boolean;
   shipping: number;
   loyaltyDiscount: number;
   giftCardApplied: number;
@@ -1039,7 +1163,7 @@ interface OrderSummaryProps {
   sticky?: boolean;
 }
 
-function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDiscount, giftCardApplied, orderTotal, taxRate = 0, taxInclusive = false, sticky }: OrderSummaryProps) {
+function _OrderSummary({ items, subtotal, discountAmount, discountLabel, freeDelivery, shipping, loyaltyDiscount, giftCardApplied, orderTotal, taxRate = 0, taxInclusive = false, sticky }: OrderSummaryProps) {
   const money = useMoney();
   return (
     <div
@@ -1071,13 +1195,23 @@ function _OrderSummary({ items, subtotal, discountAmount, shipping, loyaltyDisco
         </div>
         {discountAmount > 0 && (
           <div className="flex justify-between text-success-fg">
-            <span>Discount</span>
+            {/* Named where the merchant named it. A line reading "Discount"
+                tells a shopper nothing about why they are paying less — and
+                for an offer they never asked for, that is the whole of the
+                explanation they get. */}
+            <span>{discountLabel || 'Discount'}</span>
             <span>−{money(discountAmount)}</span>
           </div>
         )}
         <div className="flex justify-between text-fg-muted">
           <span>Shipping</span>
-          <span>{shipping > 0 ? money(shipping) : 'Free'}</span>
+          <span>
+            {shipping > 0
+              ? money(shipping)
+              : freeDelivery
+                ? 'Free'
+                : 'Free'}
+          </span>
         </div>
         {loyaltyDiscount > 0 && (
           <div className="flex justify-between text-warning-fg">
