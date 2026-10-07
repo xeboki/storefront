@@ -39,6 +39,8 @@ import { HeaderSearchSlot } from './HeaderSearchSlot';
 import { MobileTabBar } from './MobileTabBar';
 import { StoreLogo } from './StoreLogo';
 import { menuStyle } from '../header/registry';
+import { stripMessage } from '@/lib/offers';
+import { formatCurrency } from '@/lib/utils';
 import { headerStyle } from '../header/layouts/registry';
 import { MobileNav, asMobileMenu } from '../header/MobileNav';
 import { MenuIndex } from '../header/MenuIndex';
@@ -60,7 +62,8 @@ import { useStoreConfigStore } from '@/stores/storeConfigStore';
 import { hasAppointments, hasWorkOrders } from '@/lib/business-type';
 import { useT } from '@/lib/i18n/client';
 import type {
-  StoreConfig, StorefrontConfig, NavLink, FulfillmentLocation, OrderingCategory,
+  StoreConfig, StorefrontConfig, NavLink, FulfillmentLocation,
+  OrderingCategory, ShopOffer,
 } from '@xeboki/sdk';
 
 /**
@@ -88,13 +91,15 @@ interface Props {
   activeLocationId: string | null;
   /** Every active department. What reaches a menu is filtered below. */
   categories: OrderingCategory[];
+  /** What the shop is running, for the strip. Empty when it runs nothing. */
+  offers: ShopOffer[];
   locales: string[];
   locale: string;
 }
 
 export function StorefrontHeader({
   storeConfig, storefrontConfig, storeSlug, stores, activeLocationId,
-  categories, locales, locale,
+  categories, offers, locales, locale,
 }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
@@ -613,7 +618,16 @@ export function StorefrontHeader({
     <>
       {strip && !compact && (
         <UtilityBar
-          message={(header?.utilityMessage ?? '').trim()}
+          /* The shop's running offers, then whatever the merchant wrote.
+             This line used to be the merchant's sentence alone, which is how
+             it came to say "Free delivery over €50" on a shop whose live
+             promotion gave free delivery on everything. Said from the
+             promotions themselves, the words cannot contradict the rule. */
+          message={stripMessage(
+            offers,
+            header?.utilityMessage ?? '',
+            (n) => formatCurrency(n, storeConfig.currencyCode),
+          )}
           controls={
             <>
               {utilities.currency}

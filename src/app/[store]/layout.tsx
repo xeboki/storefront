@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { storeName } from '@/lib/store-name';
 import { notFound, redirect } from 'next/navigation';
-import { loadStore, loadCategories } from '@/lib/sdk/store';
+import { loadStore, loadCategories, loadOffers } from '@/lib/sdk/store';
 
 import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
@@ -154,6 +154,11 @@ export default async function StoreLayout({ params, children }: Props) {
   // The category rail is part of the header now, so the layout loads it once
   // instead of every page that wants to show categories.
   const categories = (await loadCategories(resolved.apiKey).catch(() => ({ data: [] }))).data ?? [];
+  // What the shop is running, so the strip at the top can say it. Loaded
+  // here, beside the rest of the header's data, rather than fetched by the
+  // header itself — the header renders on the server and a client fetch
+  // would announce the offer a beat after the page it sits on.
+  const offers = await loadOffers(resolved.apiKey).catch(() => []);
 
   // Resolved once per request and handed down, so the header, the catalog, the
   // product page and checkout cannot disagree about which store this is.
@@ -205,6 +210,7 @@ export default async function StoreLayout({ params, children }: Props) {
             stores={activeStore ? stores : []}
             activeLocationId={activeStore?.locationId ?? null}
             categories={categories}
+            offers={offers}
             locales={locales}
             locale={locale}
           />

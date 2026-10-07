@@ -173,6 +173,28 @@ export const loadCategories = unstable_cache(
   { revalidate: 300, tags: ['categories'] },
 );
 
+/**
+ * What the shop is running, for the strip at the top of every page.
+ *
+ * A short cache deliberately. The other config is 300s because it changes
+ * when a merchant redesigns; an offer changes when they pause it, and a
+ * strip still advertising a promotion the shop has stopped honouring is the
+ * one failure this feature must not have.
+ */
+export const loadOffers = unstable_cache(
+  async (apiKey: string) => {
+    const { getXebokiClient } = await import('./client');
+    const client = getXebokiClient(apiKey);
+    const res = await resilientRead(`offers:${apiKey.slice(-8)}`, () =>
+      client.ordering.listOffers());
+    // A shop whose offers cannot be read still serves its pages; it just
+    // says nothing it cannot stand behind.
+    return res ?? [];
+  },
+  ['offers'],
+  { revalidate: 60, tags: ['store-config'] },
+);
+
 export const loadUpsells = unstable_cache(
   async (apiKey: string, productId: string) => {
     const { getXebokiClient } = await import('./client');
