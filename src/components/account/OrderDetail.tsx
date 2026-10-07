@@ -48,6 +48,12 @@ export function OrderDetail({
   const money = useMoney();
   const [order, setOrder] = useState<OrderingOrder>(initialOrder);
   const shipments = order.shipments ?? [];
+  // The API sends an OBJECT for a delivery order. Rendering it straight
+  // threw "Objects are not valid as a React child" and 500'd the whole page
+  // — for every delivery order ever placed, unseen because the shop it was
+  // built against did collection only. Read in postal order, because a
+  // dict's own order has put postcodes above street names.
+  const addressLines = addressToLines(order.deliveryAddress);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [refreshing, setRefreshing] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -291,10 +297,12 @@ export function OrderDetail({
       {/* Delivery / notes info */}
       {(order.deliveryAddress || order.notes) && (
         <div className="p-5 rounded-brand border border-line space-y-3 text-sm">
-          {order.deliveryAddress && (
+          {addressLines.length > 0 && (
             <div>
               <p className="font-semibold text-fg mb-1">Delivery address</p>
-              <p className="text-fg-muted">{order.deliveryAddress}</p>
+              {addressLines.map((line) => (
+                <p key={line} className="text-fg-muted">{line}</p>
+              ))}
             </div>
           )}
           {order.notes && (
@@ -407,6 +415,39 @@ export function OrderDetail({
 
 function formatTime(d: Date): string {
   return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}
+
+/**
+ * An address as lines a postal service would read.
+ *
+ * Takes the object the API sends, or the single string an older shop stored.
+ * Anything under a key nobody anticipated is still printed — a dropped
+ * address line is an undelivered parcel.
+ */
+function addressToLines(address: unknown): string[] {
+  if (!address) return [];
+  if (typeof address === 'string') {
+    return address.split('\n').map((l) => l.trim()).filter(Boolean);
+  }
+  if (typeof address !== 'object') return [];
+  const fields = address as Record<string, unknown>;
+  const order = ['name', 'company', 'line1', 'line_1', 'street', 'line2',
+                 'line_2', 'city', 'town', 'state', 'county', 'postcode',
+                 'postal_code', 'zip', 'country'];
+  const seen = new Set<string>();
+  const lines: string[] = [];
+  const push = (value: unknown) => {
+    const text = String(value ?? '').trim();
+    if (text && !seen.has(text.toLowerCase())) {
+      seen.add(text.toLowerCase());
+      lines.push(text);
+    }
+  };
+  order.forEach((key) => push(fields[key]));
+  Object.entries(fields).forEach(([key, value]) => {
+    if (key !== 'id' && key !== 'type' && typeof value !== 'object') push(value);
+  });
+  return lines;
 }
 
 function statusBadge(status: string): string {
