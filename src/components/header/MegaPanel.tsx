@@ -23,17 +23,24 @@ import { NodeLink } from './NodeLink';
 import type { MenuNode } from '@/lib/navigation';
 import styles from './styles/mega.module.css';
 
-/**
- * At most this many columns, and at most this many links in each.
+/*
+ * There were caps here: four columns, eight links each, six tiles, two
+ * promos. The reasoning was navigation research — past four columns the eye
+ * has nowhere to land — and the claim was that a merchant who built more got
+ * "the rest behind the way out". They did not. The rest was dropped, and the
+ * way out is a link to the whole catalogue, not to the entries that vanished.
  *
- * The navigation research is consistent about both, and a mega menu drawn
- * badly is worse than no mega menu: past four columns the eye has nowhere to
- * land, and past eight links a column stops being scannable. A merchant who
- * builds more gets the rest behind the way out rather than a panel taller
- * than the screen.
+ * Subscriber 34's "Shops" menu is four columns of eight links: sitting
+ * exactly on both caps, one more link away from losing one with no word
+ * anywhere. A shop's menu is the shop's to decide, and the thing that decides
+ * it is the tree the merchant built in the back office, not a number in this
+ * file.
+ *
+ * The layout was already able to cope, which is what made the caps pure
+ * loss: `.inner` is `max-height: calc(100vh - 9rem)` with `overflow-y: auto`,
+ * and `.columns` is `repeat(auto-fit, …)`, so a big panel scrolls and a wide
+ * one wraps. Depth is still bounded, server-side, by `MAX_MENU_DEPTH`.
  */
-export const MAX_COLUMNS = 4;
-export const PER_COLUMN = 8;
 
 interface Props {
   node: MenuNode;
@@ -69,7 +76,8 @@ export function MegaPanel({ node, close, allHref, allLabel, showAll }: Props) {
     }
   }
 
-  const shown = columns.slice(0, MAX_COLUMNS);
+  // Every column the merchant built. The grid wraps; the panel scrolls.
+  const shown = columns;
 
   return (
     <div className={styles.panel} onMouseLeave={close} role="navigation" aria-label={node.label}>
@@ -79,7 +87,7 @@ export function MegaPanel({ node, close, allHref, allLabel, showAll }: Props) {
             <div key={heading.id} className={styles.column}>
               <p className={styles.heading}>{heading.label}</p>
               <ul className={styles.list}>
-                {heading.children.slice(0, PER_COLUMN).map((leaf) => (
+                {heading.children.map((leaf) => (
                   <li key={leaf.id}>
                     <NodeLink node={leaf} className={styles.entry} onNavigate={close} />
                   </li>
@@ -93,7 +101,7 @@ export function MegaPanel({ node, close, allHref, allLabel, showAll }: Props) {
           {loose.length > 0 && (
             <div className={styles.column}>
               <ul className={styles.list}>
-                {loose.slice(0, PER_COLUMN).map((leaf) => (
+                {loose.map((leaf) => (
                   <li key={leaf.id}>
                     <NodeLink node={leaf} className={styles.entry} onNavigate={close} />
                   </li>
@@ -109,7 +117,7 @@ export function MegaPanel({ node, close, allHref, allLabel, showAll }: Props) {
           <div key={group.id} className={styles.tiles}>
             {group.label && <p className={styles.heading}>{group.label}</p>}
             <div className={styles.tileGrid}>
-              {group.children.filter((c) => c.imageUrl).slice(0, 6).map((tile) => (
+              {group.children.filter((c) => c.imageUrl).map((tile) => (
                 <NodeLink key={tile.id} node={tile} className={styles.tile} onNavigate={close}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={tile.imageUrl} alt="" className={styles.tileImage} />
@@ -119,7 +127,7 @@ export function MegaPanel({ node, close, allHref, allLabel, showAll }: Props) {
           </div>
         ))}
 
-        {promos.slice(0, 2).map((promo) => (
+        {promos.map((promo) => (
           <NodeLink key={promo.id} node={promo} className={styles.promo} onNavigate={close}>
             {/* The merchant's own picture. Unoptimised on purpose: it is
                 their file at their dimensions, and a menu tile that waited
