@@ -18,10 +18,16 @@
  * Authoring something the shop quietly ignores is worse than a panel that is
  * awkward to aim at while the strip is moving.
  *
- * The aiming problem is handled rather than avoided: the panel is anchored to
- * its own trigger through `AnchoredPanel` — which also escapes the clip this
- * row needs — and `useCloseOnScroll` shuts it the moment the page moves, so
- * it is never left pointing at a trigger that has slid away.
+ * The aiming problem is handled rather than avoided: `useCloseOnScroll` shuts
+ * the panel the moment the page moves, so it is never left pointing at a
+ * trigger that has slid away.
+ *
+ * The panel itself is `MegaPanel` — the same one the mega menu opens. A first
+ * attempt built a flat dropdown here instead, and flattening is exactly what
+ * loses the thing the merchant made: the back end describes a submenu as
+ * columns, picture tiles and a strip (`menu_display`), and subscriber 34's
+ * "Shops" is four headed columns of eight links plus a promo tile. One list
+ * of thirty-three names is not that menu.
  *
  * The row folds away on the way down the page and returns on the way up —
  * `condense`. Animating a height to `auto` is not possible and a fixed
@@ -33,8 +39,8 @@ import Link from 'next/link';
 import { clsx } from 'clsx';
 import { ChevronDown } from 'lucide-react';
 import { ScrollRail } from '../../layout/ScrollRail';
-import { AnchoredPanel } from '../AnchoredPanel';
 import { useCloseOnScroll, useDismiss } from '../chrome';
+import { MegaPanel } from '../MegaPanel';
 import { NodeLink } from '../NodeLink';
 import type { MenuNode } from '@/lib/navigation';
 import type { MenuStyleProps } from '../types';
@@ -44,19 +50,12 @@ export default function RailMenu({
   nodes, allHref, allLabel, collapsed, linkCase, onDark, align, showAll,
 }: MenuStyleProps) {
   const [open, setOpen] = useState<string | null>(null);
-  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  const close = useCallback(() => {
-    setOpen(null);
-    setAnchor(null);
-  }, []);
+  const close = useCallback(() => setOpen(null), []);
   const dismissRef = useDismiss(open !== null, close);
   // The row folds away as the page moves; a panel hanging off a trigger in
   // it would be left pointing at nothing.
   useCloseOnScroll(open !== null, close);
-  const show = useCallback((id: string, el: HTMLElement) => {
-    setOpen(id);
-    setAnchor(el);
-  }, []);
+  const show = useCallback((id: string) => setOpen(id), []);
 
   // Hooks first: this returns early below, and a hook after a return runs on
   // some renders and not others.
@@ -76,9 +75,9 @@ export default function RailMenu({
         key={node.id}
         type="button"
         aria-expanded={open === node.id}
-        onClick={(e) => show(node.id, e.currentTarget)}
-        onMouseEnter={(e) => show(node.id, e.currentTarget)}
-        onFocus={(e) => show(node.id, e.currentTarget)}
+        onClick={() => show(node.id)}
+        onMouseEnter={() => show(node.id)}
+        onFocus={() => show(node.id)}
         className={clsx(item, 'gap-1')}
       >
         {node.label}
@@ -129,23 +128,13 @@ export default function RailMenu({
         </ScrollRail>
       </div>
       {openNode && (
-        <AnchoredPanel anchor={anchor}>
-          <div className={styles.panel} onMouseLeave={close}>
-            {openNode.children.flatMap((child) =>
-              // Two levels flattened into one list, as the inline menu does:
-              // a submenu inside a dropdown is a panel, and a panel is the
-              // mega menu's job.
-              child.children.length > 0
-                ? [
-                    <p key={child.id} className={styles.panelHeading}>{child.label}</p>,
-                    ...child.children.map((leaf) => (
-                      <NodeLink key={leaf.id} node={leaf} className={styles.panelItem} onNavigate={close} />
-                    )),
-                  ]
-                : [<NodeLink key={child.id} node={child} className={styles.panelItem} onNavigate={close} />],
-            )}
-          </div>
-        </AnchoredPanel>
+        <MegaPanel
+          node={openNode}
+          close={close}
+          allHref={allHref}
+          allLabel={allLabel}
+          showAll={showAll}
+        />
       )}
     </nav>
   );
