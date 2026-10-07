@@ -32,21 +32,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { clsx } from 'clsx';
+import { CopyCode } from './CopyCode';
+import type { OfferLine } from '@/lib/offers';
 import styles from './utility-bar.module.css';
 
 /** Long enough to read a line and copy a code off it. */
 const DWELL_MS = 5000;
 
 interface Props {
-  messages: string[];
+  lines: OfferLine[];
   controls: React.ReactNode;
   container: string;
 }
 
-export function UtilityBar({ messages, controls, container }: Props) {
+export function UtilityBar({ lines, controls, container }: Props) {
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
-  const many = messages.length > 1;
+  const many = lines.length > 1;
 
   // Somebody may be part-way through reading a line, or copying a code off
   // it, when the timer fires. Pointer or keyboard, the rule is the same.
@@ -54,13 +56,13 @@ export function UtilityBar({ messages, controls, container }: Props) {
   const release = useCallback(() => setHeld(false), []);
 
   const step = useCallback(
-    (by: number) => setIndex((i) => (i + by + messages.length) % messages.length),
-    [messages.length],
+    (by: number) => setIndex((i) => (i + by + lines.length) % lines.length),
+    [lines.length],
   );
 
   // A list that shrinks under a reader — a promotion ends — must not leave
   // the strip pointing past the end of it.
-  const count = messages.length;
+  const count = lines.length;
   useEffect(() => {
     setIndex((i) => (count === 0 ? 0 : i % count));
   }, [count]);
@@ -82,7 +84,7 @@ export function UtilityBar({ messages, controls, container }: Props) {
     return () => clearInterval(t);
   }, [many, held, step]);
 
-  if (messages.length === 0) return null;
+  if (lines.length === 0) return null;
 
   return (
     <div
@@ -94,15 +96,13 @@ export function UtilityBar({ messages, controls, container }: Props) {
     >
       <div className={clsx(container, styles.inner)}>
         <p className={styles.message}>
-          {messages.map((m, i) => (
+          {lines.map((line, i) => (
             <span
-              key={m}
+              key={line.text + (line.code ?? '')}
               className={clsx(styles.line, i === index && styles.shown)}
-              // Hidden from sight, not from a reader: all of them are here
-              // so the shop's offers are readable and indexable at once.
-              aria-hidden={undefined}
             >
-              {m}
+              {line.text}
+              {line.code && <CopyCode code={line.code} />}
             </span>
           ))}
         </p>

@@ -1,0 +1,40 @@
+/* Reads as the thing it is — a code — rather than as more of the sentence
+   around it, so a shopper can see there is something to take. */
+.code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-inline-start: 0.35rem;
+  border: 1px dashed rgb(var(--color-border));
+  border-radius: var(--radius);
+  background: rgb(var(--color-surface));
+  padding: 0.05rem 0.4rem;
+  color: rgb(var(--color-fg));
+  font: inherit;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.code:hover {
+  border-style: solid;
+  border-color: rgb(var(--color-primary));
+  color: rgb(var(--color-primary));
+}
+
+/* No light/dark variant of its own: the strip and this control both read
+   from the theme tokens, so they flip together. A second knob would be a
+   second source for the same answer. */
+
+.text { white-space: nowrap; }
+
+/* What happened, said where the icon was — so the code itself never moves. */
+.said {
+  font-weight: 500;
+  font-size: 0.6875rem;
+  letter-spacing: normal;
+  opacity: 0.85;
+}
+
+.icon { opacity: 0.6; }
+.code:hover .icon { opacity: 1; }

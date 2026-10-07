@@ -10,17 +10,29 @@
  */
 import type { ShopOffer } from '@xeboki/sdk';
 
+/** One line of the strip: words, and the code a shopper has to carry away. */
+export interface OfferLine {
+  text: string;
+  /** Absent for an offer that applies itself, and for the shop's own note. */
+  code?: string;
+}
+
 /**
  * One offer, in as few words as a strip can carry.
+ *
+ * The code is kept SEPARATE from the words rather than written into them,
+ * because it is the one part a shopper has to take with them — so it has to
+ * be something they can press and copy, not a run of letters inside a
+ * sentence they would have to select by hand on a phone.
  *
  * `money` formats an amount in the shop's currency — passed in rather than
  * imported, because this runs on the server for the header and in the
  * browser elsewhere.
  */
-export function offerPhrase(
+export function offerLine(
   offer: ShopOffer,
   money: (n: number) => string,
-): string {
+): OfferLine {
   const reward = (() => {
     switch (offer.type) {
       case 'free_shipping':
@@ -48,14 +60,21 @@ export function offerPhrase(
     );
   }
 
-  // A code is the thing a shopper has to carry away, so it goes last, where
-  // the eye lands.
-  const code = offer.code ? ` with ${offer.code}` : '';
-  return `${reward}${conditions.length ? ` ${conditions.join(' ')}` : ''}${code}`;
+  const text = `${reward}${conditions.length ? ` ${conditions.join(' ')}` : ''}`;
+  return offer.code ? { text, code: offer.code } : { text };
+}
+
+/** The same line as one string, for anywhere that cannot render a control. */
+export function offerPhrase(
+  offer: ShopOffer,
+  money: (n: number) => string,
+): string {
+  const { text, code } = offerLine(offer, money);
+  return code ? `${text} with ${code}` : text;
 }
 
 /**
- * The strip's messages, one per line it will show in turn.
+ * The strip's lines, one per turn it will take.
  *
  * A LIST rather than one joined sentence. Joining them was the first answer
  * and it fails the moment a shop runs more than two or three: the strip is
@@ -71,13 +90,13 @@ export function offerPhrase(
  * own line comes last — it is usually a standing note about delivery or
  * returns, which holds whether or not a promotion is running.
  */
-export function stripMessages(
+export function stripLines(
   offers: ShopOffer[],
   merchantMessage: string,
   money: (n: number) => string,
-): string[] {
-  const said = offers.map((o) => offerPhrase(o, money));
+): OfferLine[] {
+  const said = offers.map((o) => offerLine(o, money));
   const own = merchantMessage.trim();
-  if (own) said.push(own);
+  if (own) said.push({ text: own });
   return said;
 }

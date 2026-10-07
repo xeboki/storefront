@@ -8,7 +8,7 @@
  * what the promotion actually does.
  */
 import { describe, expect, it } from 'vitest';
-import { offerPhrase, stripMessages } from './offers';
+import { offerPhrase, offerLine, stripLines } from './offers';
 import type { ShopOffer } from '@xeboki/sdk';
 
 const money = (n: number) => `€${n.toFixed(2)}`;
@@ -61,27 +61,45 @@ describe('one offer in as few words as a strip can carry', () => {
   });
 });
 
+describe('the code is its own thing, not part of the sentence', () => {
+  it('is kept out of the words so it can be a control', () => {
+    // A code inside a sentence has to be selected by hand — on a phone that
+    // is a long-press, two drag handles and a fair chance of catching the
+    // words either side.
+    const line = offerLine(offer({ value: 12, code: 'AUTUMNWALK' }), money);
+    expect(line.text).toBe('12% off');
+    expect(line.code).toBe('AUTUMNWALK');
+  });
+
+  it('is absent for an offer that applies itself', () => {
+    expect(offerLine(offer({ code: '' }), money).code).toBeUndefined();
+  });
+
+  it('still reads as one phrase where a control cannot be drawn', () => {
+    expect(offerPhrase(offer({ value: 12, code: 'AUTUMNWALK' }), money))
+      .toBe('12% off with AUTUMNWALK');
+  });
+});
+
 describe('the strip', () => {
   it('leads with the offers and keeps the merchant their own words', () => {
-    expect(stripMessages(
+    expect(stripLines(
       [offer({ type: 'free_shipping' })],
       'Complimentary samples with every order',
       money,
-    )).toEqual(['Free delivery', 'Complimentary samples with every order']);
+    )).toEqual([
+      { text: 'Free delivery' },
+      { text: 'Complimentary samples with every order' },
+    ]);
   });
 
-  it('is just the offers when the merchant wrote nothing', () => {
-    expect(stripMessages([offer({ value: 12, code: 'X' })], '   ', money))
-      .toEqual(['12% off with X']);
-  });
-
-  it('is just their words when nothing is running', () => {
-    expect(stripMessages([], 'Free returns for 30 days', money))
-      .toEqual(['Free returns for 30 days']);
+  it('gives the merchant note no code to copy', () => {
+    const lines = stripLines([], 'Free returns for 30 days', money);
+    expect(lines).toEqual([{ text: 'Free returns for 30 days' }]);
   });
 
   it('is empty when there is nothing to say', () => {
-    expect(stripMessages([], '', money)).toEqual([]);
+    expect(stripLines([], '', money)).toEqual([]);
   });
 
   it('drops nothing, however many are running', () => {
@@ -91,11 +109,9 @@ describe('the strip', () => {
     // with its full wording.
     const many = Array.from({ length: 12 }, (_, i) =>
       offer({ id: `o${i}`, value: i + 1 }));
-    const lines = stripMessages(many, 'Our note', money);
+    const lines = stripLines(many, 'Our note', money);
     expect(lines).toHaveLength(13);
-    expect(lines[0]).toBe('1% off');
-    expect(lines.at(-1)).toBe('Our note');
-    // and no line is a run-on of several offers
-    expect(lines.every((l) => !l.includes(' · '))).toBe(true);
+    expect(lines[0].text).toBe('1% off');
+    expect(lines.at(-1)).toEqual({ text: 'Our note' });
   });
 });

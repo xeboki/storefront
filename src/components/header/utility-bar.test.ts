@@ -17,17 +17,17 @@ import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { UtilityBar } from './UtilityBar';
 
-const render = (messages: string[]) =>
+const render = (lines: Array<{ text: string; code?: string }>) =>
   renderToStaticMarkup(
     createElement(UtilityBar, {
-      messages,
+      lines,
       controls: createElement('span', null, 'EUR'),
       container: 'c',
     }),
   );
 
 describe('the strip with one announcement', () => {
-  const html = render(['Free delivery']);
+  const html = render([{ text: 'Free delivery' }]);
 
   it('says it', () => {
     expect(html).toContain('Free delivery');
@@ -41,16 +41,19 @@ describe('the strip with one announcement', () => {
 
 describe('the strip with several', () => {
   const lines = [
-    'Free delivery',
-    '12% off with AUTUMNWALK',
-    '5.00 off over 40.00 with WALKFIVE',
+    { text: 'Free delivery' },
+    { text: '12% off', code: 'AUTUMNWALK' },
+    { text: '5.00 off over 40.00', code: 'WALKFIVE' },
   ];
   const html = render(lines);
 
   it('carries every one of them, in full', () => {
     // Not three joined into a line that truncates, and not the first two
     // with the third dropped: all of them, each with its own wording.
-    for (const line of lines) expect(html).toContain(line);
+    for (const line of lines) {
+      expect(html).toContain(line.text);
+      if (line.code) expect(html).toContain(line.code);
+    }
   });
 
   it('offers arrows, so nobody has to wait for the one they saw', () => {
@@ -67,5 +70,26 @@ describe('the strip with several', () => {
 describe('the strip with nothing to say', () => {
   it('is not a band of empty page', () => {
     expect(render([])).toBe('');
+  });
+});
+
+describe('a code is something to press, not something to select', () => {
+  it('becomes a control, named with the code it would copy', () => {
+    // A reader who hears "copy" alone has not been told what they would get.
+    const html = render([{ text: '12% off', code: 'AUTUMNWALK' }]);
+    expect(html).toContain('Copy discount code AUTUMNWALK');
+    expect(html).toContain('AUTUMNWALK');
+  });
+
+  it('is absent when the offer applies itself', () => {
+    // Nothing to carry away, so nothing to press.
+    const html = render([{ text: 'Free delivery' }]);
+    expect(html).not.toContain('Copy discount code');
+    expect(html).not.toContain('<button');
+  });
+
+  it("is absent from the shop's own note", () => {
+    const html = render([{ text: 'Free returns for 30 days' }]);
+    expect(html).not.toContain('Copy discount code');
   });
 });
