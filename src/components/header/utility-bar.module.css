@@ -15,13 +15,52 @@
 }
 
 .message {
+  /* Every message in ONE grid cell, so the band sizes to the tallest and
+     nobody has to guess a height — and so a turn is a crossfade in place
+     rather than a reflow of the bar. */
+  display: grid;
   margin: 0;
   min-width: 0;
+  color: rgb(var(--color-fg-muted));
+}
+
+.line {
+  grid-area: 1 / 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: rgb(var(--color-fg-muted));
+  opacity: 0;
+  /* Out of the way of the pointer while it is not the one showing, or the
+     invisible lines would swallow clicks meant for the visible one. */
+  pointer-events: none;
 }
+
+.shown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .line { transition: opacity 400ms ease; }
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0.125rem;
+  color: rgb(var(--color-fg-subtle));
+}
+
+.step:hover { color: rgb(var(--color-fg)); }
 
 .controls {
   display: flex;

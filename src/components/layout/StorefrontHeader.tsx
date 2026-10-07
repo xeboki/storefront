@@ -39,7 +39,7 @@ import { HeaderSearchSlot } from './HeaderSearchSlot';
 import { MobileTabBar } from './MobileTabBar';
 import { StoreLogo } from './StoreLogo';
 import { menuStyle } from '../header/registry';
-import { stripMessage } from '@/lib/offers';
+import { stripMessages } from '@/lib/offers';
 import { formatCurrency } from '@/lib/utils';
 import { headerStyle } from '../header/layouts/registry';
 import { MobileNav, asMobileMenu } from '../header/MobileNav';
@@ -623,7 +623,7 @@ export function StorefrontHeader({
              it came to say "Free delivery over €50" on a shop whose live
              promotion gave free delivery on everything. Said from the
              promotions themselves, the words cannot contradict the rule. */
-          message={stripMessage(
+          messages={stripMessages(
             offers,
             header?.utilityMessage ?? '',
             (n) => formatCurrency(n, storeConfig.currencyCode),

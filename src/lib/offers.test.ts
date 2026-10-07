@@ -8,7 +8,7 @@
  * what the promotion actually does.
  */
 import { describe, expect, it } from 'vitest';
-import { offerPhrase, stripMessage, MAX_OFFERS } from './offers';
+import { offerPhrase, stripMessages } from './offers';
 import type { ShopOffer } from '@xeboki/sdk';
 
 const money = (n: number) => `€${n.toFixed(2)}`;
@@ -63,35 +63,39 @@ describe('one offer in as few words as a strip can carry', () => {
 
 describe('the strip', () => {
   it('leads with the offers and keeps the merchant their own words', () => {
-    const msg = stripMessage(
+    expect(stripMessages(
       [offer({ type: 'free_shipping' })],
       'Complimentary samples with every order',
       money,
-    );
-    expect(msg).toBe('Free delivery · Complimentary samples with every order');
+    )).toEqual(['Free delivery', 'Complimentary samples with every order']);
   });
 
   it('is just the offers when the merchant wrote nothing', () => {
-    expect(stripMessage([offer({ value: 12, code: 'X' })], '   ', money))
-      .toBe('12% off with X');
+    expect(stripMessages([offer({ value: 12, code: 'X' })], '   ', money))
+      .toEqual(['12% off with X']);
   });
 
   it('is just their words when nothing is running', () => {
-    expect(stripMessage([], 'Free returns for 30 days', money))
-      .toBe('Free returns for 30 days');
+    expect(stripMessages([], 'Free returns for 30 days', money))
+      .toEqual(['Free returns for 30 days']);
   });
 
   it('is empty when there is nothing to say', () => {
-    expect(stripMessage([], '', money)).toBe('');
+    expect(stripMessages([], '', money)).toEqual([]);
   });
 
-  it('does not let a dozen offers push the merchant off the end', () => {
-    // The strip is one line and truncates, so an unbounded list shows a
-    // shop neither its offers nor its own sentence.
+  it('drops nothing, however many are running', () => {
+    // Joining them into one line truncated the tail away, and capping the
+    // list dropped the same offers more quietly. The strip rotates, so a
+    // shop running a dozen promotions shows a dozen — one at a time, each
+    // with its full wording.
     const many = Array.from({ length: 12 }, (_, i) =>
       offer({ id: `o${i}`, value: i + 1 }));
-    const msg = stripMessage(many, 'Our note', money);
-    expect(msg.split(' · ')).toHaveLength(MAX_OFFERS + 1);
-    expect(msg.endsWith('Our note')).toBe(true);
+    const lines = stripMessages(many, 'Our note', money);
+    expect(lines).toHaveLength(13);
+    expect(lines[0]).toBe('1% off');
+    expect(lines.at(-1)).toBe('Our note');
+    // and no line is a run-on of several offers
+    expect(lines.every((l) => !l.includes(' · '))).toBe(true);
   });
 });

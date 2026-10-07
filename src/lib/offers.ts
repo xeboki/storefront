@@ -55,26 +55,29 @@ export function offerPhrase(
 }
 
 /**
- * The strip's whole message: the offers, then whatever the merchant wrote.
+ * The strip's messages, one per line it will show in turn.
  *
- * Offers first because they are the reason to read the strip, and the
- * merchant's own line after — it is usually a standing note about delivery or
- * returns, which keeps whether or not an offer is running.
+ * A LIST rather than one joined sentence. Joining them was the first answer
+ * and it fails the moment a shop runs more than two or three: the strip is
+ * one line, it truncates, and the tail — somebody's promotion — is simply
+ * gone. Capping the list instead just drops the same offers earlier and more
+ * quietly.
  *
- * The strip is one line by definition and truncates, so this cannot be
- * allowed to grow without limit: past `MAX_OFFERS` a shop running a dozen
- * promotions would push its own words off the end and show none of them
- * fully.
+ * So the strip rotates, and every offer gets a line of its own and its full
+ * wording. Nothing is dropped and nothing is cut off mid-word, however many
+ * are running.
+ *
+ * Offers lead, because they are the reason to read the strip. The merchant's
+ * own line comes last — it is usually a standing note about delivery or
+ * returns, which holds whether or not a promotion is running.
  */
-export const MAX_OFFERS = 3;
-
-export function stripMessage(
+export function stripMessages(
   offers: ShopOffer[],
   merchantMessage: string,
   money: (n: number) => string,
-): string {
-  const said = offers.slice(0, MAX_OFFERS).map((o) => offerPhrase(o, money));
+): string[] {
+  const said = offers.map((o) => offerPhrase(o, money));
   const own = merchantMessage.trim();
   if (own) said.push(own);
-  return said.join(' · ');
+  return said;
 }
