@@ -15,6 +15,16 @@ import { defineConfig } from 'vitest/config';
  * equivalent and resolves to the same symlink.
  */
 export default defineConfig({
+  /**
+   * The same JSX runtime the app is built with.
+   *
+   * Next compiles with the automatic runtime; esbuild's default here is the
+   * classic one, which emits `React.createElement` into a module that never
+   * imports React — so rendering any component in a test died with
+   * "React is not defined", in the component rather than in the test, which
+   * reads like the component is broken.
+   */
+  esbuild: { jsx: 'automatic' },
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
