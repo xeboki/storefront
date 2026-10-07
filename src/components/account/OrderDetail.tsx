@@ -25,12 +25,21 @@ interface Props {
 // Statuses after which we stop polling — the order won't change further.
 const TERMINAL_STATUSES = new Set(['completed', 'cancelled', 'refunded']);
 
+/**
+ * The steps a shopper watches their order move through.
+ *
+ * `preparing` was wrong — the server's status is `processing` — so the
+ * tracker stopped dead at "Confirmed" and stayed there while the shop
+ * picked, packed and shipped the order. The one bar a waiting shopper
+ * actually looks at, stuck, for every order this shop has ever taken.
+ */
 const STATUS_STEPS = [
-  { key: 'pending',   label: 'Placed' },
-  { key: 'confirmed', label: 'Confirmed' },
-  { key: 'preparing', label: 'Preparing' },
-  { key: 'ready',     label: 'Ready' },
-  { key: 'completed', label: 'Delivered' },
+  { key: 'pending',    label: 'Placed' },
+  { key: 'confirmed',  label: 'Confirmed' },
+  { key: 'processing', label: 'Preparing' },
+  { key: 'ready',      label: 'Ready' },
+  { key: 'shipped',    label: 'On its way' },
+  { key: 'completed',  label: 'Delivered' },
 ];
 
 export function OrderDetail({
@@ -38,6 +47,7 @@ export function OrderDetail({
 }: Props) {
   const money = useMoney();
   const [order, setOrder] = useState<OrderingOrder>(initialOrder);
+  const shipments = order.shipments ?? [];
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [refreshing, setRefreshing] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -230,6 +240,47 @@ export function OrderDetail({
         </div>
       )}
 
+      {/* Where the parcel is.
+          The one thing a shopper opens this page to find out, and until the
+          shop could record a carrier and a number there was nothing to tell
+          them. A parcel with no tracking page still says who is carrying it
+          — "An Post have it" beats silence — but it shows no link, because a
+          link that 404s reads as the shop having lost the order. */}
+      {shipments.length > 0 && (
+        <div className="p-4 rounded-brand border border-line bg-surface-alt/50 space-y-3">
+          <h2 className="text-sm font-semibold">
+            {shipments.length === 1 ? 'Your parcel' : 'Your parcels'}
+          </h2>
+          {shipments.map((parcel, i) => (
+            <div key={parcel.tracking || i} className="text-sm space-y-1">
+              <div className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-medium">{parcel.carrier}</span>
+                {parcel.service && (
+                  <span className="text-xs text-fg-muted">{parcel.service}</span>
+                )}
+              </div>
+              {parcel.tracking && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs text-fg-muted">
+                    {parcel.tracking}
+                  </span>
+                  {parcel.trackingUrl && (
+                    <a
+                      href={parcel.trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
+                      Track it &rarr;
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Cancellation notice */}
       {isCancelled && (
         <div className="p-4 rounded-brand bg-danger-bg border border-danger-border text-sm text-danger-fg">
@@ -364,7 +415,8 @@ function statusBadge(status: string): string {
     case 'cancelled':  return 'bg-danger-bg text-danger-fg border border-danger-border';
     case 'pending':    return 'bg-warning-bg text-warning-fg border border-warning-border';
     case 'ready':      return 'bg-info-bg text-info-fg border border-info-border';
-    case 'preparing':  return 'bg-violet-50 text-violet-700 border border-violet-200';
+    case 'processing': return 'bg-violet-50 text-violet-700 border border-violet-200';
+    case 'shipped':    return 'bg-info-bg text-info-fg border border-info-border';
     case 'confirmed':  return 'bg-info-bg text-info-fg border border-info-border';
     default:           return 'bg-surface-alt text-fg-muted border border-line';
   }
@@ -373,8 +425,9 @@ function statusBadge(status: string): string {
 const STATUS_LABELS: Record<string, string> = {
   pending:    'Order Placed',
   confirmed:  'Confirmed',
-  preparing:  'Being Prepared',
+  processing: 'Being Prepared',
   ready:      'Ready for Pickup',
+  shipped:    'On Its Way',
   completed:  'Delivered',
   cancelled:  'Cancelled',
   refunded:   'Refunded',
@@ -383,7 +436,8 @@ const STATUS_LABELS: Record<string, string> = {
 const STATUS_MESSAGES: Record<string, string> = {
   pending:    'Your order has been received and is awaiting confirmation.',
   confirmed:  'Your order has been confirmed and will be prepared shortly.',
-  preparing:  'Your order is being prepared right now.',
+  processing: 'Your order is being prepared right now.',
   ready:      'Your order is ready! Please collect it or await delivery.',
+  shipped:    'Your order is on its way.',
   completed:  'Order complete. Enjoy!',
 };

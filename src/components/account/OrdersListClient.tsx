@@ -16,12 +16,23 @@ interface Props {
   initialStatus?: string;
 }
 
+/**
+ * The shop's real order states.
+ *
+ * This list said `preparing`, which this system has never had — the status
+ * is `processing`. So a shopper filtering by "Preparing" got nothing, ever,
+ * and an order actually being picked matched no filter at all. `shipped` was
+ * missing for the opposite reason: it did not exist yet, and now does.
+ *
+ * Checked against the server by `tests/order-statuses-match-the-server.test.ts`.
+ */
 const STATUS_FILTERS = [
   { key: undefined,     label: 'All' },
   { key: 'pending',     label: 'Pending' },
   { key: 'confirmed',   label: 'Confirmed' },
-  { key: 'preparing',   label: 'Preparing' },
+  { key: 'processing',  label: 'Preparing' },
   { key: 'ready',       label: 'Ready' },
+  { key: 'shipped',     label: 'Shipped' },
   { key: 'completed',   label: 'Completed' },
   { key: 'cancelled',   label: 'Cancelled' },
 ];
@@ -131,7 +142,8 @@ function statusBadge(status: string): string {
     case 'cancelled':  return 'bg-danger-bg text-danger-fg';
     case 'pending':    return 'bg-warning-bg text-warning-fg';
     case 'ready':      return 'bg-info-bg text-info-fg';
-    case 'preparing':  return 'bg-violet-50 text-violet-700';
+    case 'processing': return 'bg-violet-50 text-violet-700';
+    case 'shipped':    return 'bg-info-bg text-info-fg';
     default:           return 'bg-surface-alt text-fg-muted';
   }
 }
@@ -139,8 +151,9 @@ function statusBadge(status: string): string {
 const STATUS_LABEL: Record<string, string> = {
   pending:   'Pending',
   confirmed: 'Confirmed',
-  preparing: 'Preparing',
+  processing: 'Preparing',
   ready:     'Ready',
+  shipped:   'Shipped',
   completed: 'Completed',
   cancelled: 'Cancelled',
   refunded:  'Refunded',
