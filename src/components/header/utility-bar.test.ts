@@ -15,14 +15,18 @@
 import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { UtilityBar } from './UtilityBar';
+import { DWELL_MS, UtilityBar } from './UtilityBar';
 
-const render = (lines: Array<{ text: string; code?: string }>) =>
+const render = (
+  lines: Array<{ text: string; code?: string }>,
+  rotate = 'normal',
+) =>
   renderToStaticMarkup(
     createElement(UtilityBar, {
       lines,
       controls: createElement('span', null, 'EUR'),
       container: 'c',
+      rotate,
     }),
   );
 
@@ -91,5 +95,42 @@ describe('a code is something to press, not something to select', () => {
   it("is absent from the shop's own note", () => {
     const html = render([{ text: 'Free returns for 30 days' }]);
     expect(html).not.toContain('Copy discount code');
+  });
+});
+
+/**
+ * The pace is the merchant's, and the names mean what the back office says.
+ *
+ * Asserted on the table rather than by running the timer: the rotation is an
+ * effect, these tests render to static markup, and a test that waited nine
+ * real seconds to watch a crossfade would be a worse test than this one.
+ */
+describe('how fast it turns over', () => {
+  it('is the four names the back office offers, and no others', () => {
+    // `off` is absent on purpose — no entry is what makes the strip still.
+    expect(Object.keys(DWELL_MS).sort()).toEqual(['fast', 'normal', 'slow']);
+    expect(DWELL_MS['off']).toBeUndefined();
+  });
+
+  it('holds each line for the seconds the merchant was promised', () => {
+    // These are the words in the picker: "Every 9 seconds", and so on. A
+    // shop told nine and given five is the setting lying to the merchant.
+    expect(DWELL_MS['slow']).toBe(9000);
+    expect(DWELL_MS['normal']).toBe(5000);
+    expect(DWELL_MS['fast']).toBe(3000);
+  });
+
+  it('still says its one line when the merchant stopped the rotation', () => {
+    // Off is a still strip, not an absent one.
+    const html = render([{ text: 'Free delivery' }, { text: '12% off' }], 'off');
+    expect(html).toContain('Free delivery');
+    expect(html).toContain('Next announcement');
+  });
+
+  it('draws the same first line whatever the pace', () => {
+    const lines = [{ text: 'Free delivery' }, { text: '12% off' }];
+    for (const pace of ['slow', 'normal', 'fast', 'off']) {
+      expect((render(lines, pace).match(/_shown/g) ?? [])).toHaveLength(1);
+    }
   });
 });

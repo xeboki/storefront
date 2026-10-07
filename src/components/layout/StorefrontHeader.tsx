@@ -628,6 +628,7 @@ export function StorefrontHeader({
             header?.utilityMessage ?? '',
             (n: number) => formatCurrency(n, storeConfig.currencyCode),
           )}
+          rotate={header?.utilityRotate ?? 'normal'}
           controls={
             <>
               {utilities.currency}

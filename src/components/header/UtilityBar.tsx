@@ -36,16 +36,33 @@ import { CopyCode } from './CopyCode';
 import type { OfferLine } from '@/lib/offers';
 import styles from './utility-bar.module.css';
 
-/** Long enough to read a line and copy a code off it. */
-const DWELL_MS = 5000;
+/**
+ * How long a line holds, by the name the merchant picked in the back office.
+ *
+ * The pace belongs to the shop, not to this file: two short lines want five
+ * seconds and five long offer names do not fit in five seconds, and only the
+ * merchant can see which of those their strip is. The names and the seconds
+ * are the server's — the same four a slideshow's interval uses, so "slow"
+ * means nine seconds wherever a merchant meets it.
+ *
+ * `off` is a still strip with its arrows, for a shop whose first line is the
+ * one that matters.
+ */
+export const DWELL_MS: Record<string, number> = {
+  'slow':   9000,
+  'normal': 5000,
+  'fast':   3000,
+};
 
 interface Props {
   lines: OfferLine[];
   controls: React.ReactNode;
   container: string;
+  /** slow | normal | fast | off, from the merchant's header settings. */
+  rotate: string;
 }
 
-export function UtilityBar({ lines, controls, container }: Props) {
+export function UtilityBar({ lines, controls, container, rotate }: Props) {
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
   const many = lines.length > 1;
@@ -79,10 +96,12 @@ export function UtilityBar({ lines, controls, container }: Props) {
     // automatic turn and leaves the arrows, so the other messages are still
     // reachable rather than hidden from the people who asked for less
     // movement.
-    if (!many || held || reduced.current) return;
-    const t = setInterval(() => step(1), DWELL_MS);
+    // 'off' is the merchant asking for the same thing on purpose.
+    const dwell = DWELL_MS[rotate];
+    if (!many || held || reduced.current || !dwell) return;
+    const t = setInterval(() => step(1), dwell);
     return () => clearInterval(t);
-  }, [many, held, step]);
+  }, [many, held, step, rotate]);
 
   if (lines.length === 0) return null;
 
