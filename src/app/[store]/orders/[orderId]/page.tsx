@@ -7,11 +7,11 @@
  * Authenticated access: verified server-side; forbidden if order belongs to
  * a different customer.
  */
-import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { getSession } from '@/lib/auth/session';
 import { loadStore } from '@/lib/sdk/store';
 import { getXebokiClient } from '@/lib/sdk/client';
+import { shopUrl } from '@/lib/request-origin';
 import { OrderDetail } from '@/components/account/OrderDetail';
 
 interface Props {
@@ -33,11 +33,9 @@ export default async function OrderPage({ params }: Props) {
   }
 
   // The shop's own address, as the request arrived at it. A share link has
-  // to be absolute — a relative one pasted into WhatsApp goes nowhere.
-  const host = headers().get('x-forwarded-host') ?? headers().get('host') ?? '';
-  const proto = headers().get('x-forwarded-proto')
-    ?? (host.startsWith('localhost') ? 'http' : 'https');
-  const shopUrl = host ? `${proto}://${host}/${params.store}` : '';
+  // to be absolute — a relative one pasted into WhatsApp goes nowhere. One
+  // helper answers this for every page that shares something.
+  const storeUrl = shopUrl(params.store);
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -52,7 +50,7 @@ export default async function OrderPage({ params }: Props) {
            It was built from `window.location.origin`, which is undefined
            during SSR — so the share block rendered as nothing in the served
            HTML and would only have appeared after hydration, if at all. */
-        shopUrl={shopUrl}
+        shopUrl={storeUrl}
         shopName={resolved?.storeConfig?.displayName || resolved?.storeConfig?.businessName || ''}
       />
     </div>

@@ -69,7 +69,6 @@ export async function loadSectionContext(
     categories,
     featured,
     shownCategories,
-    apiKey,
   };
 
   return { ctx, homeSections: storefrontConfig?.homeSections ?? [] };

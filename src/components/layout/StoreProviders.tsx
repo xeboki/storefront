@@ -10,7 +10,9 @@ import { StorefrontConfigProvider } from '@/lib/storefront-config';
 
 interface Props {
   slug: string;
-  apiKey: string;
+  // No `apiKey`. It was declared here, never destructured, and passed in by
+  // the layout — which serialised the shop's live key into the RSC payload
+  // of every single page. Anyone who opened view-source had it.
   storeConfig: StoreConfig;
   storefrontConfig: StorefrontConfig | null;
   children: React.ReactNode;

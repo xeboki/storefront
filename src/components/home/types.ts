@@ -21,8 +21,13 @@ export interface SectionContext {
   featured: OrderingProduct[];
   /** The merchant's chosen departments, else all of them. */
   shownCategories: OrderingCategory[];
-  /** The API key, for a band that genuinely has to fetch its own. */
-  apiKey: string;
+  // No API key here, deliberately.
+  //
+  // There was one — "for a band that genuinely has to fetch its own" — and
+  // no band ever did. Five of these bands are client components, so the
+  // whole context is serialised into the page, and the shop's live key was
+  // sitting in the HTML of every home page as a result. A band that truly
+  // needs more data gets it from the page, which runs on the server.
 }
 
 export interface SectionProps {

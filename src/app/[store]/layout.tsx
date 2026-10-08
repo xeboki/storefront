@@ -183,7 +183,7 @@ export default async function StoreLayout({ params, children }: Props) {
       <AnalyticsScripts
         analytics={storefrontConfig?.analytics}
       />
-      <StoreProviders slug={slug} apiKey={resolved.apiKey} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
+      <StoreProviders slug={slug} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
           <LocaleProvider locale={locale}>
           {resolved.isTestMode && (
             <div style={{ background: '#F59E0B', color: '#000', textAlign: 'center', padding: '8px 16px', fontSize: '13px', fontWeight: 600, letterSpacing: '0.05em' }}>
