@@ -2,7 +2,9 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, Calendar, Clock, User, Tag } from 'lucide-react';
-import { loadStore, loadBlogPost, loadBlogPosts, loadBlogCategories, loadCatalog } from '@/lib/sdk/store';
+import { loadStore, loadBlogPost, loadBlogPosts, loadBlogCategories, loadBlogComments, loadCatalog } from '@/lib/sdk/store';
+import { Comments } from '@/components/blog/Comments';
+import { getSession } from '@/lib/auth/session';
 import { ProductCard } from '@/components/product/ProductCard';
 import { generateBlogPosting, generateBreadcrumbs } from '@/lib/seo/structured-data';
 import { BlogBody } from '@/components/blog/BlogBody';
@@ -66,7 +68,7 @@ export default async function BlogPostPage({ params }: Props) {
   // Both are best-effort: a post renders whether or not its suggestions and
   // its product cards can be loaded. A blog that 500s because a linked
   // product was deleted would be a worse page than one without the strip.
-  const [siblings, products, categories] = await Promise.all([
+  const [siblings, products, categories, commentThread, session] = await Promise.all([
     loadBlogPosts(resolved.apiKey, 'published', { perPage: 24 })
       .then((r) => r.data)
       .catch(() => []),
@@ -81,6 +83,11 @@ export default async function BlogPostPage({ params }: Props) {
           .catch(() => [])
       : Promise.resolve([]),
     loadBlogCategories(resolved.apiKey).catch(() => []),
+    // Not cached, unlike everything beside it: a thread changes when a
+    // stranger types. Cached for ten minutes, somebody posts a comment,
+    // reloads, does not see it, and posts it again.
+    loadBlogComments(resolved.apiKey, params.slug),
+    getSession(),
   ]);
 
   // What to read next, scored. A shared category counts for more than a
@@ -349,6 +356,18 @@ export default async function BlogPostPage({ params }: Props) {
             </ul>
           </section>
         )}
+
+        {/* What readers said. Renders nothing at all when the shop has
+            comments switched off — a notice would advertise a feature it
+            does not have. */}
+        <Comments
+          thread={commentThread}
+          storeSlug={params.store}
+          slug={post.slug}
+          viewer={session && session.storeSlug === params.store
+            ? { name: session.name, email: session.email }
+            : null}
+        />
 
         {/* The posts either side, and the way back to the index.
             A single "All Posts" link made a reader work through a blog by

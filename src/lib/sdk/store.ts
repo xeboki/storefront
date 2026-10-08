@@ -283,6 +283,31 @@ export const loadBlogCategories = unstable_cache(
   { revalidate: 600, tags: ['blog'] },
 );
 
+/**
+ * The comments under a post, and whether the form should be drawn.
+ *
+ * **Not cached.** Everything else here is, because a catalogue changes when
+ * a merchant changes it. A comment thread changes when a stranger types,
+ * and a 600-second cache means somebody posts a comment, the page reloads,
+ * and their own comment is not there — which reads as the comment being
+ * lost, so they write it again.
+ */
+export async function loadBlogComments(apiKey: string, slug: string) {
+  const { getXebokiClient } = await import('./client');
+  const client = getXebokiClient(apiKey);
+  try {
+    return await client.ordering.listBlogComments(slug);
+  } catch {
+    // A post renders whether or not its comments can be read. A blog that
+    // 500s because the comment collection is unreachable is a worse page
+    // than one without the thread.
+    return {
+      comments: [], total: 0, isOpen: false,
+      closedReason: null, allowGuests: true, moderated: true,
+    };
+  }
+}
+
 export const loadBlogPost = unstable_cache(
   async (apiKey: string, slug: string) => {
     const { getXebokiClient } = await import('./client');
