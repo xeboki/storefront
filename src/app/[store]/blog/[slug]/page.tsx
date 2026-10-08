@@ -75,9 +75,14 @@ export default async function BlogPostPage({ params }: Props) {
         .sort((a, b) => b.near - a.near)
         .slice(0, 3))
       .catch(() => []),
+    // Asked for BY ID. Filtering a page of fifty to find three silently
+    // showed nothing on a shop with 160 products.
     post.relatedProductIds.length
-      ? loadCatalog(resolved.apiKey, { perPage: 50 })
-          .then((r) => r.data.filter((x) => post.relatedProductIds.includes(x.id)))
+      ? loadCatalog(resolved.apiKey, {
+          ids: post.relatedProductIds,
+          perPage: post.relatedProductIds.length,
+        })
+          .then((r) => r.data)
           .catch(() => [])
       : Promise.resolve([]),
   ]);

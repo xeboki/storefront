@@ -1,3 +1,4 @@
+import typography from '@tailwindcss/typography';
 import type { Config } from 'tailwindcss';
 
 /**
@@ -93,7 +94,13 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Every `prose-*` class in the blog body was inert: the plugin that
+    // defines them was never installed, so a post rendered with the global
+    // reset and an <h2> came out SMALLER than the paragraph under it. On
+    // every post, on every shop.
+    typography,
+  ],
 };
 
 export default config;
