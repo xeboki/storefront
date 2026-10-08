@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { storeName } from '@/lib/store-name';
 import { notFound, redirect } from 'next/navigation';
-import { loadStore, loadCategories, loadOffers } from '@/lib/sdk/store';
+import { loadStore, loadCategories, loadOffers, loadCustomPages } from '@/lib/sdk/store';
 
 import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
@@ -159,6 +159,10 @@ export default async function StoreLayout({ params, children }: Props) {
   // header itself — the header renders on the server and a client fetch
   // would announce the offer a beat after the page it sits on.
   const offers = await loadOffers(resolved.apiKey).catch(() => []);
+  // The merchant's own pages, for the footer and the menu. Published only,
+  // and in the order they dragged them into.
+  const pages = (await loadCustomPages(resolved.apiKey, true)
+    .catch(() => ({ data: [] }))).data ?? [];
 
   // Resolved once per request and handed down, so the header, the catalog, the
   // product page and checkout cannot disagree about which store this is.
@@ -223,6 +227,9 @@ export default async function StoreLayout({ params, children }: Props) {
             />
           )}
           <StorefrontFooter
+            footerPages={pages
+              .filter((page) => page.showInFooter)
+              .map((page) => ({ slug: page.slug, title: page.title }))}
             storeConfig={storeConfig}
             storefrontConfig={storefrontConfig}
             storeSlug={slug}

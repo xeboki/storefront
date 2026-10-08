@@ -13,10 +13,20 @@ interface Props {
   storeSlug: string;
   /** What checkout will actually accept. Named, never guessed. */
   paymentMethods?: StorePaymentMethod[];
+  /**
+   * The merchant's own pages, the ones they ticked "show in the footer".
+   *
+   * That tick has existed in the API and the SDK since the module shipped
+   * and **nothing has ever rendered it** — nor did any control set it. It
+   * is the one-tick way to get a Returns Policy into the footer without
+   * opening the menu builder, which stays the way to *arrange* links.
+   */
+  footerPages?: Array<{ slug: string; title: string }>;
 }
 
 export function StorefrontFooter({
   storeConfig, storefrontConfig, storeSlug, paymentMethods = [],
+  footerPages = [],
 }: Props) {
   const year = new Date().getFullYear();
 
@@ -186,6 +196,28 @@ export function StorefrontFooter({
                 </ul>
               </div>
             </>
+          )}
+
+          {/* The merchant's own pages. Its own column rather than appended
+              to one of the built-ins, because it appears whether or not
+              those are showing — a shop with hand-built footer columns can
+              still tick a page into the footer and expect to see it. */}
+          {footerPages.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-fg mb-3">About</h4>
+              <ul className="space-y-2 text-sm text-fg-muted">
+                {footerPages.map((page) => (
+                  <li key={page.slug}>
+                    <Link
+                      href={`/${storeSlug}/p/${page.slug}`}
+                      className="hover:text-primary transition-colors"
+                    >
+                      {page.title}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
 

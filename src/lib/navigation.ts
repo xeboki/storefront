@@ -59,7 +59,11 @@ export function targetHref(
     case 'catalog':  return { href: ctx.catalogHref(null), external: false };
     case 'category': return { href: ctx.catalogHref(value), external: false };
     case 'product':  return { href: `${shop}/product/${value}`, external: false };
-    case 'page':     return { href: `${shop}/page/${value}`, external: false };
+    // `/p/`, not `/page/`. The route has always been `app/[store]/p/`;
+    // this said `/page/` and every custom page a merchant put in the menu
+    // or the footer led to a 404. Proven on 34: the footer's own About
+    // link answered 404 while `/p/about` answered 200.
+    case 'page':     return { href: `${shop}/p/${value}`, external: false };
     case 'blog':     return { href: `${shop}/blog`, external: false };
     case 'book':     return { href: `${shop}/book`, external: false };
     case 'repairs':  return { href: `${shop}/repairs`, external: false };
