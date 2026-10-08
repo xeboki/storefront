@@ -24,6 +24,8 @@ interface Props {
   /** The Checkout tab's switch, which read nothing until now. */
   showSocialShare?: boolean;
   shopName?: string;
+  /** Absolute, resolved on the server — see the order page. */
+  shopUrl?: string;
 }
 
 // Statuses after which we stop polling — the order won't change further.
@@ -48,7 +50,7 @@ const STATUS_STEPS = [
 
 export function OrderDetail({
   order: initialOrder, storeSlug, isGuest, thankYouMessage,
-  showSocialShare = false, shopName = '',
+  showSocialShare = false, shopName = '', shopUrl = '',
 }: Props) {
   const money = useMoney();
   const [order, setOrder] = useState<OrderingOrder>(initialOrder);
@@ -131,14 +133,7 @@ export function OrderDetail({
 
       {/* The shop, never the order — see ShareTheShop. */}
       {showSocialShare && (
-        <ShareTheShop
-          shopName={shopName}
-          shopUrl={
-            typeof window === 'undefined'
-              ? ''
-              : `${window.location.origin}/${storeSlug}`
-          }
-        />
+        <ShareTheShop shopName={shopName} shopUrl={shopUrl} />
       )}
 
       {/* Back link */}
