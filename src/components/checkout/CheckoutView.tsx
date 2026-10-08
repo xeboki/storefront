@@ -405,9 +405,22 @@ export function CheckoutView({
   // ── Helpers ─────────────────────────────────────────────────────────────────
 
   const isGuest = !customer;
-  const guestValid = !isGuest || (guestName.trim().length > 0 && guestEmail.trim().length > 0);
-
   const asks = storefrontConfig?.checkout;
+  /**
+   * The shop requires an account and nobody is signed in.
+   *
+   * `accountMode` was a setting a merchant could turn on and nothing read —
+   * not here, and not the order route, which took the guest order anyway.
+   * The server refuses it now; this is what keeps a shopper from filling in
+   * a whole checkout before finding out.
+   */
+  const mustSignIn = isGuest && asks?.accountMode === 'required';
+  const guestValid = !isGuest
+    ? true
+    : !mustSignIn
+      && guestName.trim().length > 0
+      && guestEmail.trim().length > 0;
+
   const deliveryDays = deliveryEstimateText(storefrontConfig?.deliveryEstimate);
   /** The extra details this shop requires, and whether each has been given. */
   const extraFields = [
@@ -715,6 +728,21 @@ export function CheckoutView({
               <span className="text-xs text-success-fg font-medium bg-success-bg border border-success-border rounded px-2 py-0.5">
                 Signed in
               </span>
+            </div>
+          ) : mustSignIn ? (
+            /* The shop asks shoppers to sign in. The server refuses a guest
+               order outright; this is what stops somebody filling in a whole
+               checkout before being told. */
+            <div className="space-y-3">
+              <p className="text-sm text-fg-muted">
+                This shop asks shoppers to sign in before ordering.
+              </p>
+              <a
+                href={`/${storeSlug}/login?next=/${storeSlug}/checkout`}
+                className="inline-block rounded-brand bg-primary px-4 py-2 text-sm font-semibold text-on-primary"
+              >
+                Sign in or create an account
+              </a>
             </div>
           ) : (
             <div className="space-y-3">

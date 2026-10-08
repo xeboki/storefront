@@ -39,6 +39,8 @@ export default async function OrderPage({ params }: Props) {
         storeSlug={params.store}
         isGuest={!session}
         thankYouMessage={resolved?.storefrontConfig?.checkout?.thankYouMessage}
+        showSocialShare={resolved?.storefrontConfig?.checkout?.showSocialShare ?? false}
+        shopName={resolved?.storeConfig?.displayName || resolved?.storeConfig?.businessName || ''}
       />
     </div>
   );

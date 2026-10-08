@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { ShareTheShop } from './ShareTheShop';
 import Link from 'next/link';
 import { ArrowLeft, Package, RotateCw } from 'lucide-react';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -20,6 +21,9 @@ interface Props {
    * you when it's ready" had no way to.
    */
   thankYouMessage?: string;
+  /** The Checkout tab's switch, which read nothing until now. */
+  showSocialShare?: boolean;
+  shopName?: string;
 }
 
 // Statuses after which we stop polling — the order won't change further.
@@ -44,6 +48,7 @@ const STATUS_STEPS = [
 
 export function OrderDetail({
   order: initialOrder, storeSlug, isGuest, thankYouMessage,
+  showSocialShare = false, shopName = '',
 }: Props) {
   const money = useMoney();
   const [order, setOrder] = useState<OrderingOrder>(initialOrder);
@@ -122,6 +127,18 @@ export function OrderDetail({
         <p className="rounded-brand border border-success-border bg-success-bg px-4 py-3 text-sm text-success-fg">
           {thankYouMessage}
         </p>
+      )}
+
+      {/* The shop, never the order — see ShareTheShop. */}
+      {showSocialShare && (
+        <ShareTheShop
+          shopName={shopName}
+          shopUrl={
+            typeof window === 'undefined'
+              ? ''
+              : `${window.location.origin}/${storeSlug}`
+          }
+        />
       )}
 
       {/* Back link */}
