@@ -99,7 +99,16 @@ export default async function BlogPostPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* The same container the product page uses.
+          The post sat in `max-w-3xl` while a product page ran to
+          `max-w-7xl`, so an article looked pinched beside the rest of the
+          shop with a third of the screen empty either side.
+
+          Wide container, narrow READING column: a 1280px measure is about
+          160 characters a line, which is a worse read than a narrow one. So
+          the picture, the product strip and what-to-read-next take the full
+          width, and the prose keeps a column you can actually follow. */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Back link */}
         <Link
           href={`/${params.store}/blog`}
@@ -108,9 +117,12 @@ export default async function BlogPostPage({ params }: Props) {
           <ArrowLeft size={16} /> Back to Blog
         </Link>
 
-        {/* Featured image */}
+        {/* Featured image. Taller on a phone, wider on a desktop: a 21/9
+            crop is a band on a 390px screen and shows almost nothing of the
+            picture. The letterbox only earns its keep when there is width
+            to fill. */}
         {post.featuredImageUrl && (
-          <div className="relative aspect-video rounded-brand overflow-hidden mb-8 bg-surface-alt">
+          <div className="relative aspect-[4/3] sm:aspect-[16/9] lg:aspect-[21/9] rounded-brand overflow-hidden mb-10 bg-surface-alt">
             <Image
               src={post.featuredImageUrl}
               // The merchant's own description of the picture, falling back
@@ -121,10 +133,16 @@ export default async function BlogPostPage({ params }: Props) {
               fill
               className="object-cover"
               priority
-              sizes="(max-width: 768px) 100vw, 768px"
+              sizes="(max-width: 1280px) 100vw, 1280px"
             />
           </div>
         )}
+
+        {/* The reading column.
+            Everything a person reads line by line lives in here, at a
+            measure they can follow — roughly 70 characters. The picture
+            above and the strips below use the whole container. */}
+        <div className="mx-auto w-full max-w-[72ch]">
 
         {/* Tags */}
         {post.tags.length > 0 && (
@@ -143,7 +161,9 @@ export default async function BlogPostPage({ params }: Props) {
         )}
 
         {/* Title */}
-        <h1 className="text-4xl font-bold text-fg leading-tight mb-4">{post.title}</h1>
+        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-fg leading-tight mb-4 text-balance">
+          {post.title}
+        </h1>
 
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-4 text-sm text-fg-subtle mb-8 pb-8 border-b border-line">
@@ -170,6 +190,8 @@ export default async function BlogPostPage({ params }: Props) {
         {/* Body (rendered markdown) */}
         <BlogBody body={post.body} />
 
+        </div>{/* end reading column */}
+
         {/* What this post is about, for sale.
             The thing that makes a shop's blog earn its keep: write about a
             fragrance, show the bottle with a way to buy it. */}
@@ -178,7 +200,11 @@ export default async function BlogPostPage({ params }: Props) {
             <h2 className="text-lg font-semibold text-fg mb-4">
               {products.length === 1 ? 'Featured in this post' : 'Featured in this post'}
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
+            {/* Four across on a wide screen now that the page is not
+                boxed into 768px. Two on a phone, never one — a single
+                full-width product card under an article reads as an advert
+                rather than a suggestion. */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} storeSlug={params.store} />
               ))}
@@ -191,19 +217,19 @@ export default async function BlogPostPage({ params }: Props) {
         {nearby.length > 0 && (
           <section className="mt-12 pt-8 border-t border-line">
             <h2 className="text-lg font-semibold text-fg mb-4">Read next</h2>
-            <ul className="space-y-3">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {nearby.map((other) => (
                 <li key={other.id}>
                   <Link
                     href={`/${params.store}/blog/${other.slug}`}
-                    className="group flex items-baseline justify-between gap-4"
+                    className="group flex h-full flex-col justify-between gap-2 rounded-brand border border-line p-4 transition-colors hover:border-primary"
                   >
                     <span className="font-medium text-fg group-hover:text-primary transition-colors">
                       {other.title}
                     </span>
                     {other.readingMinutes > 0 && (
-                      <span className="shrink-0 text-xs text-fg-subtle">
-                        {other.readingMinutes} min
+                      <span className="text-xs text-fg-subtle">
+                        {other.readingMinutes} min read
                       </span>
                     )}
                   </Link>

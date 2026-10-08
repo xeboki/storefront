@@ -60,12 +60,15 @@ export default async function BlogListPage({ params, searchParams }: Props) {
     return `/${params.store}/blog${query ? `?${query}` : ''}`;
   };
 
+  // The same container as a post and a product page. The shop had three
+  // different widths — 5xl here, 3xl on a post, 7xl on a product — so
+  // moving between them shifted the whole page sideways.
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-fg">Blog</h1>
-        <p className="text-fg-muted mt-2">
+        <p className="text-fg-muted mt-2 max-w-[60ch]">
           News, updates, and stories from {storeName(resolved.storeConfig)}
         </p>
       </div>
@@ -139,7 +142,7 @@ export default async function BlogListPage({ params, searchParams }: Props) {
             : 'No posts yet.'}
         </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {posts.map((post) => (
             <article key={post.id} className="group flex flex-col rounded-brand border border-line overflow-hidden hover:shadow-md transition-shadow">
               {/* Featured image */}
@@ -151,7 +154,10 @@ export default async function BlogListPage({ params, searchParams }: Props) {
                       alt={post.featuredImageAlt || post.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      // Four columns at xl, three at lg, two at sm. A
+                      // `33vw` told the browser to fetch a third-width
+                      // image for a card that is a quarter of the row.
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                     />
                   ) : (
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/30 flex items-center justify-center">
