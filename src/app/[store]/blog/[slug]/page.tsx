@@ -15,6 +15,7 @@ import type { Metadata } from 'next';
 
 interface Props {
   params: { store: string; slug: string };
+  searchParams: { sort?: string };
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -52,7 +53,12 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
-export default async function BlogPostPage({ params }: Props) {
+export default async function BlogPostPage({ params, searchParams }: Props) {
+  // In the URL rather than in state, so a reader can send somebody the
+  // thread in the order they read it, and so the first paint is already
+  // sorted. Anything but the two known values falls back rather than
+  // reaching the API.
+  const sort = searchParams?.sort === 'newest' ? 'newest' : 'oldest';
   const resolved = await loadStore(params.store);
   if (!resolved) notFound();
 
@@ -86,7 +92,7 @@ export default async function BlogPostPage({ params }: Props) {
     // Not cached, unlike everything beside it: a thread changes when a
     // stranger types. Cached for ten minutes, somebody posts a comment,
     // reloads, does not see it, and posts it again.
-    loadBlogComments(resolved.apiKey, params.slug),
+    loadBlogComments(resolved.apiKey, params.slug, sort),
     getSession(),
   ]);
 

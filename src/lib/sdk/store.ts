@@ -6,7 +6,7 @@
  */
 import { unstable_cache } from 'next/cache';
 import { resilientRead } from './resilient';
-import type { StoreConfig, StorefrontConfig } from '@xeboki/sdk';
+import type { BlogCommentThread, StoreConfig, StorefrontConfig } from '@xeboki/sdk';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -292,18 +292,23 @@ export const loadBlogCategories = unstable_cache(
  * and their own comment is not there — which reads as the comment being
  * lost, so they write it again.
  */
-export async function loadBlogComments(apiKey: string, slug: string) {
+export async function loadBlogComments(
+  apiKey: string,
+  slug: string,
+  sort?: 'oldest' | 'newest',
+): Promise<BlogCommentThread> {
   const { getXebokiClient } = await import('./client');
   const client = getXebokiClient(apiKey);
   try {
-    return await client.ordering.listBlogComments(slug);
+    return await client.ordering.listBlogComments(slug, { sort });
   } catch {
     // A post renders whether or not its comments can be read. A blog that
     // 500s because the comment collection is unreachable is a worse page
-    // than one without the thread.
+    // than one without the thread. Typed, so a field added to the thread
+    // cannot be forgotten here and read as `undefined` on the page.
     return {
-      comments: [], total: 0, isOpen: false,
-      closedReason: null, allowGuests: true, moderated: true,
+      comments: [], total: 0, isOpen: false, closedReason: null,
+      allowGuests: true, moderated: true, sort: 'oldest', canReport: false,
     };
   }
 }

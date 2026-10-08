@@ -21,7 +21,7 @@
  */
 import { useState } from 'react';
 import type { BlogComment, BlogCommentThread } from '@xeboki/sdk';
-import { MessageCircle, CornerDownRight, Clock } from 'lucide-react';
+import { MessageCircle, CornerDownRight, Clock, Pin, Flag, Check } from 'lucide-react';
 
 interface Props {
   thread: BlogCommentThread;
@@ -43,10 +43,12 @@ function initial(name: string): string {
   return /[A-Z0-9]/.test(letter) ? letter : '·';
 }
 
-function Comment({ comment, onReply, replyingTo }: {
+function Comment({ comment, onReply, replyingTo, onReport, reported }: {
   comment: BlogComment & { pending?: boolean };
   onReply?: (id: string, name: string) => void;
   replyingTo: string | null;
+  onReport?: (id: string) => void;
+  reported: boolean;
 }) {
   return (
     <li className={comment.depth > 0 ? 'ms-6 sm:ms-12' : ''}>
@@ -54,6 +56,8 @@ function Comment({ comment, onReply, replyingTo }: {
         className={`flex gap-3 rounded-brand border p-4 ${
           comment.pending
             ? 'border-dashed border-primary/50 bg-primary/5'
+            : comment.isPinned
+            ? 'border-primary/40 bg-primary/[0.04]'
             : 'border-line'
         }`}
       >
@@ -77,6 +81,14 @@ function Comment({ comment, onReply, replyingTo }: {
                 Shop
               </span>
             )}
+            {/* The shop saying "read this one". It leads the thread
+                whatever order the reader chose, so it needs to say why it
+                is at the top. */}
+            {comment.isPinned && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-primary">
+                <Pin size={10} aria-hidden="true" /> Pinned
+              </span>
+            )}
             {comment.depth > 0 && (
               <CornerDownRight size={12} className="text-fg-subtle" aria-hidden="true" />
             )}
@@ -96,14 +108,33 @@ function Comment({ comment, onReply, replyingTo }: {
               Waiting for the shop to read it — only you can see this.
             </p>
           )}
-          {onReply && !comment.pending && comment.depth === 0 && (
-            <button
-              type="button"
-              onClick={() => onReply(comment.id, comment.authorName)}
-              className="mt-2 text-xs font-medium text-primary hover:opacity-80"
-            >
-              {replyingTo === comment.id ? 'Cancel reply' : 'Reply'}
-            </button>
+          {!comment.pending && (
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+              {onReply && comment.depth === 0 && (
+                <button
+                  type="button"
+                  onClick={() => onReply(comment.id, comment.authorName)}
+                  className="text-xs font-medium text-primary hover:opacity-80"
+                >
+                  {replyingTo === comment.id ? 'Cancel reply' : 'Reply'}
+                </button>
+              )}
+              {/* A reader telling the shop about something it has not read.
+                  It says "Reported" afterwards and stays said: a control
+                  that resets invites a second report from the same person,
+                  which is the one thing the count must not include. */}
+              {onReport && !comment.isShopReply && (
+                <button
+                  type="button"
+                  onClick={() => onReport(comment.id)}
+                  disabled={reported}
+                  className="inline-flex items-center gap-1 text-xs text-fg-subtle transition-colors hover:text-fg disabled:cursor-default disabled:opacity-70"
+                >
+                  {reported ? <Check size={11} /> : <Flag size={11} />}
+                  {reported ? 'Reported' : 'Report'}
+                </button>
+              )}
+            </div>
           )}
         </div>
       </article>
@@ -119,6 +150,7 @@ export function Comments({ thread, storeSlug, slug, viewer }: Props) {
   const [email, setEmail] = useState(viewer?.email ?? '');
   const [website, setWebsite] = useState('');
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
+  const [reported, setReported] = useState<Set<string>>(new Set());
   const [sending, setSending] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [said, setSaid] = useState<string | null>(null);
@@ -131,6 +163,23 @@ export function Comments({ thread, storeSlug, slug, viewer }: Props) {
 
   const needsIdentity = !viewer;
   const canPost = thread.isOpen && (viewer || thread.allowGuests);
+  const tops = comments.filter((c) => c.depth === 0).length;
+
+  /** Tell the shop about a comment it has not read.
+   *
+   * Marked reported straight away and never un-marked. The endpoint
+   * answers the same thing whatever happened — on purpose, so nobody can
+   * probe which comments are near being pulled — so there is nothing to
+   * wait for and nothing to report back. */
+  async function report(id: string) {
+    if (reported.has(id)) return;
+    setReported((was) => new Set(was).add(id));
+    fetch(`/api/blog/${encodeURIComponent(slug)}/comments/${encodeURIComponent(id)}/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ storeSlug }),
+    }).catch(() => undefined);
+  }
 
   async function send(event: React.FormEvent) {
     event.preventDefault();
@@ -179,13 +228,36 @@ export function Comments({ thread, storeSlug, slug, viewer }: Props) {
     'placeholder:text-fg-subtle focus:border-primary focus:outline-none';
 
   return (
-    <section className="mt-12 border-t border-line pt-8 xl:col-span-2">
-      <h2 className="mb-5 inline-flex items-center gap-2 text-lg font-semibold text-fg">
-        <MessageCircle size={18} aria-hidden="true" />
-        {comments.length === 0
-          ? 'Comments'
-          : `${comments.length} comment${comments.length === 1 ? '' : 's'}`}
-      </h2>
+    <section id="comments" className="mt-12 scroll-mt-28 border-t border-line pt-8 xl:col-span-2">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-fg">
+          <MessageCircle size={18} aria-hidden="true" />
+          {comments.length === 0
+            ? 'Comments'
+            : `${comments.length} comment${comments.length === 1 ? '' : 's'}`}
+        </h2>
+        {/* Only worth offering once there is something to reorder. Two
+            comments do not need a sort control, and one is an invitation
+            to press something that does nothing. */}
+        {tops > 2 && (
+          <div className="flex items-center gap-1 text-xs">
+            {(['oldest', 'newest'] as const).map((order) => (
+              <a
+                key={order}
+                href={`?sort=${order}#comments`}
+                aria-current={thread.sort === order ? 'true' : undefined}
+                className={`rounded-brand px-2.5 py-1 transition-colors ${
+                  thread.sort === order
+                    ? 'bg-surface-alt font-medium text-fg'
+                    : 'text-fg-subtle hover:text-fg'
+                }`}
+              >
+                {order === 'oldest' ? 'Oldest first' : 'Newest first'}
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
 
       {comments.length > 0 && (
         <ul className="mb-8 space-y-3">
@@ -194,6 +266,8 @@ export function Comments({ thread, storeSlug, slug, viewer }: Props) {
               key={comment.id}
               comment={comment}
               replyingTo={replyTo?.id ?? null}
+              reported={reported.has(comment.id)}
+              onReport={thread.canReport ? report : undefined}
               onReply={canPost
                 ? (id, who) => setReplyTo(replyTo?.id === id ? null : { id, name: who })
                 : undefined}
