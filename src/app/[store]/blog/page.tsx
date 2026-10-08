@@ -3,12 +3,12 @@ import { storeName } from '@/lib/store-name';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Tag } from 'lucide-react';
-import { loadStore, loadBlogPosts } from '@/lib/sdk/store';
+import { loadStore, loadBlogPosts, loadBlogCategories } from '@/lib/sdk/store';
 import type { Metadata } from 'next';
 
 interface Props {
   params: { store: string };
-  searchParams: { tag?: string };
+  searchParams: { tag?: string; category?: string; page?: string };
 }
 
 export async function generateMetadata({ params }: { params: { store: string } }): Promise<Metadata> {
@@ -29,13 +29,36 @@ export default async function BlogListPage({ params, searchParams }: Props) {
   const resolved = await loadStore(params.store);
   if (!resolved) notFound();
 
-  const result = await loadBlogPosts(resolved.apiKey, 'published');
-  const posts = searchParams.tag
-    ? result.data.filter((p) => p.tags.includes(searchParams.tag!))
-    : result.data;
+  const perPage = 12;
+  const page = Math.max(1, Number(searchParams.page) || 1);
+  const categories = await loadBlogCategories(resolved.apiKey);
+  const category = categories.find((c) => c.slug === searchParams.category);
 
-  // Collect all tags from published posts
-  const allTags = Array.from(new Set(result.data.flatMap((p) => p.tags))).sort();
+  // Filtered and paged by the SERVER. Filtering a page of results in the
+  // browser meant a tag used only on old posts looked unused, and anything
+  // past the hundredth post was invisible.
+  const result = await loadBlogPosts(resolved.apiKey, 'published', {
+    tag: searchParams.tag,
+    categoryId: category?.id,
+    page,
+    perPage,
+  });
+  const posts = result.data;
+  const total = result.total ?? posts.length;
+  const lastPage = Math.max(1, Math.ceil(total / perPage));
+
+  // The tags of this page. A complete tag list needs its own endpoint; this
+  // is honest about being the tags you can see rather than pretending to be
+  // all of them.
+  const allTags = Array.from(new Set(posts.flatMap((p) => p.tags))).sort();
+
+  const withParams = (next: Record<string, string | undefined>) => {
+    const q = new URLSearchParams();
+    const merged = { tag: searchParams.tag, category: searchParams.category, ...next };
+    Object.entries(merged).forEach(([k, v]) => { if (v) q.set(k, v); });
+    const query = q.toString();
+    return `/${params.store}/blog${query ? `?${query}` : ''}`;
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -47,11 +70,43 @@ export default async function BlogListPage({ params, searchParams }: Props) {
         </p>
       </div>
 
+      {/* Categories — the merchant's own groupings, as distinct from tags. */}
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          <Link
+            href={withParams({ category: undefined, page: undefined })}
+            className={`text-sm px-3 py-1.5 rounded-brand font-medium border transition-colors ${
+              !searchParams.category
+                ? 'bg-primary-solid text-primary-foreground border-primary'
+                : 'bg-surface text-fg border-line hover:border-primary'
+            }`}
+          >
+            All posts
+          </Link>
+          {categories
+            .filter((c) => c.postCount > 0)
+            .map((c) => (
+              <Link
+                key={c.id}
+                href={withParams({ category: c.slug, page: undefined })}
+                className={`text-sm px-3 py-1.5 rounded-brand font-medium border transition-colors ${
+                  searchParams.category === c.slug
+                    ? 'bg-primary-solid text-primary-foreground border-primary'
+                    : 'bg-surface text-fg border-line hover:border-primary'
+                }`}
+              >
+                {c.name}
+                <span className="ms-1.5 text-xs opacity-70">{c.postCount}</span>
+              </Link>
+            ))}
+        </div>
+      )}
+
       {/* Tag filter */}
       {allTags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-8">
           <Link
-            href={`/${params.store}/blog`}
+            href={withParams({ tag: undefined, page: undefined })}
             className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-colors ${
               !searchParams.tag
                 ? 'bg-primary-solid text-primary-foreground border-primary'
@@ -63,7 +118,7 @@ export default async function BlogListPage({ params, searchParams }: Props) {
           {allTags.map((tag) => (
             <Link
               key={tag}
-              href={`/${params.store}/blog?tag=${encodeURIComponent(tag)}`}
+              href={withParams({ tag, page: undefined })}
               className={`text-xs px-3 py-1.5 rounded-full font-medium border transition-colors ${
                 searchParams.tag === tag
                   ? 'bg-primary-solid text-primary-foreground border-primary'
@@ -78,7 +133,11 @@ export default async function BlogListPage({ params, searchParams }: Props) {
 
       {/* Post grid */}
       {posts.length === 0 ? (
-        <p className="text-fg-subtle text-sm">No posts yet.</p>
+        <p className="text-fg-subtle text-sm">
+          {searchParams.tag || searchParams.category
+            ? 'Nothing here yet under that heading.'
+            : 'No posts yet.'}
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {posts.map((post) => (
@@ -89,7 +148,7 @@ export default async function BlogListPage({ params, searchParams }: Props) {
                   {post.featuredImageUrl ? (
                     <Image
                       src={post.featuredImageUrl}
-                      alt={post.title}
+                      alt={post.featuredImageAlt || post.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-300"
                       sizes="(max-width: 768px) 100vw, 33vw"
@@ -144,6 +203,37 @@ export default async function BlogListPage({ params, searchParams }: Props) {
             </article>
           ))}
         </div>
+      )}
+      {/* Paging. The index asked for 100 posts and showed them all, so a
+          shop past its hundredth lost everything after it. */}
+      {lastPage > 1 && (
+        <nav className="mt-10 flex items-center justify-center gap-3 text-sm">
+          {page > 1 ? (
+            <Link
+              href={withParams({ page: page === 2 ? undefined : String(page - 1) })}
+              className="rounded-brand border border-line px-3 py-1.5 font-medium hover:border-primary"
+            >
+              Newer
+            </Link>
+          ) : (
+            <span className="rounded-brand border border-line px-3 py-1.5 text-fg-subtle">
+              Newer
+            </span>
+          )}
+          <span className="text-fg-muted">Page {page} of {lastPage}</span>
+          {page < lastPage ? (
+            <Link
+              href={withParams({ page: String(page + 1) })}
+              className="rounded-brand border border-line px-3 py-1.5 font-medium hover:border-primary"
+            >
+              Older
+            </Link>
+          ) : (
+            <span className="rounded-brand border border-line px-3 py-1.5 text-fg-subtle">
+              Older
+            </span>
+          )}
+        </nav>
       )}
     </div>
   );

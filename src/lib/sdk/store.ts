@@ -230,13 +230,53 @@ export const loadProduct = unstable_cache(
 // Blog helpers (10 min cache — blog changes are infrequent)
 // ---------------------------------------------------------------------------
 
+/**
+ * One page of the blog.
+ *
+ * It used to ask for 100 and show them all. A shop past its hundredth post
+ * lost everything after it, silently — the same unbounded-fetch ceiling the
+ * catalogue and the order list both had, and the same fix: ask the server
+ * for the page you are showing.
+ *
+ * Tag and category are filtered by the SERVER too. Filtering in the page
+ * meant a tag's results were drawn from whichever 100 posts came back, so a
+ * tag used only on old posts looked unused.
+ */
 export const loadBlogPosts = unstable_cache(
-  async (apiKey: string, status?: 'draft' | 'published') => {
+  async (
+    apiKey: string,
+    status?: 'draft' | 'published',
+    opts: { tag?: string; categoryId?: string; page?: number; perPage?: number } = {},
+  ) => {
     const { getXebokiClient } = await import('./client');
     const client = getXebokiClient(apiKey);
-    return client.ordering.listBlogPosts({ status, limit: 100 });
+    const perPage = opts.perPage ?? 12;
+    const page = Math.max(1, opts.page ?? 1);
+    return client.ordering.listBlogPosts({
+      status,
+      tag: opts.tag,
+      categoryId: opts.categoryId,
+      limit: perPage,
+      offset: (page - 1) * perPage,
+    });
   },
   ['blog-posts'],
+  { revalidate: 600, tags: ['blog'] },
+);
+
+/** The shop's blog categories, with public post counts. */
+export const loadBlogCategories = unstable_cache(
+  async (apiKey: string) => {
+    const { getXebokiClient } = await import('./client');
+    const client = getXebokiClient(apiKey);
+    try {
+      return await client.ordering.listBlogCategories();
+    } catch {
+      // A blog that cannot read its categories still lists its posts.
+      return [];
+    }
+  },
+  ['blog-categories'],
   { revalidate: 600, tags: ['blog'] },
 );
 

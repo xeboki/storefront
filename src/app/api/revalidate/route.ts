@@ -15,7 +15,17 @@ import { revalidateTag } from 'next/cache';
  * `REVALIDATE_SECRET` set it answers 404 rather than 401: an endpoint that
  * exists and refuses tells an attacker it is there.
  */
-const TAGS = ['store-config', 'catalog', 'categories'] as const;
+/**
+ * Every cache tag the loaders use.
+ *
+ * It listed three of five. `blog` and `pages` were never purged, so a
+ * merchant who published a post or a page waited out the ten-minute TTL
+ * with no way to force it — and "Publish now" quietly did nothing for them.
+ *
+ * Held against `src/lib/sdk/store.ts` by a test, because a list written by
+ * hand beside the tags it is supposed to cover is the bug it should catch.
+ */
+const TAGS = ['store-config', 'catalog', 'categories', 'blog', 'pages'] as const;
 
 export async function POST(request: Request) {
   const secret = process.env.REVALIDATE_SECRET;
