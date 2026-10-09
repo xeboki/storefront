@@ -2,8 +2,7 @@ import type { MetadataRoute } from 'next';
 import { storeSlug } from '@/lib/store-slug';
 import { loadStore, loadCatalog, loadCategories, loadBlogPosts, loadCustomPages } from '@/lib/sdk/store';
 import { locationSlugs } from '@/lib/location';
-
-const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store';
+import { shopOrigin } from '@/lib/seo/canonical';
 
 export default async function sitemap({
   params,
@@ -19,9 +18,12 @@ export default async function sitemap({
   // Unpublished stores should not be indexed at all
   if (!resolved.storefrontConfig?.isPublished) return [];
 
-  const base = resolved.storefrontConfig?.customDomain
-    ? `https://${resolved.storefrontConfig.customDomain}`
-    : `https://${store}.${BASE_DOMAIN}`;
+  // The same resolver the canonical tags use. Built by hand here before, and
+  // differently: it prefixed `https://` onto a custom domain the merchant had
+  // typed WITH a scheme (`https://https://shop.example`) and kept a trailing
+  // slash. So a sitemap could advertise addresses that no page claimed as its
+  // canonical — a crawler reading both is told the shop disagrees with itself.
+  const base = shopOrigin(store, resolved.storefrontConfig).replace(/\/+$/, '');
 
   const [catalogResult, categoriesResult, blogResult, pagesResult] = await Promise.allSettled([
     loadCatalog(resolved.apiKey),
@@ -71,7 +73,10 @@ export default async function sitemap({
       url: `${base}/product/${p.id}`,
       changeFrequency: 'weekly' as const,
       priority: 0.8,
-      lastModified: undefined,
+      // The catalog response has always carried `updated_at`; the SDK dropped
+      // it and this line then said so explicitly. A sitemap with no dates
+      // gives a crawler no reason to come back to a page that changed.
+      lastModified: p.updatedAt ? new Date(p.updatedAt) : undefined,
     }));
 
   const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({

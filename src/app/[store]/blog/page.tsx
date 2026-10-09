@@ -3,6 +3,7 @@ import { storeName } from '@/lib/store-name';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Tag } from 'lucide-react';
+import { canonicalUrl } from '@/lib/seo/canonical';
 import { loadStore, loadBlogPosts, loadBlogCategories } from '@/lib/sdk/store';
 import type { Metadata } from 'next';
 
@@ -18,6 +19,10 @@ export async function generateMetadata({ params }: { params: { store: string } }
   return {
     title: 'Blog',
     description: `News, updates, and stories from ${name}`,
+    // `?tag=` and `?page=2` are the same blog, filtered.
+    alternates: {
+      canonical: canonicalUrl(params.store, resolved.storefrontConfig, '/blog'),
+    },
   };
 }
 

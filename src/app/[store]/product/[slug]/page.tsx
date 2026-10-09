@@ -5,6 +5,7 @@
 import type { Metadata } from 'next';
 import { storeName } from '@/lib/store-name';
 import { notFound } from 'next/navigation';
+import { canonicalUrl } from '@/lib/seo/canonical';
 import { loadStore, loadProduct, loadUpsells } from '@/lib/sdk/store';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { ProductGrid } from '@/components/product/ProductGrid';
@@ -35,9 +36,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: product.name,
       description: product.description ?? '',
       images: ogImages,
+      // A product shared on social is a product, not a website.
       type: 'website',
+      url: canonicalUrl(params.store, resolved.storefrontConfig,
+                        `/product/${params.slug}`),
     },
     twitter: { card: 'summary_large_image', images: ogImages.map((i) => i.url) },
+    // `params.slug` — a product has no `slug` field of its own; the route
+    // segment IS its address. Without this, every `?location=` and
+    // `?variant=` is a separate page to a crawler, all competing for the
+    // same words.
+    alternates: {
+      canonical: canonicalUrl(params.store, resolved.storefrontConfig,
+                              `/product/${params.slug}`),
+    },
   };
 }
 

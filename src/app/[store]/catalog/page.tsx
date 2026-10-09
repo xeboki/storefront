@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import type { Metadata } from 'next'
+import { canonicalUrl } from '@/lib/seo/canonical'
 import { loadStore, loadCatalog, loadCategories } from '@/lib/sdk/store'
 import { activeLocation, isLocationFirst, onlineStores, storeLabel } from '@/lib/location'
 import { InStockFilter } from '@/components/product/InStockFilter'
@@ -25,9 +26,41 @@ interface Props {
 /// pieces and a wholesaler with nine hundred got the same listing.
 const DEFAULT_PER_PAGE = 24
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(
+  { params, searchParams }: Props,
+): Promise<Metadata> {
   const store = await loadStore(params.store)
-  return { title: store ? `Shop — ${storeName(store.storeConfig)}` : 'Shop' }
+
+  // **Just "Shop".** The shop's name is already in the title template, so
+  // `Shop — Game Bench` came out as `Shop — Game Bench | Game Bench` —
+  // the name twice in a result that has about sixty characters to work
+  // with. A page title is the page, not the page and the shop.
+  //
+  // A category listing says which category, because that is the thing
+  // somebody searched for.
+  const category = searchParams.category
+    ? (await loadCategories(store?.apiKey ?? '').catch(() => ({ data: [] })))
+        .data.find((c) => c.id === searchParams.category)
+    : undefined
+
+  // **The category stays in the canonical; everything else goes.**
+  //
+  // A category listing is a page worth indexing on its own — "olive oil"
+  // is a real search — and the sitemap lists one per category, so
+  // canonicalising them all back to `/catalog` would tell a crawler to
+  // index pages and then that none of them are real. Paging, sorting and
+  // the in-stock filter are the same listing rearranged, so they drop.
+  const canonicalPath = searchParams.category
+    ? `/catalog?category=${encodeURIComponent(searchParams.category)}`
+    : '/catalog'
+
+  return {
+    title: category?.name ?? 'Shop',
+    alternates: {
+      canonical: canonicalUrl(params.store, store?.storefrontConfig,
+                              canonicalPath),
+    },
+  }
 }
 
 function pageHref(base: string, sp: URLSearchParams, page: number): string {

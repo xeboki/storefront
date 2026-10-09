@@ -5,6 +5,7 @@
 import { notFound, permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import { loadStore, loadCustomPage } from '@/lib/sdk/store';
+import { canonicalUrl } from '@/lib/seo/canonical';
 import { BlogBody } from '@/components/blog/BlogBody';
 import { generateBreadcrumbs } from '@/lib/seo/structured-data';
 import type { Metadata } from 'next';
@@ -25,6 +26,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: page.seoTitle ?? page.title,
       description: page.seoDescription ?? undefined,
+      type: 'article',
+      url: canonicalUrl(params.store, resolved.storefrontConfig,
+                        `/p/${page.slug}`),
+    },
+    // `page.slug`, not `params.slug` — a former address redirects, so the
+    // canonical must name the one the page actually lives at.
+    alternates: {
+      canonical: canonicalUrl(params.store, resolved.storefrontConfig,
+                              `/p/${page.slug}`),
     },
   };
 }
@@ -52,7 +62,9 @@ export default async function CustomPagePage({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {resolved.storefrontConfig?.structuredDataEnabled && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      )}
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Where this is. The page emitted BreadcrumbList structured data

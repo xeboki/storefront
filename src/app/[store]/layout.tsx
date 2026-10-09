@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { storeName } from '@/lib/store-name';
 import { notFound, redirect } from 'next/navigation';
 import { loadStore, loadCategories, loadOffers, loadCustomPages } from '@/lib/sdk/store';
+import { shopOrigin } from '@/lib/seo/canonical';
 
 import { StoreProviders } from '@/components/layout/StoreProviders';
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
@@ -44,16 +45,26 @@ export async function generateMetadata({ params }: { params: { store: string } }
   // monogram, so the tab carries the same mark as the header.
   const icon = storefrontConfig?.faviconUrl || `/${params.store}/brandmark`;
 
+  // The shop's one public address, so every page's `alternates.canonical`
+  // resolves against it. Nothing emitted a canonical link at all, and the
+  // catalogue alone serves the same products under `?category=`, `?page=`
+  // and `?sort=` — several of which are in the sitemap.
+  const origin = shopOrigin(params.store, storefrontConfig);
+
   return {
+    metadataBase: new URL(origin),
     title: {
       default: storefrontConfig?.seoTitle || storeName(storeConfig),
       template: titleTemplate,
     },
     description: storefrontConfig?.seoDescription || `Shop at ${storeName(storeConfig)}`,
+    alternates: { canonical: '/' },
     openGraph: {
       siteName: storeName(storeConfig),
       images: ogImages,
       type: 'website',
+      // Shared without this, a link shows whatever host the sharer was on.
+      url: `${origin}/`,
     },
     twitter: {
       card: 'summary_large_image',

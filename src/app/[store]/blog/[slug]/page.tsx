@@ -11,6 +11,7 @@ import { BlogBody } from '@/components/blog/BlogBody';
 import { headingId } from '@/lib/heading-id';
 import { ArticleRail, ArticleContents, ArticleShare } from '@/components/blog/ArticleRail';
 import { shopUrl } from '@/lib/request-origin';
+import { canonicalUrl } from '@/lib/seo/canonical';
 import type { Metadata } from 'next';
 
 interface Props {
@@ -46,6 +47,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       tags: post.tags,
     },
     twitter: { card: 'summary_large_image', images: ogImages.map((i) => i.url) },
+    alternates: {
+      canonical: canonicalUrl(params.store, resolved.storefrontConfig,
+                              `/blog/${post.slug}`),
+    },
   };
 }
 
@@ -152,8 +157,16 @@ export default async function BlogPostPage({ params, searchParams }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {/* Only when the shop asked for rich results.
+          The switch was honoured on the home page and ignored here, which
+          is worse than wholly dead: a merchant turns it off, sees the home
+          page change, and assumes it worked everywhere. */}
+      {storefrontConfig?.structuredDataEnabled && (
+        <>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+        </>
+      )}
 
       {/* The same container the product page uses.
           The post sat in `max-w-3xl` while a product page ran to
