@@ -30,6 +30,9 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    // `.tsx` too. A component test could not be collected at all under
+    // the old pattern — a whole file of assertions sat there not running,
+    // which is the quietest way for a test suite to be wrong.
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
   },
 });

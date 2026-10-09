@@ -24,6 +24,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { ReactNode } from 'react';
 import { headingId } from '@/lib/heading-id';
+import { BLOCKS } from './PageBlocks';
 
 function textOf(children: ReactNode): string {
   if (typeof children === 'string') return children;
@@ -118,6 +119,33 @@ export function BlogBody({ body }: Props) {
                 )}
               </span>
             ) : null,
+          // ```callout, ```faq, ```columns, ```button, ```video.
+          //
+          // A fenced block with a word after the backticks is something
+          // every Markdown reader already understands, so a block this
+          // build does not know renders as **plain text** rather than as
+          // broken markup — which is what a shop on an older storefront
+          // should see, and what somebody who mistypes the word gets.
+          //
+          // **Intercepted at `pre`, not at `code`.** Markdown wraps a
+          // fenced block in `<pre><code>`, so replacing only the inner one
+          // left every block sitting inside the code-block styling: grey,
+          // monospace, and horizontally scrolling. The first version did
+          // exactly that, and the columns ran into each other on the shop.
+          pre: ({ children, ...rest }) => {
+            const fenced = Array.isArray(children) ? children[0] : children;
+            const className = (fenced as { props?: { className?: string } })
+              ?.props?.className ?? '';
+            const [name, arg] = (/language-(\S+)(?:\s+(\S+))?/
+              .exec(className) ?? []).slice(1);
+            const render = name ? BLOCKS[name] : undefined;
+            if (render) {
+              const body = (fenced as { props?: { children?: unknown } })
+                ?.props?.children;
+              return render(String(body ?? '').replace(/\n$/, ''), arg);
+            }
+            return <pre {...rest}>{children}</pre>;
+          },
           // A table is the one block that cannot be made narrower. Let it
           // scroll inside the measure rather than widening the column or
           // spilling off a phone.
