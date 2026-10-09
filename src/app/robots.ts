@@ -9,8 +9,7 @@
 import type { MetadataRoute } from 'next';
 import { storeSlug } from '@/lib/store-slug';
 import { loadStore } from '@/lib/sdk/store';
-
-const BASE_DOMAIN = process.env.NEXT_PUBLIC_BASE_DOMAIN ?? 'xeboki.store';
+import { shopOrigin } from '@/lib/seo/canonical';
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const store = storeSlug();
@@ -20,9 +19,12 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   const resolved = await loadStore(store).catch(() => null);
   const isPublished = resolved?.storefrontConfig?.isPublished ?? false;
 
-  const base = resolved?.storefrontConfig?.customDomain
-    ? `https://${resolved.storefrontConfig.customDomain}`
-    : `https://${store}.${BASE_DOMAIN}`;
+  // The same resolver the canonical tags and the sitemap use. Built by hand
+  // here before, and it would have pasted `https://` onto a custom domain the
+  // merchant had already typed one into — putting
+  // `Sitemap: https://https://shop.example/sitemap.xml` in the one file a
+  // crawler reads first.
+  const base = shopOrigin(store, resolved?.storefrontConfig).replace(/\/+$/, '');
 
   if (!isPublished) {
     return {

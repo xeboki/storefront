@@ -139,9 +139,26 @@ describe('every indexable page says which address it is', () => {
 describe('the sitemap agrees with the canonicals', () => {
   const APP = join(__dirname, '..', '..', 'app', '[store]');
   const sitemap = readFileSync(join(APP, 'sitemap.ts'), 'utf8');
+  // robots.txt is the first file a crawler reads, and the line it cares
+  // about is the sitemap's address. It had its own copy of the origin
+  // rules, so a custom domain typed WITH a scheme would have put
+  // `Sitemap: https://https://shop.example/sitemap.xml` in it.
+  const robots = readFileSync(
+    join(__dirname, '..', '..', 'app', 'robots.ts'), 'utf8');
 
   it('resolves the origin with the same helper the pages use', () => {
     expect(sitemap).toContain('shopOrigin');
+  });
+
+  it('robots.txt points at the same origin', () => {
+    expect(robots).toContain('shopOrigin');
+    const handRolled = robots
+      .split('\n')
+      .filter((l) => !l.trimStart().startsWith('//') && !l.trimStart().startsWith('*'))
+      .filter((l) => /`https:\/\/\$\{/.test(l));
+    expect(handRolled, `robots.ts builds a shop address without
+      \`shopOrigin\`, so the one line a crawler reads first can name an
+      address no page claims: ${handRolled.join(' | ')}`).toEqual([]);
   });
 
   it('does not build the origin by hand', () => {
