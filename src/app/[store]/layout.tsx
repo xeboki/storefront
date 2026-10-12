@@ -18,6 +18,7 @@ import { generateOrganization } from '@/lib/seo/structured-data';
 import { LocaleProvider } from '@/lib/i18n/client';
 import { activeLocale, availableLocales } from '@/lib/i18n/server';
 import { AnalyticsScripts } from '@/components/analytics/AnalyticsScripts';
+import { CookieBanner } from '@/components/analytics/CookieBanner';
 import { activeLocation, needsStoreChoice, onlineStores } from '@/lib/location';
 import { StoreGate } from '@/components/location/StoreGate';
 import { headers } from 'next/headers';
@@ -197,7 +198,9 @@ export default async function StoreLayout({ params, children }: Props) {
       )}
       <AnalyticsScripts
         analytics={storefrontConfig?.analytics}
+        storeSlug={slug}
       />
+      <CookieBanner analytics={storefrontConfig?.analytics} storeSlug={slug} />
       <StoreProviders slug={slug} storeConfig={storeConfig} storefrontConfig={storefrontConfig}>
           <LocaleProvider locale={locale}>
           {resolved.isTestMode && (

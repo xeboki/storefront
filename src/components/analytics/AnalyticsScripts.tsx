@@ -16,16 +16,31 @@
  *
  * Google Tag Manager was never loaded at all: the container id was written by
  * the Analytics tab and no tag manager existed in this codebase.
+ *
+ * **Consent is decided here, on the server.** When a shop has switched its
+ * cookie banner on and this browser has not accepted, no tag is emitted at
+ * all — rather than emitting one and trusting nothing to call it. A tag that
+ * reaches the page can fire, and a conversion reported by accident cannot be
+ * taken back. A shop with the banner off is untouched and loads as before.
  */
 import Script from 'next/script';
+import { cookies } from 'next/headers';
 import type { AnalyticsSettings } from '@xeboki/sdk';
+import { consentCookieName } from './CookieBanner';
 
 interface Props {
   analytics?: AnalyticsSettings | null;
+  storeSlug: string;
 }
 
-export function AnalyticsScripts({ analytics }: Props) {
+export function AnalyticsScripts({ analytics, storeSlug }: Props) {
   if (!analytics) return null;
+
+  // Off → nothing to ask, load as always. On → only once accepted.
+  const waitingForConsent =
+    analytics.consent.bannerEnabled &&
+    cookies().get(consentCookieName(storeSlug))?.value !== 'accepted';
+  if (waitingForConsent) return null;
 
   // An ID from the deployment is a default for a shop that set none — never
   // an override of a shop that switched tracking off.
